@@ -51,8 +51,6 @@ public class ConversaAgendamentoService {
         );
     }
 
-    private void processarInteracao(Barbeiro barbeiro, Cliente cliente, String telefone, JsonNode mensagem) {
-
     public void processarInteracao(
             String id,
             Barbeiro barbeiro,
