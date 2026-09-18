@@ -97,6 +97,7 @@ class ConversaServiceTest {
                 .horarioSelecionado(LocalTime.of(10, 0))
                 .precoServicoNaConfirmacao(new BigDecimal("30.00"))
                 .duracaoServicoNaConfirmacao(30)
+                .confirmacaoId(UUID.randomUUID())
                 .build();
 
         when(barbeiros.findByWhatsappPhoneNumberId("api-teste"))
@@ -121,7 +122,7 @@ class ConversaServiceTest {
         when(disponibilidade.buscarHorarios(barbeiro, servico, dia))
                 .thenReturn(livres);
 
-        conversa.processar(clique("CONFIRMAR"));
+        conversa.processar(confirmarAtual());
 
         assertEquals(EtapaConversaEnum.ESCOLHENDO_HORARIO, sessao.getEtapa());
         assertNull(sessao.getHorarioSelecionado());
@@ -130,7 +131,12 @@ class ConversaServiceTest {
                 eq("cliente-teste"),
                 contains("reservado")
         );
-        verify(whatsapp).enviarHorarios("api-teste", "cliente-teste", livres);
+        verify(whatsapp).enviarHorarios(
+                "api-teste",
+                "cliente-teste",
+                livres,
+                0
+        );
     }
 
     @Test
@@ -142,7 +148,7 @@ class ConversaServiceTest {
         when(disponibilidade.buscarHorarios(barbeiro, servico, dia))
                 .thenReturn(List.of());
 
-        assertDoesNotThrow(() -> conversa.processar(clique("CONFIRMAR")));
+        assertDoesNotThrow(() -> conversa.processar(confirmarAtual()));
 
         assertEquals(EtapaConversaEnum.ESCOLHENDO_DATA, sessao.getEtapa());
         assertNull(sessao.getDataSelecionada());
@@ -154,7 +160,7 @@ class ConversaServiceTest {
     void confirmacaoAntigaNaoCriaOutraReserva() {
         sessao.limpar();
 
-        conversa.processar(clique("CONFIRMAR"));
+        conversa.processar(confirmarAtual());
 
         verifyNoInteractions(agendamentos);
         verify(whatsapp).enviarTextoAposCommit(
@@ -177,7 +183,7 @@ class ConversaServiceTest {
                 any(), any(), any(), any(), any(), any()
         )).thenReturn(salvo);
 
-        conversa.processar(clique("CONFIRMAR"));
+        conversa.processar(confirmarAtual());
 
         assertEquals(EtapaConversaEnum.MENU, sessao.getEtapa());
         assertNull(sessao.getServicoSelecionado());
@@ -187,6 +193,10 @@ class ConversaServiceTest {
                 anyString(),
                 contains("Agendamento confirmado")
         );
+    }
+
+    private JsonNode confirmarAtual() {
+        return clique("CONFIRMAR_" + sessao.getConfirmacaoId());
     }
 
     private JsonNode clique(String id) {
