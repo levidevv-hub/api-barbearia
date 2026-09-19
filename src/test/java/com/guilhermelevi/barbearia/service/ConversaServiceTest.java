@@ -53,18 +53,39 @@ class ConversaServiceTest {
         previas = mock(PreviaBloqueioService.class);
         servicoService = mock(ServicoService.class);
 
+        ConversaAgendamentoService conversaAgendamento =
+                new ConversaAgendamentoService(
+                        servicos,
+                        sessoes,
+                        disponibilidade,
+                        agendamentos,
+                        whatsapp
+                );
+
+        ConversaServicoAdminService conversaServicoAdmin =
+                new ConversaServicoAdminService(
+                        servicos,
+                        sessoes,
+                        autorizacao,
+                        servicoService,
+                        whatsapp
+                );
+
+        ConversaAdminService conversaAdmin =
+                new ConversaAdminService(
+                        autorizacao,
+                        bloqueios,
+                        previas,
+                        agendamentos,
+                        conversaServicoAdmin,
+                        whatsapp
+                );
+
         conversa = new ConversaService(
                 barbeiros,
                 clientes,
-                servicos,
-                sessoes,
-                disponibilidade,
-                agendamentos,
-                whatsapp,
-                autorizacao,
-                bloqueios,
-                previas,
-                servicoService
+                conversaAgendamento,
+                conversaAdmin
         );
 
         barbeiro = Barbeiro.builder()
