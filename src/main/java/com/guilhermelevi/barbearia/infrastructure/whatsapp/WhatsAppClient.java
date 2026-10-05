@@ -12,7 +12,7 @@ import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
+import com.guilhermelevi.barbearia.repositories.IBarbeiroRepository;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.time.LocalTime;
@@ -38,11 +38,14 @@ public class WhatsAppClient {
     @Value("${whatsapp.api-version}")
     private String apiVersion;
 
-    public WhatsAppClient(RestClient.Builder builder) {
+    private final IBarbeiroRepository barbeiroRepository;
+
+    public WhatsAppClient(RestClient.Builder builder, IBarbeiroRepository barbeiroRepository) {
 
         this.restClient = builder
                 .baseUrl("https://graph.facebook.com")
                 .build();
+        this.barbeiroRepository = barbeiroRepository;
     }
 
     private String enviar(
@@ -55,7 +58,7 @@ public class WhatsAppClient {
                         apiVersion,
                         phoneNumberId
                 )
-                .header("Authorization", "Bearer " + token)
+                .header("Authorization", "Bearer " + buscarToken(phoneNumberId))
                 .body(body)
                 .retrieve()
                 .body(JsonNode.class);
@@ -971,5 +974,16 @@ public class WhatsAppClient {
 
             enviarAposCommit(phoneNumberId, body);
         }
+    }
+
+    private String buscarToken(String phoneNumberId) {
+
+        return barbeiroRepository
+                .findByWhatsappPhoneNumberId(phoneNumberId)
+                .map(barbeiro -> barbeiro.getWhatsappAccessToken())
+                .filter(accessToken ->
+                        accessToken != null && !accessToken.isBlank()
+                )
+                .orElse(token);
     }
 }

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.client.RestClient;
-
+import com.guilhermelevi.barbearia.repositories.IBarbeiroRepository;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,6 +23,8 @@ class WhatsAppClientTest {
 
     @Test
     void listaVaziaAgendaRespostaParaDepoisDoCommit() {
+        IBarbeiroRepository barbeiroRepository =
+                mock(IBarbeiroRepository.class);
         RestClient.Builder builder = mock(RestClient.Builder.class);
         RestClient restClient = mock(RestClient.class);
 
@@ -30,7 +32,8 @@ class WhatsAppClientTest {
                 .thenReturn(builder);
         when(builder.build()).thenReturn(restClient);
 
-        WhatsAppClient client = new WhatsAppClient(builder);
+        WhatsAppClient client =
+                new WhatsAppClient(builder, barbeiroRepository);
 
         TransactionSynchronizationManager.setActualTransactionActive(true);
         TransactionSynchronizationManager.initSynchronization();
@@ -53,13 +56,16 @@ class WhatsAppClientTest {
 
     @Test
     void transacaoSemSincronizacaoEhRejeitada() {
+        IBarbeiroRepository barbeiroRepository =
+                mock(IBarbeiroRepository.class);
         RestClient.Builder builder = mock(RestClient.Builder.class);
         RestClient restClient = mock(RestClient.class);
 
         when(builder.baseUrl(anyString())).thenReturn(builder);
         when(builder.build()).thenReturn(restClient);
 
-        WhatsAppClient client = new WhatsAppClient(builder);
+        WhatsAppClient client =
+                new WhatsAppClient(builder, barbeiroRepository);
 
         TransactionSynchronizationManager.setActualTransactionActive(true);
 
