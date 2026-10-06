@@ -49,6 +49,16 @@ public class ConversaAgendamentoService {
                 barbeiro.getWhatsappPhoneNumberId(),
                 telefone
         );
+
+        if (
+                barbeiro.getLatitude() != null &&
+                        barbeiro.getLongitude() != null
+        ) {
+            whatsapp.enviarBotaoLocalizacao(
+                    barbeiro.getWhatsappPhoneNumberId(),
+                    telefone
+            );
+        }
     }
 
     public void processarInteracao(
@@ -57,6 +67,18 @@ public class ConversaAgendamentoService {
             Cliente cliente,
             String telefone
     ) {
+
+        if ("VER_LOCALIZACAO".equals(id)) {
+
+            whatsapp.enviarLocalizacao(
+                    barbeiro.getWhatsappPhoneNumberId(),
+                    telefone,
+                    barbeiro
+            );
+
+            return;
+        }
+
         if ("CONSULTAR".equals(id)) {
             List<Agendamento> agendamentos =
                     agendamentoService.listarProximos(cliente, barbeiro);
