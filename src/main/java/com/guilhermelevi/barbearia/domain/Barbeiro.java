@@ -18,6 +18,7 @@ public class Barbeiro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nome;
+
     @Column(length = 2048)
     private String whatsappAccessToken;
     @Column(unique = true)
@@ -26,7 +27,12 @@ public class Barbeiro {
     private String numeroWhatsAppNotificacao;
     @Column(name = "numero_whatsapp_administrador")
     private String numeroWhatsAppAdministrador;
+
     private LocalTime inicioExpediente;
     private LocalTime fimExpediente;
+
+    private Double latitude;
+    private Double longitude;
+    private String endereco;
 
 }

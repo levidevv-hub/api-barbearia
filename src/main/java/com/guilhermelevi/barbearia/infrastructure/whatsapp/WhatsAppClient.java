@@ -1,6 +1,7 @@
 package com.guilhermelevi.barbearia.infrastructure.whatsapp;
 
 import com.guilhermelevi.barbearia.domain.Agendamento;
+import com.guilhermelevi.barbearia.domain.Barbeiro;
 import com.guilhermelevi.barbearia.domain.Servico;
 import com.guilhermelevi.barbearia.domain.SessaoConversa;
 import org.springframework.beans.factory.annotation.Value;
@@ -985,5 +986,74 @@ public class WhatsAppClient {
                         accessToken != null && !accessToken.isBlank()
                 )
                 .orElse(token);
+    }
+
+    public void enviarBotaoLocalizacao(
+            String phoneNumberId,
+            String numero
+    ) {
+
+        Map<String, Object> body = Map.of(
+                "messaging_product", "whatsapp",
+                "to", numero,
+                "type", "interactive",
+                "interactive", Map.of(
+                        "type", "button",
+                        "body", Map.of(
+                                "text", "Quer saber onde estamos?"
+                        ),
+                        "action", Map.of(
+                                "buttons", List.of(
+                                        botao(
+                                                "VER_LOCALIZACAO",
+                                                "Ver localização"
+                                        )
+                                )
+                        )
+                )
+        );
+
+        enviarAposCommit(phoneNumberId, body);
+    }
+
+    public void enviarLocalizacao(
+            String phoneNumberId,
+            String numero,
+            Barbeiro barbeiro
+    ) {
+
+        if (
+                barbeiro.getLatitude() == null ||
+                        barbeiro.getLongitude() == null
+        ) {
+            enviarTextoAposCommit(
+                    phoneNumberId,
+                    numero,
+                    "A localização ainda não está cadastrada."
+            );
+            return;
+        }
+
+        Map<String, Object> localizacao = new java.util.HashMap<>();
+
+        localizacao.put("latitude", barbeiro.getLatitude());
+        localizacao.put("longitude", barbeiro.getLongitude());
+        localizacao.put("name", barbeiro.getNome());
+
+        if (
+                barbeiro.getEndereco() != null &&
+                        !barbeiro.getEndereco().isBlank()
+        ) {
+            localizacao.put("address", barbeiro.getEndereco());
+        }
+
+        Map<String, Object> body = Map.of(
+                "messaging_product", "whatsapp",
+                "to", numero,
+                "type", "location",
+                "location", localizacao
+        );
+
+        enviarAposCommit(phoneNumberId, body);
     }
 }
