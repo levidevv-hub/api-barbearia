@@ -1,5 +1,12 @@
-**
-!Dockerfile
-!build/
-!build/libs/
-!build/libs/barbearia-0.0.1-SNAPSHOT.jar
+.git
+.github
+.gradle
+.idea
+.vscode
+out
+bin
+.env
+*.iml
+
+build/
+!gradle/wrapper/gradle-wrapper.jar
