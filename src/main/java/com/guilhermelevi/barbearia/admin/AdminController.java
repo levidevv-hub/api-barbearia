@@ -6,60 +6,65 @@ import com.guilhermelevi.barbearia.service.ConexaoWhatsAppPendenteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import java.security.Principal;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
 
-@Controller @RequiredArgsConstructor
+@RestController @RequiredArgsConstructor
+@RequestMapping("/api/admin")
 public class AdminController {
     private final IBarbeiroRepository barbeiros;
     private final ConexaoWhatsAppPendenteService conexoes;
 
-    @GetMapping("/login")
-    public String login() { return "admin/login"; }
-
-    @GetMapping("/admin")
-    public String painel(Model model) {
-        model.addAttribute("barbeiros", barbeiros.findAll(Sort.by(Sort.Direction.DESC, "id")));
-        return "admin/index";
+    @GetMapping("/csrf")
+    public Map<String, String> csrf(CsrfToken token) {
+        return Map.of("token", token.getToken(), "headerName", token.getHeaderName());
     }
+    @GetMapping("/session")
+    public Map<String, String> session(Principal principal) { return Map.of("username", principal.getName()); }
 
-    @GetMapping("/admin/barbeiros/novo")
-    public String novo(Model model) {
-        model.addAttribute("form", new BarbeiroForm());
-        return "admin/form";
-    }
-
-    @PostMapping("/admin/barbeiros")
-    public String cadastrar(@Valid @ModelAttribute("form") BarbeiroForm form,
-                            BindingResult result, RedirectAttributes flash) {
-        if (form.getInicioExpediente() != null && form.getFimExpediente() != null
-                && !form.getFimExpediente().isAfter(form.getInicioExpediente())) {
-            result.rejectValue("fimExpediente", "intervalo", "O fim deve ser depois do inicio.");
+    // DTO explicito: nunca serialize a entidade que contem credenciais da Meta.
+    public record BarbeiroResumo(Long id, String nome, String numeroWhatsAppAdministrador,
+            String numeroWhatsAppNotificacao, LocalTime inicioExpediente,
+            LocalTime fimExpediente, String endereco, boolean vinculoRegistrado) {
+        static BarbeiroResumo from(Barbeiro b) {
+            return new BarbeiroResumo(b.getId(), b.getNome(), b.getNumeroWhatsAppAdministrador(),
+                    b.getNumeroWhatsAppNotificacao(), b.getInicioExpediente(), b.getFimExpediente(),
+                    b.getEndereco(), b.getWhatsappPhoneNumberId() != null && !b.getWhatsappPhoneNumberId().isBlank());
         }
-        if (result.hasErrors()) return "admin/form";
-        Barbeiro barbeiro = new Barbeiro();
-        barbeiro.setNome(form.getNome().strip());
-        barbeiro.setNumeroWhatsAppAdministrador(form.getNumeroWhatsAppAdministrador());
-        barbeiro.setNumeroWhatsAppNotificacao(form.getNumeroWhatsAppNotificacao());
-        barbeiro.setInicioExpediente(form.getInicioExpediente());
-        barbeiro.setFimExpediente(form.getFimExpediente());
-        barbeiro.setEndereco(form.getEndereco() == null ? null : form.getEndereco().strip());
-        barbeiros.save(barbeiro);
-        flash.addFlashAttribute("sucesso", "Barbeiro cadastrado. Agora gere o link para conectar o WhatsApp.");
-        return "redirect:/admin";
     }
-
-    @PostMapping("/admin/barbeiros/{id}/link")
-    public String gerarLink(@PathVariable Long id, RedirectAttributes flash) {
-        try {
-            flash.addFlashAttribute("link", "https://zaluratech.com.br/conectar-whatsapp?token=" + conexoes.gerarToken(id));
-            flash.addFlashAttribute("linkBarbeiroId", id);
-        } catch (IllegalArgumentException erro) {
-            flash.addFlashAttribute("erro", erro.getMessage());
-        }
-        return "redirect:/admin";
+    @GetMapping("/barbeiros")
+    public List<BarbeiroResumo> listar() {
+        return barbeiros.findAll(Sort.by(Sort.Direction.DESC, "id")).stream().map(BarbeiroResumo::from).toList();
+    }
+    @PostMapping("/barbeiros") @ResponseStatus(HttpStatus.CREATED)
+    public BarbeiroResumo cadastrar(@Valid @RequestBody BarbeiroForm form) {
+        if (!form.getFimExpediente().isAfter(form.getInicioExpediente()))
+            throw new IllegalArgumentException("O fim deve ser depois do início.");
+        Barbeiro b = new Barbeiro();
+        b.setNome(form.getNome().strip());
+        b.setNumeroWhatsAppAdministrador(form.getNumeroWhatsAppAdministrador());
+        b.setNumeroWhatsAppNotificacao(form.getNumeroWhatsAppNotificacao());
+        b.setInicioExpediente(form.getInicioExpediente());
+        b.setFimExpediente(form.getFimExpediente());
+        b.setEndereco(form.getEndereco() == null ? null : form.getEndereco().strip());
+        return BarbeiroResumo.from(barbeiros.save(b));
+    }
+    @PostMapping("/barbeiros/{id}/link")
+    public Map<String, String> gerarLink(@PathVariable Long id) {
+        return Map.of("link", "https://zaluratech.com.br/conectar-whatsapp?token=" + conexoes.gerarToken(id));
+    }
+    @ExceptionHandler(IllegalArgumentException.class) @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> invalido(IllegalArgumentException e) { return Map.of("erro", e.getMessage()); }
+    @ExceptionHandler(MethodArgumentNotValidException.class) @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> validacao(MethodArgumentNotValidException e) {
+        return Map.of("erro", e.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(java.util.stream.Collectors.joining("; ")));
     }
 }

@@ -1,6 +1,6 @@
 # Painel administrativo privado
 
-Acesse `https://api.zaluratech.com.br/admin`. Apenas o usuário configurado no servidor pode entrar. Não há cadastro público de usuários.
+O front é um HTML independente hospedado em `https://zaluratech.com.br/painel.html`. Este repositório contém somente o backend. Apenas o usuário configurado no servidor pode entrar. Não há cadastro público de usuários.
 
 ## Configuração
 
@@ -28,3 +28,16 @@ O cadastro inicial não configura serviços, pausas nem expediente semanal. Essa
 O antigo POST `/api/meta/whatsapp/link/{barbeiroId}` agora exige sessão de administrador e CSRF. O curl antigo sem autenticação deixa de funcionar. O webhook continua público e validando assinatura; `/connect` e `/validar-token/{token}` mantêm a validação do token de conexão existente.
 
 Antes de implantar: conferir CI, configurar credenciais, testar login, cadastro, geração do link e uma mensagem real do WhatsApp. Nenhuma alteração de produção é feita por este PR.
+
+## Contrato REST para o front
+
+Todas as chamadas usam `credentials: include`. Buscar GET `/api/admin/csrf` antes do login e novamente depois dele. Enviar o token retornado no cabeçalho `X-CSRF-TOKEN` de cada POST.
+
+- POST `/api/admin/login`: formulário URL encoded, `username` e `password`; retorna 204 ou 401.
+- GET `/api/admin/session`: usuário autenticado ou 401.
+- GET `/api/admin/barbeiros`: lista de DTOs, sem credenciais da Meta.
+- POST `/api/admin/barbeiros`: JSON dos campos do cadastro; retorna 201 ou 400.
+- POST `/api/admin/barbeiros/{id}/link`: JSON com `link`.
+- POST `/api/admin/logout`: encerra sessão, retorna 204.
+
+CORS permite apenas https://zaluratech.com.br e https://www.zaluratech.com.br, com credenciais. Hostinger e API devem estar em HTTPS nestes subdomínios do mesmo domínio; não usar domínio temporário para autenticação. A página não guarda senha nem token de sessão no localStorage.

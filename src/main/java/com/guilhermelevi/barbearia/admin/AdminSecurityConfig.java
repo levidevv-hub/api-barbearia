@@ -32,17 +32,34 @@ public class AdminSecurityConfig {
     }
 
     @Bean
+    org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+        var cors = new org.springframework.web.cors.CorsConfiguration();
+        cors.setAllowedOrigins(java.util.List.of("https://zaluratech.com.br", "https://www.zaluratech.com.br"));
+        cors.setAllowedMethods(java.util.List.of("GET", "POST", "OPTIONS"));
+        cors.setAllowedHeaders(java.util.List.of("Content-Type", "X-CSRF-TOKEN"));
+        cors.setAllowCredentials(true);
+        var source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", cors);
+        return source;
+    }
+
+    @Bean
     SecurityFilterChain security(HttpSecurity http) throws Exception {
         return http
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/admin.css", "/error").permitAll()
+                        .requestMatchers("/api/admin/csrf", "/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/webhook/whatsapp", "/api/meta/whatsapp/validar-token/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/webhook/whatsapp", "/api/meta/whatsapp/connect").permitAll()
                         .anyRequest().hasRole("ADMIN"))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/webhook/whatsapp", "/api/meta/whatsapp/connect"))
-                .formLogin(login -> login.loginPage("/login").defaultSuccessUrl("/admin", true).permitAll())
-                .logout(logout -> logout.logoutSuccessUrl("/login?logout").invalidateHttpSession(true).deleteCookies("JSESSIONID"))
+                .exceptionHandling(errors -> errors.authenticationEntryPoint((request, response, error) -> response.setStatus(401)))
+                .formLogin(login -> login.loginPage("/api/admin/login").loginProcessingUrl("/api/admin/login")
+                        .successHandler((request, response, authentication) -> response.setStatus(204))
+                        .failureHandler((request, response, error) -> response.setStatus(401)).permitAll())
+                .logout(logout -> logout.logoutUrl("/api/admin/logout")
+                        .logoutSuccessHandler((request, response, authentication) -> response.setStatus(204))
+                        .invalidateHttpSession(true).deleteCookies("JSESSIONID"))
                 .build();
     }
 }
