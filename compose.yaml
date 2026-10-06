@@ -34,6 +34,8 @@ services:
       META_APP_ID: ${META_APP_ID:?Configure META_APP_ID}
       META_APP_SECRET: ${META_APP_SECRET:?Configure META_APP_SECRET}
       BLOQUEIO_TESTE_CHAVE: ${BLOQUEIO_TESTE_CHAVE:?Configure BLOQUEIO_TESTE_CHAVE}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:?Configure ADMIN_USERNAME}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:?Configure ADMIN_PASSWORD_HASH}
       TZ: America/Fortaleza
       JAVA_TOOL_OPTIONS: "-Xms128m -Xmx1024m -Duser.timezone=America/Fortaleza"
     ports:
