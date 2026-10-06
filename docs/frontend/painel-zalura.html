@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#070a08">
+  <title>Painel Administrativo · ZaluraTech</title>
+  <style>
+    :root{--bg:#070a08;--surface:#0d120f;--surface2:#121915;--surface3:#17201b;--border:rgba(255,255,255,.075);--border2:rgba(255,255,255,.12);--text:#f4f7f5;--muted:#93a198;--muted2:#66736b;--green:#15ce78;--greenSoft:rgba(21,206,120,.10);--greenBorder:rgba(21,206,120,.25);--danger:#ff727e;--dangerSoft:rgba(255,114,126,.10);--warning:#f4c65d;--warningSoft:rgba(244,198,93,.10);--max:1180px;--radius:18px}
+    *{box-sizing:border-box}html{color-scheme:dark;scroll-behavior:smooth}body{margin:0;min-height:100vh;color:var(--text);background:radial-gradient(circle at 8% 0%,rgba(21,206,120,.075),transparent 28%),radial-gradient(circle at 92% 4%,rgba(21,206,120,.04),transparent 24%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}button,input{font:inherit}button{border:0}[hidden]{display:none!important}
+    .topbar{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--border);background:rgba(7,10,8,.82);backdrop-filter:blur(18px)}.topbar-inner{width:min(var(--max),calc(100% - 40px));min-height:72px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:inline-flex;align-items:center;gap:11px;color:var(--text);text-decoration:none;user-select:none}.brand-mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--greenBorder);background:linear-gradient(145deg,rgba(21,206,120,.18),rgba(21,206,120,.025));color:var(--green);font-weight:950;font-size:18px;letter-spacing:-1px}.brand-copy{display:flex;flex-direction:column;gap:4px;line-height:1}.brand-name{font-size:14px;font-weight:900;letter-spacing:.12em}.brand-name span{color:var(--green)}.brand-subtitle{color:var(--muted2);font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}.toolbar{display:flex;align-items:center;gap:10px}.user-pill{min-height:36px;padding:0 13px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.025);color:var(--muted);font-size:13px;font-weight:750}.user-pill:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(21,206,120,.10)}
+    .btn{min-height:42px;padding:0 16px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-weight:850;transition:.18s ease}.btn-primary{background:var(--green);color:#031008;box-shadow:0 10px 30px rgba(21,206,120,.11)}.btn-primary:hover:not(:disabled){background:#1adc83;transform:translateY(-1px)}.btn-danger{border:1px solid rgba(255,114,126,.4);color:var(--danger);background:var(--dangerSoft)}.btn-secondary{border:1px solid var(--border2);color:var(--text);background:rgba(255,255,255,.035)}.btn-secondary:hover:not(:disabled){background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.18)}button:disabled{opacity:.5;cursor:wait}button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+    .notice{width:min(var(--max),calc(100% - 40px));margin:18px auto 0;padding:13px 15px;min-height:48px;display:flex;align-items:center;border:1px solid var(--greenBorder);border-radius:12px;color:#c8f8df;background:var(--greenSoft);font-size:14px;font-weight:700}.notice.error{border-color:rgba(255,114,126,.28);background:var(--dangerSoft);color:#ffd3d7}
+    .main{width:min(var(--max),calc(100% - 40px));margin:0 auto;padding:42px 0 72px}.eyebrow{margin:0 0 8px;color:var(--green);font-size:11px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}h1,h2,h3,p{margin-top:0}h1{margin-bottom:10px;font-size:clamp(34px,4vw,52px);line-height:1.02;letter-spacing:-.045em}h2{margin-bottom:7px;font-size:20px;letter-spacing:-.02em}.lead{margin-bottom:0;color:var(--muted);font-size:15px;line-height:1.65}.page-head{margin-bottom:28px;display:flex;align-items:flex-end;justify-content:space-between;gap:28px}.page-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}.stat{min-height:116px;padding:20px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent),var(--surface)}.stat-label{color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.06em;text-transform:uppercase}.stat-value{margin-top:10px;font-size:31px;font-weight:950;letter-spacing:-.045em}.stat-value.green{color:var(--green)}.stat-value.warning{color:var(--warning)}
+    .card{border:1px solid var(--border);border-radius:var(--radius);background:linear-gradient(180deg,rgba(255,255,255,.018),transparent 40%),var(--surface);box-shadow:0 16px 50px rgba(0,0,0,.11)}.card+.card{margin-top:18px}.card-head{padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--border)}.card-head p{margin:3px 0 0;color:var(--muted);font-size:13px}.card-body{padding:24px}.link-card{margin-bottom:18px;border-color:var(--greenBorder);background:radial-gradient(circle at 100% 0%,rgba(21,206,120,.07),transparent 34%),var(--surface)}.link-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;margin-top:16px}
+    label{display:block;color:#cbd4cf;font-size:13px;font-weight:750}input{width:100%;min-height:46px;margin-top:8px;padding:0 13px;border:1px solid var(--border2);border-radius:11px;background:#0a0f0c;color:var(--text);outline:none;transition:.18s ease}input::placeholder{color:#566159}input:focus{border-color:rgba(21,206,120,.58);box-shadow:0 0 0 4px rgba(21,206,120,.08);background:#0c120e}input[readonly]{color:#c9f4dc;background:rgba(21,206,120,.045);border-color:var(--greenBorder)}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.form-grid+.form-grid,.form-grid+label,label+.form-grid{margin-top:18px}.hint{display:block;margin:9px 0 0;color:var(--muted2);font-size:12px;line-height:1.55}.form-actions{margin-top:24px;display:flex;justify-content:flex-end;gap:10px}
+    .table-wrap{overflow:auto}table{width:100%;min-width:830px;border-collapse:collapse;text-align:left}th,td{padding:17px 20px;border-bottom:1px solid var(--border);vertical-align:middle}th{color:var(--muted2);font-size:10px;font-weight:900;letter-spacing:.10em;text-transform:uppercase;white-space:nowrap}td{color:#d8dfdb;font-size:14px}tbody tr{transition:background .15s ease}tbody tr:hover{background:rgba(255,255,255,.018)}tbody tr:last-child td{border-bottom:0}.client-main{display:flex;align-items:center;gap:11px;min-width:190px}.client-avatar{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--border2);background:var(--surface3);color:var(--green);font-size:12px;font-weight:950}.client-name{color:var(--text);font-weight:820}.client-id{margin-top:3px;color:var(--muted2);font-size:11px;font-weight:700}.badge{display:inline-flex;align-items:center;gap:7px;min-height:29px;padding:0 10px;border-radius:999px;border:1px solid var(--border);font-size:11px;font-weight:850;white-space:nowrap}.badge:before{content:"";width:6px;height:6px;border-radius:50%}.badge-ok{color:#aff2cf;background:var(--greenSoft);border-color:var(--greenBorder)}.badge-ok:before{background:var(--green)}.badge-pending{color:#f5d98a;background:var(--warningSoft);border-color:rgba(244,198,93,.2)}.badge-pending:before{background:var(--warning)}.empty{padding:50px 24px;text-align:center;color:var(--muted)}.footer-note{padding:16px 20px;border-top:1px solid var(--border);color:var(--muted2);font-size:11px;line-height:1.55}
+    .login-shell{min-height:calc(100vh - 72px);width:min(1120px,calc(100% - 40px));margin:0 auto;display:grid;grid-template-columns:1.08fr .92fr;gap:54px;align-items:center;padding:54px 0 70px}.login-copy{max-width:560px}.login-copy h1{font-size:clamp(45px,6vw,76px);line-height:.96;max-width:650px}.login-copy h1 span{color:var(--green)}.login-points{margin-top:32px;display:grid;gap:12px}.login-point{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:14px}.login-point i{width:28px;height:28px;flex:0 0 28px;display:grid;place-items:center;border:1px solid var(--greenBorder);border-radius:9px;background:var(--greenSoft);color:var(--green);font-style:normal;font-size:12px;font-weight:900}.login-card{width:100%;max-width:430px;justify-self:end;padding:28px;border:1px solid var(--border2);border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent),var(--surface);box-shadow:0 30px 90px rgba(0,0,0,.28)}.login-card .brand-mini{width:46px;height:46px;margin-bottom:22px;display:grid;place-items:center;border-radius:14px;background:var(--greenSoft);border:1px solid var(--greenBorder);color:var(--green);font-weight:950;font-size:21px}.login-card h2{font-size:27px;letter-spacing:-.035em}.login-card>p{color:var(--muted);line-height:1.6;font-size:14px}.login-card form{margin-top:24px;display:grid;gap:17px}.login-card .btn{width:100%;margin-top:2px;min-height:48px}.security-note{margin:18px 0 0!important;color:var(--muted2)!important;font-size:11px!important;display:flex;gap:8px;align-items:flex-start}.security-note span{color:var(--green);font-weight:900}
+    @media(max-width:900px){.login-shell{grid-template-columns:1fr;gap:32px;max-width:600px}.login-card{max-width:none;justify-self:stretch}.login-points{display:none}}@media(max-width:720px){.topbar-inner,.main,.notice{width:min(100% - 24px,var(--max))}.topbar-inner{min-height:64px}.brand-subtitle{display:none}.brand-mark{width:34px;height:34px}.user-pill{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.main{padding-top:28px}.page-head{align-items:flex-start;flex-direction:column;gap:18px}.page-actions,.page-actions .btn{width:100%}.stats{grid-template-columns:1fr}.stat{min-height:96px}.card-head{align-items:flex-start;flex-direction:column}.form-grid{grid-template-columns:1fr;gap:16px}.form-grid+.form-grid,.form-grid+label,label+.form-grid{margin-top:16px}.form-actions{flex-direction:column-reverse}.form-actions .btn{width:100%}.link-row{grid-template-columns:1fr}.link-row .btn{width:100%}.login-shell{width:min(100% - 24px,600px);min-height:calc(100vh - 64px);padding:36px 0 50px}.login-copy h1{font-size:clamp(40px,13vw,58px)}.login-card{padding:22px}h1{font-size:36px}}@media(max-width:520px){.brand-copy{display:none}.toolbar{gap:7px}.user-pill{max-width:100px;padding:0 10px}#logout{padding:0 12px}.card-body{padding:18px}.card-head{padding:18px}}
+  
+    .config-days{display:grid;gap:12px}.config-day{padding:16px;border:1px solid var(--border2);border-radius:12px;background:var(--surface2)}.day-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.toggle{display:flex;align-items:center;gap:10px}.toggle input{width:20px;min-height:20px;margin:0;accent-color:var(--green)}.period-row{display:flex;align-items:end;gap:10px;margin-top:12px}.period-row label{flex:1}.period-row .btn{flex:0 0 auto}.config-section{margin-top:28px;padding-top:24px;border-top:1px solid var(--border)}.config-section h3{margin-bottom:8px}.config-actions{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.config-status{color:var(--warning);font-size:13px}.map-link{color:var(--green);display:inline-block;margin-top:14px}.block-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}.row-actions{display:flex;gap:8px}.config-error{color:var(--danger);line-height:1.5}.config-note{color:var(--muted);font-size:13px;line-height:1.6}.config-day .btn{min-height:36px;font-size:12px}@media(max-width:520px){.period-row{flex-wrap:wrap}.period-row label{min-width:95px}.day-head{align-items:flex-start;flex-wrap:wrap}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/painel/" aria-label="ZaluraTech">
+        <span class="brand-mark">Z</span>
+        <span class="brand-copy"><span class="brand-name">ZALURA<span>TECH</span></span><span class="brand-subtitle">Painel administrativo</span></span>
+      </a>
+      <div class="toolbar">
+        <span id="user-wrap" class="user-pill" hidden><span id="user"></span></span>
+        <button id="logout" class="btn btn-secondary" type="button" hidden>Sair</button>
+      </div>
+    </div>
+  </div>
+
+  <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
+
+  <section id="login-view" class="login-shell" hidden>
+    <div class="login-copy">
+      <p class="eyebrow">ZALURATECH BUSINESS</p>
+      <h1>Operação simples.<br><span>Controle total.</span></h1>
+      <p class="lead">Cadastre clientes, gere conexões do WhatsApp e acompanhe os vínculos do seu sistema de agendamentos em um único lugar.</p>
+      <div class="login-points" aria-hidden="true">
+        <div class="login-point"><i>01</i> Cadastro rápido de novos estabelecimentos</div>
+        <div class="login-point"><i>02</i> Geração segura do link de conexão</div>
+        <div class="login-point"><i>03</i> Visualização centralizada dos clientes</div>
+      </div>
+    </div>
+
+    <div class="login-card">
+      <div class="brand-mini">Z</div>
+      <p class="eyebrow">ACESSO PRIVADO</p>
+      <h2>Entrar no painel</h2>
+      <p>Use suas credenciais administrativas da ZaluraTech.</p>
+      <form id="login-form">
+        <label>Usuário<input name="username" autocomplete="username" placeholder="Seu usuário" required></label>
+        <label>Senha<input name="password" type="password" autocomplete="current-password" placeholder="Sua senha" required></label>
+        <button class="btn btn-primary" type="submit">Entrar no painel</button>
+      </form>
+      <p class="security-note"><span>●</span>Área restrita. A sessão é protegida pelo backend da ZaluraTech.</p>
+    </div>
+  </section>
+
+  <main id="panel" class="main" hidden>
+    <div class="page-head">
+      <div><p class="eyebrow">PAINEL ADMINISTRATIVO</p><h1>Clientes</h1><p class="lead">Cadastre barbeiros e conecte o WhatsApp de cada operação.</p></div>
+      <div class="page-actions">
+        <button id="refresh" class="btn btn-secondary" type="button">Atualizar</button>
+        <button id="new" class="btn btn-primary" type="button">+ Cadastrar barbeiro</button>
+      </div>
+    </div>
+
+    <section class="stats" aria-label="Resumo">
+      <div class="stat"><div class="stat-label">Clientes cadastrados</div><div id="stat-total" class="stat-value">0</div></div>
+      <div class="stat"><div class="stat-label">WhatsApp vinculado</div><div id="stat-linked" class="stat-value green">0</div></div>
+      <div class="stat"><div class="stat-label">Aguardando vínculo</div><div id="stat-pending" class="stat-value warning">0</div></div>
+    </section>
+
+    <section id="link-box" class="card link-card" hidden>
+      <div class="card-head"><div><p class="eyebrow">CONEXÃO WHATSAPP</p><h2 id="link-title">Link de conexão</h2><p>Envie ao responsável. O link é válido por 30 minutos e para uma única conexão.</p></div></div>
+      <div class="card-body">
+        <label for="link-value">Link gerado</label>
+        <div class="link-row"><input id="link-value" aria-label="Link de conexão" readonly><button id="copy" class="btn btn-primary" type="button">Copiar link</button></div>
+        <p id="copy-status" class="hint" role="status"></p>
+      </div>
+    </section>
+
+    <section id="new-box" class="card" hidden>
+      <div class="card-head"><div><p class="eyebrow">NOVO CLIENTE</p><h2>Cadastrar barbeiro</h2><p>Cadastre os dados básicos. Depois, use Configurar para definir a agenda semanal.</p></div></div>
+      <div class="card-body">
+        <form id="create-form">
+          <label>Nome do barbeiro ou estabelecimento<input name="nome" maxlength="120" placeholder="Ex.: Barbearia Central" required></label>
+          <div class="form-grid">
+            <label>WhatsApp do administrador<input name="numeroWhatsAppAdministrador" type="tel" inputmode="numeric" pattern="[1-9][0-9]{7,14}" placeholder="5588999999999" required><span class="hint">País + DDD + número, somente dígitos.</span></label>
+            <label>WhatsApp para notificações<input name="numeroWhatsAppNotificacao" type="tel" inputmode="numeric" pattern="[1-9][0-9]{7,14}" placeholder="5588999999999" required><span class="hint">Pode ser o mesmo número do administrador.</span></label>
+          </div>
+          <div class="form-grid">
+            <label>Início geral de referência<input name="inicioExpediente" type="time" required></label>
+            <label>Fim geral de referência<input name="fimExpediente" type="time" required></label>
+          </div>
+          <label>Endereço<input name="endereco" maxlength="255" placeholder="Ex.: Russas - CE"><span class="hint">Opcional. O endereço não define automaticamente latitude e longitude.</span></label>
+          <div class="form-actions"><button id="cancel" class="btn btn-secondary" type="button">Cancelar</button><button class="btn btn-primary" type="submit">Cadastrar barbeiro</button></div>
+        </form>
+      </div>
+    </section>
+
+
+    <section id="config-box" class="card" hidden aria-labelledby="config-title">
+      <div class="card-head"><div><p class="eyebrow">AGENDA E LOCALIZAÇÃO</p><h2 id="config-title">Configurar barbeiro</h2><p>Defina quando e onde o cliente será atendido.</p></div><button id="config-close" type="button" class="btn btn-secondary">Fechar</button></div>
+      <div class="card-body">
+        <p id="config-loading" role="status">Carregando configurações…</p>
+        <p id="config-error" class="config-error" role="alert" hidden></p>
+        <form id="config-form" hidden>
+          <fieldset id="config-fields" style="border:0;padding:0;margin:0;min-width:0">
+            <h3>Expediente semanal</h3>
+            <p class="config-note">Adicione os períodos de atendimento de cada dia. Para almoço ou outra pausa, deixe um intervalo entre os períodos. Os horários seguem o fuso configurado na sua operação.</p>
+            <div class="config-actions"><button id="close-week" class="btn btn-secondary" type="button">Fechar todos os dias</button><button id="copy-week" class="btn btn-secondary" type="button">Copiar segunda para terça a sexta</button></div>
+            <div id="config-days" class="config-days"></div>
+            <div class="config-section">
+              <h3>Local de atendimento</h3>
+              <label>Endereço completo<input id="config-address" maxlength="255" placeholder="Rua, número, bairro, cidade e estado"></label>
+              <div class="form-grid">
+                <label>Latitude<input id="config-lat" type="number" min="-90" max="90" step="any" placeholder="Ex.: -4.94"></label>
+                <label>Longitude<input id="config-lng" type="number" min="-180" max="180" step="any" placeholder="Ex.: -37.97"></label>
+              </div>
+              <p class="hint">Use as coordenadas do estabelecimento. No Google Maps, clique com o botão direito no ponto e copie latitude e longitude. Preencher somente o endereço não gera coordenadas.</p>
+              <div class="config-actions"><button id="use-location" class="btn btn-secondary" type="button">Usar minha localização atual</button><button id="preview-map" class="btn btn-secondary" type="button">Conferir no mapa</button></div>
+              <p class="hint">Use a localização atual somente se estiver na barbearia.</p>
+              <a id="map-link" class="map-link" target="_blank" rel="noopener noreferrer" hidden>Abrir ponto no Google Maps ↗</a>
+            </div>
+            <p class="config-note">Mudanças de expediente valem para novos horários disponíveis. Agendamentos já confirmados continuam registrados.</p>
+            <p id="config-status" class="config-status" role="status"></p>
+            <div class="form-actions"><button class="btn btn-primary" id="config-save" type="submit">Salvar horários e localização</button></div>
+          </fieldset>
+        </form>
+        <section id="blocks-section" class="config-section" hidden>
+          <h3>Folgas e datas bloqueadas</h3>
+          <p class="config-note">Bloqueie o dia inteiro para feriados, férias ou imprevistos. Datas com agendamentos futuros precisam ser tratadas antes; esta tela não cancela reservas.</p>
+          <div id="blocks-list"></div>
+          <form id="block-form">
+            <div class="form-grid"><label>Data<input name="data" type="date" required></label><label>Motivo<input name="motivo" maxlength="255" placeholder="Ex.: feriado" required></label></div>
+            <div class="form-actions"><button class="btn btn-secondary" type="submit">Bloquear data</button></div>
+          </form>
+        </section>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><div><p class="eyebrow">OPERAÇÕES</p><h2 id="count">Clientes cadastrados</h2><p>Visualize o status e gere um novo link de conexão quando necessário.</p></div></div>
+      <p id="empty" class="empty" hidden>Nenhum barbeiro cadastrado ainda.</p>
+      <div id="table-wrap" class="table-wrap">
+        <table>
+          <thead><tr><th>Cliente</th><th>Administrador</th><th>Expediente</th><th>WhatsApp</th><th>Ação</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="footer-note">“Vínculo registrado” indica que a conexão foi salva no sistema. Para validar a operação completa, faça um agendamento de teste no WhatsApp.</div>
+    </section>
+  </main>
+
+<script>
+'use strict';
+const API='https://api.zaluratech.com.br';
+const $=id=>document.getElementById(id);
+let csrf=null;
+let configId=null, configDirty=false, configGeneration=0, configSaving=false;
+
+function notice(message,error=false){$('notice').textContent=message;$('notice').hidden=!message;$('notice').classList.toggle('error',error)}
+function updateStats(data){const linked=data.filter(x=>x.vinculoRegistrado).length;$('stat-total').textContent=data.length;$('stat-linked').textContent=linked;$('stat-pending').textContent=data.length-linked}
+function loggedOut(){configGeneration++;configId=null;configDirty=false;configSaving=false;$('config-form').reset();$('config-days').replaceChildren();$('blocks-list').replaceChildren();$('config-box').hidden=true;$('login-view').hidden=false;$('panel').hidden=true;$('logout').hidden=true;$('user-wrap').hidden=true;$('user').textContent='';$('rows').replaceChildren();$('link-value').value='';$('link-box').hidden=true;$('new-box').hidden=true;updateStats([])}
+
+async function request(path,options={}){
+  const headers={...options.headers};
+  if(options.method&&options.method!=='GET'&&csrf)headers[csrf.headerName]=csrf.token;
+  let response;
+  try{response=await fetch(API+path,{...options,headers,credentials:'include',cache:'no-store'})}
+  catch{throw new Error('Não foi possível acessar a API da ZaluraTech.')}
+  if(!response.ok){
+    if(response.status===401){loggedOut();throw new Error(path.endsWith('/login')?'Usuário ou senha inválidos.':'Entre novamente para acessar o painel.')}
+    if(response.status===403){csrf=null;loggedOut();throw new Error('Sessão inválida ou acesso negado. Entre novamente.')}
+    let body={};try{body=await response.json()}catch{}
+    throw new Error(body.erro||'Não foi possível concluir a operação ('+response.status+').')
+  }
+  return response.status===204?null:response.json()
+}
+
+async function getCsrf(){csrf=await request('/api/admin/csrf')}
+async function busy(button,fn){if(button)button.disabled=true;try{await fn()}catch(e){notice(e.message,true)}finally{if(button)button.disabled=false}}
+function formatPhone(value){if(!value)return'Não informado';const d=String(value).replace(/\D/g,'');if(d.length===13)return'+'+d.slice(0,2)+' ('+d.slice(2,4)+') '+d.slice(4,9)+'-'+d.slice(9);return'+'+d}
+function formatTime(value){return value?String(value).slice(0,5):'—'}
+function initials(name){const p=String(name||'').trim().split(/\s+/).filter(Boolean);return p.length?p.slice(0,2).map(x=>x[0]).join('').toUpperCase():'Z'}
+function cell(row){const td=document.createElement('td');row.append(td);return td}
+
+async function list(){
+  const data=await request('/api/admin/barbeiros');
+  $('rows').replaceChildren();
+  $('count').textContent='Clientes cadastrados ('+data.length+')';
+  $('empty').hidden=data.length>0;
+  $('table-wrap').hidden=data.length===0;
+  updateStats(data);
+
+  for(const b of data){
+    const row=document.createElement('tr');
+    const c1=cell(row),wrap=document.createElement('div'),avatar=document.createElement('span'),text=document.createElement('div'),name=document.createElement('div'),id=document.createElement('div');
+    wrap.className='client-main';avatar.className='client-avatar';avatar.textContent=initials(b.nome);name.className='client-name';name.textContent=b.nome||'Sem nome';id.className='client-id';id.textContent='ID #'+b.id;text.append(name,id);wrap.append(avatar,text);c1.append(wrap);
+    cell(row).textContent=formatPhone(b.numeroWhatsAppAdministrador);
+    cell(row).textContent='Ver em Configurar';
+    const status=cell(row),badge=document.createElement('span');badge.className=b.vinculoRegistrado?'badge badge-ok':'badge badge-pending';badge.textContent=b.vinculoRegistrado?'Vínculo registrado':'Pendente';status.append(badge);
+    const action=cell(row),btn=document.createElement('button');btn.className='btn btn-secondary';btn.type='button';btn.textContent='Gerar link';
+    btn.addEventListener('click',()=>busy(btn,async()=>{const r=await request('/api/admin/barbeiros/'+b.id+'/link',{method:'POST'});$('link-title').textContent='Conexão de '+b.nome;$('link-value').value=r.link;$('copy-status').textContent='';$('link-box').hidden=false;$('link-box').scrollIntoView({behavior:'smooth',block:'center'})}));
+    const configBtn=document.createElement('button');configBtn.type='button';configBtn.className='btn btn-secondary';configBtn.textContent='Configurar';configBtn.addEventListener('click',()=>openConfig(b));const actions=document.createElement('div');actions.className='row-actions';const removeBtn=document.createElement('button');removeBtn.type='button';removeBtn.className='btn btn-danger';removeBtn.textContent='Excluir';removeBtn.addEventListener('click',()=>removeBarber(b,removeBtn));actions.append(configBtn,btn,removeBtn);action.append(actions);$('rows').append(row)
+  }
+}
+
+async function showPanel(){const s=await request('/api/admin/session');$('user').textContent=s.username;$('user-wrap').hidden=false;$('login-view').hidden=true;$('panel').hidden=false;$('logout').hidden=false;await list()}
+
+$('login-form').addEventListener('submit',e=>{e.preventDefault();busy(e.submitter,async()=>{await getCsrf();await request('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(e.target))});e.target.reset();await getCsrf();notice('');await showPanel()})});
+$('logout').addEventListener('click',e=>busy(e.currentTarget,async()=>{await request('/api/admin/logout',{method:'POST'});csrf=null;$('create-form').reset();loggedOut();notice('Sessão encerrada.')}));
+$('new').addEventListener('click',()=>{$('new-box').hidden=false;$('new-box').scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>$('create-form').elements.nome.focus(),300)});
+$('cancel').addEventListener('click',()=>{$('create-form').reset();$('new-box').hidden=true});
+$('refresh').addEventListener('click',e=>busy(e.currentTarget,async()=>{await list();notice('Lista atualizada.')}));
+$('create-form').addEventListener('submit',e=>{e.preventDefault();busy(e.submitter,async()=>{const data=Object.fromEntries(new FormData(e.target));if(data.fimExpediente<=data.inicioExpediente)throw new Error('O fim do expediente deve ser depois do início.');await request('/api/admin/barbeiros',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});e.target.reset();$('new-box').hidden=true;notice('Barbeiro cadastrado. Clique em Configurar para definir os dias e períodos de atendimento antes de conectar o WhatsApp.');await list()})});
+$('copy').addEventListener('click',async()=>{const v=$('link-value').value;if(!v)return;try{await navigator.clipboard.writeText(v);$('copy-status').textContent='Link copiado para a área de transferência.'}catch{$('link-value').select();$('copy-status').textContent='Selecione o link acima e copie manualmente.'}});
+
+
+
+async function removeBarber(b,button){
+  if(configSaving)return;
+  if(configId===b.id&&!confirmDiscard())return;
+  const answer=window.prompt('Excluir '+b.nome+' do sistema Zalura? Os serviços, horários e links pendentes desse cadastro serão removidos. A conta na Meta não será excluída. Cadastros com histórico de agendamentos são preservados.\n\nDigite o nome exato para confirmar: '+b.nome);
+  if(answer===null)return;
+  if(answer!==b.nome){notice('Nome diferente. Nenhum barbeiro foi excluído.',true);return}
+  await busy(button,async()=>{
+    await request('/api/admin/barbeiros/'+b.id+'/remover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nomeConfirmacao:answer})});
+    if(configId===b.id){configGeneration++;configDirty=false;configId=null;$('config-box').hidden=true}
+    $('link-value').value='';$('link-box').hidden=true;
+    notice('Barbeiro excluído do sistema. A conta do WhatsApp na Meta não foi alterada.');await list();
+  });
+}
+
+const weekdays=[['MONDAY','Segunda-feira'],['TUESDAY','Terça-feira'],['WEDNESDAY','Quarta-feira'],['THURSDAY','Quinta-feira'],['FRIDAY','Sexta-feira'],['SATURDAY','Sábado'],['SUNDAY','Domingo']];
+function configError(message=''){$('config-error').textContent=message;$('config-error').hidden=!message}
+function markDirty(){configDirty=true;$('config-status').textContent='Alterações ainda não salvas.'}
+function confirmDiscard(){return !configDirty||window.confirm('Descartar as alterações de horários e localização ainda não salvas?')}
+function addPeriod(container,value={inicio:'',fim:''}){
+  const row=document.createElement('div');row.className='period-row';
+  for(const [key,label] of [['inicio','Das'],['fim','Até']]){
+    const l=document.createElement('label');l.textContent=label;const input=document.createElement('input');input.type='time';input.step='60';input.required=true;input.dataset.field=key;input.value=value[key]?value[key].slice(0,5):'';l.append(input);row.append(l);
+  }
+  const remove=document.createElement('button');remove.type='button';remove.className='btn btn-secondary';remove.textContent='Remover';remove.addEventListener('click',()=>{row.remove();markDirty()});row.append(remove);container.append(row);
+}
+function renderWeek(week){
+  $('config-days').replaceChildren();
+  for(const [key,title] of weekdays){
+    const d=week.find(x=>x.diaSemana===key)||{aberto:false,periodos:[]};
+    const card=document.createElement('div');card.className='config-day';card.dataset.day=key;
+    const head=document.createElement('div');head.className='day-head';
+    const label=document.createElement('label');label.className='toggle';const toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=d.aberto;toggle.dataset.open='true';label.append(toggle,document.createTextNode(title));
+    const add=document.createElement('button');add.type='button';add.className='btn btn-secondary';add.textContent='+ Período';head.append(label,add);
+    const periods=document.createElement('div');periods.className='periods';
+    for(const p of d.periodos||[])addPeriod(periods,p);
+    const closed=document.createElement('p');closed.className='hint';closed.textContent='Fechado — sem novos horários neste dia.';
+    function refreshDay(){periods.hidden=!toggle.checked;closed.hidden=toggle.checked;add.disabled=!toggle.checked;periods.querySelectorAll('input').forEach(i=>i.disabled=!toggle.checked)}
+    toggle.addEventListener('change',()=>{if(toggle.checked&&!periods.children.length)addPeriod(periods);refreshDay();markDirty()});
+    add.addEventListener('click',()=>{if(periods.children.length>=12){configError('Limite de 12 períodos por dia.');return}addPeriod(periods);markDirty()});
+    card.append(head,periods,closed);$('config-days').append(card);refreshDay();
+  }
+}
+function readWeek(){
+  return [...$('config-days').children].map(card=>({diaSemana:card.dataset.day,aberto:card.querySelector('[data-open]').checked,periodos:card.querySelector('[data-open]').checked?[...card.querySelectorAll('.period-row')].map(row=>({inicio:row.querySelector('[data-field=inicio]').value,fim:row.querySelector('[data-field=fim]').value})):[]}));
+}
+function validateWeek(week){
+  for(const d of week){
+    const name=weekdays.find(x=>x[0]===d.diaSemana)[1];
+    if(d.aberto&&!d.periodos.length)throw new Error(name+': adicione pelo menos um período ou marque como fechado.');
+    const sorted=[...d.periodos].sort((a,b)=>a.inicio.localeCompare(b.inicio));let previous=null;
+    for(const p of sorted){if(!p.inicio||!p.fim||p.fim<=p.inicio)throw new Error(name+': informe início e fim válidos no mesmo dia.');if(previous&&p.inicio<previous)throw new Error(name+': há períodos sobrepostos.');previous=p.fim}
+  }
+}
+function coordinates(){
+  const lat=$('config-lat').value.trim(),lng=$('config-lng').value.trim();
+  if(Boolean(lat)!==Boolean(lng))throw new Error('Informe latitude e longitude juntas.');
+  if(!lat)return {latitude:null,longitude:null};
+  const latitude=Number(lat),longitude=Number(lng);
+  if(!Number.isFinite(latitude)||!Number.isFinite(longitude)||Math.abs(latitude)>90||Math.abs(longitude)>180)throw new Error('Informe coordenadas válidas.');
+  return {latitude,longitude};
+}
+async function openConfig(b){
+  if(configSaving||!confirmDiscard())return;
+  const generation=++configGeneration;configId=b.id;configDirty=false;
+  $('config-title').textContent='Configurar '+b.nome;$('config-box').hidden=false;$('config-loading').hidden=false;$('config-form').hidden=true;$('blocks-section').hidden=true;configError();$('map-link').hidden=true;$('config-status').textContent='';$('block-form').reset();
+  $('config-box').scrollIntoView({behavior:'smooth',block:'start'});
+  try{
+    const c=await request('/api/admin/barbeiros/'+b.id+'/configuracao');if(generation!==configGeneration)return;
+    renderWeek(c.semana);$('config-address').value=c.endereco||'';$('config-lat').value=c.latitude??'';$('config-lng').value=c.longitude??'';$('config-form').hidden=false;$('blocks-section').hidden=false;
+    await loadBlocks(b.id,generation);
+  }catch(e){if(generation===configGeneration)configError(e.message.includes('(404)')?'A API ainda não tem a configuração de agenda. Instale a atualização do backend incluída com este painel.':e.message)}
+  finally{if(generation===configGeneration)$('config-loading').hidden=true}
+}
+async function loadBlocks(id,generation){
+  const items=await request('/api/admin/barbeiros/'+id+'/bloqueios');if(id!==configId||generation!==configGeneration)return;
+  $('blocks-list').replaceChildren();
+  if(!items.length){const p=document.createElement('p');p.className='hint';p.textContent='Nenhuma data bloqueada de hoje em diante.';$('blocks-list').append(p)}
+  for(const item of items){const row=document.createElement('div');row.className='block-item';const text=document.createElement('span');text.textContent=item.data.split('-').reverse().join('/')+' · '+item.motivo;const btn=document.createElement('button');btn.type='button';btn.className='btn btn-secondary';btn.textContent='Liberar';btn.addEventListener('click',()=>busy(btn,async()=>{await request('/api/admin/barbeiros/'+id+'/bloqueios/liberar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:item.data})});await loadBlocks(id,generation);notice('Data liberada. O expediente semanal continua valendo.')}));row.append(text,btn);$('blocks-list').append(row)}
+}
+$('config-form').addEventListener('input',markDirty);
+$('config-close').addEventListener('click',()=>{if(configSaving||!confirmDiscard())return;configGeneration++;configDirty=false;configId=null;$('config-box').hidden=true});
+$('close-week').addEventListener('click',()=>{renderWeek(weekdays.map(([diaSemana])=>({diaSemana,aberto:false,periodos:[]})));markDirty()});
+$('copy-week').addEventListener('click',()=>{const week=readWeek();for(let i=1;i<=4;i++){week[i].aberto=week[0].aberto;week[i].periodos=week[0].periodos.map(p=>({...p}))}renderWeek(week);markDirty()});
+$('config-form').addEventListener('submit',async e=>{
+  e.preventDefault();if(configSaving)return;configError();const id=configId,generation=configGeneration;
+  try{
+    const semana=readWeek();validateWeek(semana);const payload={semana,endereco:$('config-address').value.trim(),...coordinates()};
+    configSaving=true;$('config-fields').disabled=true;$('config-close').disabled=true;
+    await request('/api/admin/barbeiros/'+id+'/configuracao',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(generation!==configGeneration)return;configDirty=false;$('config-status').textContent='Horários e localização salvos na API.';notice('Configurações salvas.');
+  }catch(e){if(generation===configGeneration)configError(e.message)}
+  finally{configSaving=false;$('config-fields').disabled=false;$('config-close').disabled=false}
+});
+$('preview-map').addEventListener('click',()=>{try{configError();const c=coordinates();if(c.latitude===null)throw new Error('Informe as coordenadas para conferir o ponto no mapa.');$('map-link').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(c.latitude+','+c.longitude);$('map-link').hidden=false}catch(e){configError(e.message)}});
+$('use-location').addEventListener('click',()=>{
+  configError();if(!navigator.geolocation){configError('Este navegador não oferece localização. Preencha as coordenadas manualmente.');return}
+  const generation=configGeneration;$('use-location').disabled=true;
+  navigator.geolocation.getCurrentPosition(p=>{$('use-location').disabled=false;if(generation!==configGeneration)return;$('config-lat').value=p.coords.latitude.toFixed(6);$('config-lng').value=p.coords.longitude.toFixed(6);markDirty()},()=>{$('use-location').disabled=false;if(generation===configGeneration)configError('Não foi possível obter a localização. Você pode preencher as coordenadas manualmente.')},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+});
+$('block-form').addEventListener('submit',e=>{e.preventDefault();const id=configId,generation=configGeneration;busy(e.submitter,async()=>{const body=Object.fromEntries(new FormData(e.target));body.motivo=body.motivo.trim();if(!body.motivo)throw new Error('Informe o motivo do bloqueio.');await request('/api/admin/barbeiros/'+id+'/bloqueios',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(generation===configGeneration)e.target.reset();await loadBlocks(id,generation);notice('Data bloqueada.');})});
+window.addEventListener('beforeunload',e=>{if(configDirty){e.preventDefault();e.returnValue=''}});
+
+(async()=>{notice('Conectando ao painel…');try{await getCsrf();await showPanel();notice('')}catch(e){loggedOut();if(!['Entre novamente para acessar o painel.','Entre para acessar o painel.'].includes(e.message))notice(e.message,true);else notice('')}})();
+</script>
+</body>
+</html>
