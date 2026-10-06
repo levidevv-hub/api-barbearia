@@ -17,7 +17,14 @@ import static org.mockito.Mockito.*;
 @WebMvcTest(AdminController.class)
 @Import(AdminSecurityConfig.class)
 class AdminSecurityTest {
-    @Autowired MockMvc mvc;
+    @Autowired org.springframework.web.context.WebApplicationContext context;
+    MockMvc mvc;
+    @org.junit.jupiter.api.BeforeEach
+    void configurarSegurancaMockMvc() {
+        mvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup(context)
+                .apply(org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity())
+                .build();
+    }
     @MockitoBean IBarbeiroRepository barbeiros;
     @MockitoBean ConexaoWhatsAppPendenteService conexoes;
 
