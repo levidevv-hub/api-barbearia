@@ -9,9 +9,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
 
 jobs:
   build:
@@ -19,6 +19,24 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: barbearia_test
+          POSTGRES_USER: barbearia_test
+          POSTGRES_PASSWORD: barbearia_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U barbearia_test -d barbearia_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_POSTGRES_URL: jdbc:postgresql://localhost:5432/barbearia_test
+      TEST_POSTGRES_USERNAME: barbearia_test
+      TEST_POSTGRES_PASSWORD: barbearia_test
 
     steps:
     - uses: actions/checkout@v4
@@ -35,6 +53,15 @@ jobs:
 
     - name: Build with Gradle Wrapper
       run: ./gradlew build
+
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports
+        path: |
+          build/reports/tests/test
+          build/test-results/test
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
     # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.

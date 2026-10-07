@@ -19,6 +19,10 @@ public class Barbeiro {
     private Long id;
     private String nome;
 
+    @Builder.Default
+    @Column(name = "robo_ativo", nullable = false, columnDefinition = "boolean default true")
+    private boolean roboAtivo = true;
+
     @Column(length = 2048)
     private String whatsappAccessToken;
     @Column(unique = true)

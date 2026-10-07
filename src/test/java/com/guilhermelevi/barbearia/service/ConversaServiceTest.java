@@ -78,14 +78,16 @@ class ConversaServiceTest {
                         previas,
                         agendamentos,
                         conversaServicoAdmin,
-                        whatsapp
+                        whatsapp,
+                        new ControleRoboService(barbeiros, autorizacao)
                 );
 
         conversa = new ConversaService(
                 barbeiros,
                 clientes,
                 conversaAgendamento,
-                conversaAdmin
+                conversaAdmin,
+                autorizacao
         );
 
         barbeiro = Barbeiro.builder()

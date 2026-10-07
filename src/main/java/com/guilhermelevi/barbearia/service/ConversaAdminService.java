@@ -24,6 +24,7 @@ public class ConversaAdminService {
     private final AgendamentoService agendamentoService;
     private final ConversaServicoAdminService servicoAdminService;
     private final WhatsAppClient whatsapp;
+    private final ControleRoboService controleRoboService;
 
     public boolean processarTexto(
             String texto,
@@ -121,6 +122,18 @@ public class ConversaAdminService {
         }
 
         switch (id) {
+            case "ADMIN_CONTROLE_ROBO", "ADMIN_VOLTAR_CONTROLE_ROBO" ->
+                    whatsapp.enviarControleRobo(phoneNumberId, telefone, barbeiro.isRoboAtivo());
+
+            case "ADMIN_PAUSAR_ROBO" ->
+                    whatsapp.enviarConfirmacaoPausaRobo(phoneNumberId, telefone);
+
+            case "ADMIN_CONFIRMAR_PAUSA_ROBO", "ADMIN_REATIVAR_ROBO" -> {
+                boolean ativo = "ADMIN_REATIVAR_ROBO".equals(id);
+                Barbeiro atualizado = controleRoboService.alterar(barbeiro.getId(), telefone, ativo);
+                whatsapp.enviarControleRobo(phoneNumberId, telefone, atualizado.isRoboAtivo());
+            }
+
             case "ADMIN_BLOQUEAR_DIA" ->
                     whatsapp.enviarTextoAposCommit(
                             phoneNumberId,

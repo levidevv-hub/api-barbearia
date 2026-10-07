@@ -15,6 +15,30 @@ import static org.mockito.Mockito.*;
 class EnvioNotificacaoServiceTest {
 
     @Test
+    void pausaMantemAvisoPendenteSemTentativasEReativacaoEnvia() {
+        var repository = mock(INotificacaoPendenteRepository.class);
+        var whatsapp = mock(WhatsAppClient.class);
+        var service = new EnvioNotificacaoService(repository, whatsapp);
+        var notificacao = notificacao();
+        var barbeiro = notificacao.getAgendamento().getBarbeiro();
+        barbeiro.setRoboAtivo(false);
+        when(repository.buscarParaEnviar(1L)).thenReturn(Optional.of(notificacao));
+
+        service.enviarPendente(1L);
+
+        verifyNoInteractions(whatsapp);
+        assertEquals(NotificacaoPendente.Status.PENDENTE, notificacao.getStatus());
+        assertEquals(0, notificacao.getTentativas());
+        assertNull(notificacao.getUltimaTentativaEm());
+
+        barbeiro.setRoboAtivo(true);
+        when(whatsapp.enviarTexto(anyString(), anyString(), anyString())).thenReturn("wamid.reativado");
+        service.enviarPendente(1L);
+        assertEquals(NotificacaoPendente.Status.ACEITA_PELA_API, notificacao.getStatus());
+        assertEquals(1, notificacao.getTentativas());
+    }
+
+    @Test
     void enviaTextoEMarcaAceite() throws Exception {
         INotificacaoPendenteRepository repository =
                 mock(INotificacaoPendenteRepository.class);

@@ -553,6 +553,11 @@ public class WhatsAppClient {
     ) {
         List<Map<String, Object>> opcoes = List.of(
                 Map.<String, Object>of(
+                        "id", "ADMIN_CONTROLE_ROBO",
+                        "title", "Controle do robô",
+                        "description", "Pausar ou reativar o atendimento para todos os clientes"
+                ),
+                Map.<String, Object>of(
                         "id", "ADMIN_BLOQUEAR_DIA",
                         "title", "Bloquear dia",
                         "description", "Bloquear uma data na agenda"
@@ -612,6 +617,38 @@ public class WhatsAppClient {
         );
 
         enviarAposCommit(phoneNumberId, body);
+    }
+
+    public void enviarControleRobo(String phoneNumberId, String numero, boolean ativo) {
+        String texto = ativo
+                ? "🤖 Robô ATIVO.\nO atendimento automático aos clientes está habilitado."
+                : "⏸️ Robô PAUSADO.\nNenhuma nova resposta automática será enviada aos clientes "
+                        + "desta barbearia até você reativar.\n\nAvisos pendentes aos clientes aguardam "
+                        + "a reativação. Minha agenda continua disponível.";
+        enviarBotoesControleRobo(phoneNumberId, numero, texto, List.of(
+                botao(ativo ? "ADMIN_PAUSAR_ROBO" : "ADMIN_REATIVAR_ROBO",
+                        ativo ? "Pausar robô" : "Reativar robô")
+        ));
+    }
+
+    public void enviarConfirmacaoPausaRobo(String phoneNumberId, String numero) {
+        enviarBotoesControleRobo(phoneNumberId, numero,
+                "Pausar o atendimento automático para todos os clientes desta barbearia?\n\n"
+                        + "O robô ficará pausado até você reativar em Minha agenda → Controle do robô.",
+                List.of(botao("ADMIN_CONFIRMAR_PAUSA_ROBO", "Sim, pausar"),
+                        botao("ADMIN_VOLTAR_CONTROLE_ROBO", "Voltar")));
+    }
+
+    private void enviarBotoesControleRobo(String phoneNumberId, String numero,
+                                         String texto, List<Map<String, Object>> botoes) {
+        enviarAposCommit(phoneNumberId, Map.of(
+                "messaging_product", "whatsapp",
+                "to", numero,
+                "type", "interactive",
+                "interactive", Map.of(
+                        "type", "button",
+                        "body", Map.of("text", texto),
+                        "action", Map.of("buttons", botoes))));
     }
 
     public void enviarConfirmacaoBloqueio(
