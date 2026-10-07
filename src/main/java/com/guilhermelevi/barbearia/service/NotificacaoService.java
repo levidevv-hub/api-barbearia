@@ -24,6 +24,7 @@ public class NotificacaoService {
             DateTimeFormatter.ofPattern("HH:mm");
 
     private final WhatsAppClient whatsappClient;
+    private final CentralWhatsappService centralWhatsappService;
 
     @Value("${whatsapp.notificacao.usar-template:false}")
     private boolean usarTemplate;
@@ -58,8 +59,6 @@ public class NotificacaoService {
 
         // Copiamos os dados antes de encerrar a transação.
         Long agendamentoId = agendamento.getId();
-        String phoneNumberId =
-                agendamento.getBarbeiro().getWhatsappPhoneNumberId();
         String destinatario =
                 agendamento.getBarbeiro().getNumeroWhatsAppNotificacao();
 
@@ -68,6 +67,17 @@ public class NotificacaoService {
                     "Agendamento {} sem destinatário para notificação.",
                     agendamentoId
             );
+            return;
+        }
+
+        String phoneNumberId;
+        try {
+            phoneNumberId = centralWhatsappService.linhaNotificacao(
+                    agendamento.getBarbeiro().getWhatsappPhoneNumberId());
+        } catch (IllegalStateException e) {
+            // Configuração de avisos não pode impedir a reserva do cliente.
+            log.error("Agendamento {}: não foi possível preparar o aviso ao barbeiro: {}",
+                    agendamentoId, e.getMessage());
             return;
         }
 
@@ -101,15 +111,16 @@ public class NotificacaoService {
                     @Override
                     public void afterCommit() {
                         try {
+                            String mensagemId;
                             if (usarTemplate) {
-                                whatsappClient.enviarTemplate(
+                                mensagemId = whatsappClient.enviarTemplate(
                                         phoneNumberId,
                                         destinatario,
                                         nomeTemplate,
                                         dados
                                 );
                             } else {
-                                whatsappClient.enviarTexto(
+                                mensagemId = whatsappClient.enviarTexto(
                                         phoneNumberId,
                                         destinatario,
                                         mensagem
@@ -117,9 +128,8 @@ public class NotificacaoService {
                             }
 
                             log.info(
-                                    "API aceitou notificação {} do agendamento {}.",
-                                    nomeTemplate,
-                                    agendamentoId
+                                    "API aceitou notificação {} do agendamento {} pela linha {}. Mensagem: {}",
+                                    nomeTemplate, agendamentoId, phoneNumberId, mensagemId
                             );
                         } catch (RuntimeException e) {
                             log.error(

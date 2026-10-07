@@ -1,6 +1,7 @@
 package com.guilhermelevi.barbearia.service;
 
 import com.guilhermelevi.barbearia.domain.*;
+import com.guilhermelevi.barbearia.repositories.IBarbeiroRepository;
 import com.guilhermelevi.barbearia.infrastructure.whatsapp.WhatsAppClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ class NotificacaoServiceTest {
     @Test
     void exigeTransacaoAtiva() {
         NotificacaoService service =
-                new NotificacaoService(mock(WhatsAppClient.class));
+                new NotificacaoService(mock(WhatsAppClient.class), new CentralWhatsappService(mock(IBarbeiroRepository.class)));
 
         assertThrows(
                 IllegalStateException.class,
@@ -38,7 +39,7 @@ class NotificacaoServiceTest {
     @Test
     void enviaSomenteDepoisDoCommit() throws Exception {
         WhatsAppClient whatsapp = mock(WhatsAppClient.class);
-        NotificacaoService service = new NotificacaoService(whatsapp);
+        NotificacaoService service = new NotificacaoService(whatsapp, new CentralWhatsappService(mock(IBarbeiroRepository.class)));
         definirUsarTemplate(service, false);
 
         TransactionSynchronizationManager.setActualTransactionActive(true);
@@ -64,7 +65,7 @@ class NotificacaoServiceTest {
     @Test
     void semDestinatarioNaoRegistraEnvio() throws Exception {
         WhatsAppClient whatsapp = mock(WhatsAppClient.class);
-        NotificacaoService service = new NotificacaoService(whatsapp);
+        NotificacaoService service = new NotificacaoService(whatsapp, new CentralWhatsappService(mock(IBarbeiroRepository.class)));
         definirUsarTemplate(service, false);
 
         Agendamento agendamento = agendamento();
