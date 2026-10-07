@@ -44,6 +44,12 @@ public class EnvioNotificacaoService {
             return;
         }
 
+        // Avisos aos clientes ficam pendentes durante a pausa e voltam a ser
+        // enviados pelo scheduler após a reativação, sem consumir tentativas.
+        if (!notificacao.getAgendamento().getBarbeiro().isRoboAtivo()) {
+            return;
+        }
+
         notificacao.registrarTentativa();
 
         try {

@@ -3,6 +3,8 @@ package com.guilhermelevi.barbearia.infrastructure.whatsapp;
 import com.guilhermelevi.barbearia.domain.Agendamento;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.client.RestClient;
 import com.guilhermelevi.barbearia.repositories.IBarbeiroRepository;
@@ -21,6 +23,51 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class WhatsAppClientTest {
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void controleEnviaBotaoCompativelComWhatsAppEComEstado(boolean ativo) {
+        var builder = RestClient.builder();
+        var server = MockRestServiceServer.bindTo(builder).build();
+        var repository = mock(IBarbeiroRepository.class);
+        when(repository.findByWhatsappPhoneNumberId("phone"))
+                .thenReturn(Optional.of(Barbeiro.builder().whatsappAccessToken("teste").build()));
+        var client = new WhatsAppClient(builder, repository);
+        ReflectionTestUtils.setField(client, "apiVersion", "v26.0");
+        String id = ativo ? "ADMIN_PAUSAR_ROBO" : "ADMIN_REATIVAR_ROBO";
+        String titulo = ativo ? "Pausar robô" : "Reativar robô";
+        server.expect(requestTo("https://graph.facebook.com/v26.0/phone/messages"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(content().json("""
+                        {"type":"interactive","interactive":{"type":"button","action":{"buttons":[
+                          {"type":"reply","reply":{"id":"%s","title":"%s"}}
+                        ]}}}
+                        """.formatted(id, titulo)))
+                .andRespond(withSuccess("{\"messages\":[{\"id\":\"wamid.controle\"}]}", MediaType.APPLICATION_JSON));
+        client.enviarControleRobo("phone", "5588912345678", ativo);
+        server.verify();
+    }
+
+    @Test
+    void confirmacaoOferecePausaEVoltarComIdsDistintos() {
+        var builder = RestClient.builder();
+        var server = MockRestServiceServer.bindTo(builder).build();
+        var repository = mock(IBarbeiroRepository.class);
+        when(repository.findByWhatsappPhoneNumberId("phone"))
+                .thenReturn(Optional.of(Barbeiro.builder().whatsappAccessToken("teste").build()));
+        var client = new WhatsAppClient(builder, repository);
+        ReflectionTestUtils.setField(client, "apiVersion", "v26.0");
+        server.expect(requestTo("https://graph.facebook.com/v26.0/phone/messages"))
+                .andExpect(content().json("""
+                        {"type":"interactive","interactive":{"type":"button","action":{"buttons":[
+                          {"type":"reply","reply":{"id":"ADMIN_CONFIRMAR_PAUSA_ROBO","title":"Sim, pausar"}},
+                          {"type":"reply","reply":{"id":"ADMIN_VOLTAR_CONTROLE_ROBO","title":"Voltar"}}
+                        ]}}}
+                        """))
+                .andRespond(withSuccess("{\"messages\":[{\"id\":\"wamid.confirmacao\"}]}", MediaType.APPLICATION_JSON));
+        client.enviarConfirmacaoPausaRobo("phone", "5588912345678");
+        server.verify();
+    }
 
     @AfterEach
     void limparTransacao() {
