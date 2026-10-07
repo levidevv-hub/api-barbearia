@@ -1,6 +1,7 @@
 package com.guilhermelevi.barbearia.service;
 
 import com.guilhermelevi.barbearia.domain.Barbeiro;
+import com.guilhermelevi.barbearia.domain.SessaoCentralWhatsapp;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ class ControleRoboPostgresTest {
                     var existente = sessao.find(Barbeiro.class, 1L);
                     assertTrue(existente.isRoboAtivo(), "Cadastro anterior ao deploy deve continuar ativo");
                     existente.setRoboAtivo(false);
+                    sessao.persist(new SessaoCentralWhatsapp("990000:5511980000001", 1L));
                     sessao.persist(Barbeiro.builder().nome("Novo").build());
                     transacao.commit();
                 }
@@ -38,6 +40,7 @@ class ControleRoboPostgresTest {
                      var sessao = fabrica.openSession()) {
                     assertFalse(sessao.find(Barbeiro.class, 1L).isRoboAtivo(), "Reiniciar não pode reativar o robô");
                     assertTrue(sessao.find(Barbeiro.class, 2L).isRoboAtivo());
+                    assertEquals(1L, sessao.find(SessaoCentralWhatsapp.class, "990000:5511980000001").getBarbeiroId());
                 }
                 sql.execute("insert into " + schema + ".barbeiros (nome) values ('Sem campo')");
                 try (var resultado = sql.executeQuery("select robo_ativo from " + schema + ".barbeiros where nome = 'Sem campo'")) {
@@ -52,7 +55,7 @@ class ControleRoboPostgresTest {
     }
 
     private SessionFactory fabrica(String url, String usuario, String senha, String schema) {
-        return new Configuration().addAnnotatedClass(Barbeiro.class)
+        return new Configuration().addAnnotatedClass(Barbeiro.class).addAnnotatedClass(SessaoCentralWhatsapp.class)
                 .setProperty("hibernate.connection.url", url)
                 .setProperty("hibernate.connection.username", usuario)
                 .setProperty("hibernate.connection.password", senha)

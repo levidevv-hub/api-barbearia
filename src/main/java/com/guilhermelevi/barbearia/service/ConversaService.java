@@ -16,6 +16,8 @@ public class ConversaService {
     private final ConversaAgendamentoService agendamentoService;
     private final ConversaAdminService adminService;
     private final AutorizacaoBarbeiroService autorizacaoBarbeiroService;
+    private final CentralWhatsappService centralWhatsappService;
+    private final ConversaCentralService conversaCentralService;
 
     public void processar(JsonNode payload) {
         JsonNode value = payload
@@ -37,6 +39,16 @@ public class ConversaService {
         String phoneNumberId = value.path("metadata")
                 .path("phone_number_id")
                 .asText();
+
+        // A central é administrativa, inclusive quando seu próprio robô está pausado.
+        if (centralWhatsappService.ehCentral(phoneNumberId)) {
+            conversaCentralService.processar(phoneNumberId, telefoneCliente, mensagem);
+            return;
+        }
+
+        // Mensagens administrativas enviadas pela central não são clientes.
+        // Evita que a linha do barbeiro responda à central criando um ciclo.
+        if (centralWhatsappService.ehRemetenteCentral(telefoneCliente)) return;
 
         String nomeCliente = value.path("contacts")
                 .path(0)

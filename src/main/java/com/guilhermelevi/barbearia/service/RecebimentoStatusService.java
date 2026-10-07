@@ -76,6 +76,9 @@ public class RecebimentoStatusService {
                 ? erros.toString()
                 : null;
 
+        if ("failed".equals(status)) {
+            log.warn("Meta informou falha na mensagem {} da linha {}: {}", mensagemId, phoneNumberId, detalhesErro);
+        }
         repository.save(
                 new StatusMensagemRecebido(
                         mensagemId,

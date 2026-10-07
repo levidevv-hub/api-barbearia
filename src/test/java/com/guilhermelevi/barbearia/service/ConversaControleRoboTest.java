@@ -27,7 +27,8 @@ class ConversaControleRoboTest {
     private final ConversaAdminService admin = new ConversaAdminService(
             autorizacao, mock(BloqueioDataService.class), mock(PreviaBloqueioService.class),
             mock(AgendamentoService.class), mock(ConversaServicoAdminService.class), whatsapp, controle);
-    private final ConversaService conversa = new ConversaService(barbeiros, clientes, agendamento, admin, autorizacao);
+    private final ConversaService conversa = new ConversaService(barbeiros, clientes, agendamento, admin, autorizacao,
+            mock(CentralWhatsappService.class), mock(ConversaCentralService.class));
     private Barbeiro barbeiro;
 
     @BeforeEach

@@ -547,6 +547,25 @@ public class WhatsAppClient {
         return enviar(phoneNumberId, body);
     }
 
+    public void enviarSelecaoBarbeariasCentral(String phoneNumberId, String numero,
+                                               List<Barbeiro> barbeiros, int pagina) {
+        int inicio = pagina * 8;
+        var opcoes = new ArrayList<Map<String, Object>>();
+        for (var b : barbeiros.subList(inicio, Math.min(inicio + 8, barbeiros.size()))) {
+            String nome = b.getNome() == null || b.getNome().isBlank() ? "Barbearia" : b.getNome();
+            opcoes.add(Map.of("id", "CENTRAL_SELECIONAR_" + b.getId(),
+                    "title", nome.length() > 24 ? nome.substring(0, 24) : nome,
+                    "description", "Agenda #" + b.getId()));
+        }
+        if (pagina > 0) opcoes.add(Map.of("id", "CENTRAL_PAGINA_" + (pagina - 1), "title", "Página anterior"));
+        if (inicio + 8 < barbeiros.size()) opcoes.add(Map.of("id", "CENTRAL_PAGINA_" + (pagina + 1), "title", "Próxima página"));
+        enviarAposCommit(phoneNumberId, Map.of(
+                "messaging_product", "whatsapp", "to", numero, "type", "interactive",
+                "interactive", Map.of("type", "list", "body", Map.of("text", "Qual barbearia deseja administrar?"),
+                        "action", Map.of("button", "Escolher barbearia", "sections", List.of(
+                                Map.of("title", "Suas barbearias", "rows", opcoes))))));
+    }
+
     public void enviarMenuAdministrador(
             String phoneNumberId,
             String numero
@@ -773,8 +792,11 @@ public class WhatsAppClient {
             String phoneNumberId,
             Map<String, Object> body
     ) {
+        // Captura o canal e IDs da agenda agora, antes de limpar o escopo da
+        // central. O afterCommit não consulta ThreadLocal nem seleção mutável.
+        var envio = RespostaCentralWhatsapp.preparar(phoneNumberId, body);
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
-            enviar(phoneNumberId, body);
+            enviar(envio.phoneNumberId(), envio.body());
             return;
         }
 
@@ -789,7 +811,7 @@ public class WhatsAppClient {
                     @Override
                     public void afterCommit() {
                         try {
-                            enviar(phoneNumberId, body);
+                            enviar(envio.phoneNumberId(), envio.body());
                         } catch (RuntimeException e) {
                             log.error(
                                     "Falha ao enviar resposta após o commit. "
