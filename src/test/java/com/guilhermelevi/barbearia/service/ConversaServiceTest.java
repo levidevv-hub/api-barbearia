@@ -87,7 +87,9 @@ class ConversaServiceTest {
                 clientes,
                 conversaAgendamento,
                 conversaAdmin,
-                autorizacao
+                autorizacao,
+                mock(CentralWhatsappService.class),
+                mock(ConversaCentralService.class)
         );
 
         barbeiro = Barbeiro.builder()

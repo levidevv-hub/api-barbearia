@@ -8,11 +8,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface IBarbeiroRepository extends JpaRepository<Barbeiro, Long> {
 
     Optional<Barbeiro> findByWhatsappPhoneNumberId(String numero);
+
+    List<Barbeiro> findByNumeroWhatsAppAdministradorOrderByIdAsc(String numero);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select b from Barbeiro b where b.id = :id")
