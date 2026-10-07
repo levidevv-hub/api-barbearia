@@ -37,7 +37,7 @@ class PainelGestaoTest {
     Barbeiro barbeiro(String nome) {
         var b=new Barbeiro();b.setNome(nome);b.setInicioExpediente(LocalTime.of(8,0));b.setFimExpediente(LocalTime.of(18,0));
         b.setNumeroWhatsAppAdministrador("5588999999999");b.setNumeroWhatsAppNotificacao("5588999999999");
-        b.setWhatsappAccessToken("credencial-privada");b.setWhatsappPhoneNumberId("phone-id");
+        b.setWhatsappAccessToken("credencial-privada");b.setWhatsappPhoneNumberId("phone-id-"+nome);
         em.persist(b);em.flush();return b;
     }
     ServicoAdminController.Form form(String nome, int duracao, boolean ativo) {
@@ -64,7 +64,7 @@ class PainelGestaoTest {
     }
     @Test void preservaDuracaoDaReservaEAExclusaoRespeitaHistoricoCancelado() {
         var b=barbeiro("Agenda");var s=servicos.cadastrar(b.getId(),form("Corte",30,true));
-        var cliente=new Cliente();em.persist(cliente);
+        var cliente=new Cliente();cliente.setNumeroTelefone("5588912345678");em.persist(cliente);
         var a=new Agendamento(cliente,b,em.find(Servico.class,s.id()),LocalDateTime.now().plusDays(20));
         a.setStatus(StatusAgendamentoEnum.CANCELADO);em.persist(a);em.flush();
         servicos.editar(b.getId(),s.id(),form("Corte",60,true));em.flush();em.clear();
@@ -90,7 +90,7 @@ class PainelGestaoTest {
         dados.salvar(b.getId(),new BarbeiroDadosController.Dados(" Depois ","5588988888888","5588977777777"));em.clear();
         var salvo=em.find(Barbeiro.class,b.getId());
         assertEquals("Depois",salvo.getNome());assertEquals("5588988888888",salvo.getNumeroWhatsAppAdministrador());
-        assertEquals("credencial-privada",salvo.getWhatsappAccessToken());assertEquals("phone-id",salvo.getWhatsappPhoneNumberId());
+        assertEquals("credencial-privada",salvo.getWhatsappAccessToken());assertEquals("phone-id-Antes",salvo.getWhatsappPhoneNumberId());
         assertEquals(LocalTime.of(8,0),salvo.getInicioExpediente());
     }
     @Test void intervaloBloqueiaCorteQueAtravessariaAlmocoESemIntervaloLibera() {
@@ -116,7 +116,7 @@ class PainelGestaoTest {
     }
     @Test void naoMoveBloqueioParaDataComReserva() {
         var b=barbeiro("Agenda");var data=LocalDate.now().plusDays(30);
-        var s=servicos.cadastrar(b.getId(),form("Corte",30,true));var cliente=new Cliente();em.persist(cliente);
+        var s=servicos.cadastrar(b.getId(),form("Corte",30,true));var cliente=new Cliente();cliente.setNumeroTelefone("5588912345678");em.persist(cliente);
         em.persist(new Agendamento(cliente,b,em.find(Servico.class,s.id()),data.plusDays(1).atTime(10,0)));em.flush();
         configuracao.bloquear(b.getId(),new Bloqueio(data,"Folga"));
         assertThrows(IllegalArgumentException.class,()->configuracao.editarBloqueio(b.getId(),new EdicaoBloqueio(data,data.plusDays(1),"Viagem")));

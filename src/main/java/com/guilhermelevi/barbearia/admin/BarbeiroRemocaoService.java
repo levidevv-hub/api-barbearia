@@ -40,7 +40,12 @@ public class BarbeiroRemocaoService {
         excluir("delete from PeriodoExpediente p where p.expedienteSemanal.id in (select e.id from ExpedienteSemanal e where e.barbeiro.id = :id)", id);
         excluir("delete from ExpedienteSemanal e where e.barbeiro.id = :id", id);
         excluir("delete from Servico s where s.barbeiro.id = :id", id);
-        barbeiros.delete(b);
+        // Bulk deletes não removem as entidades do contexto de persistência.
+        // Desanexa as referências já excluídas antes de remover o pai; a trava
+        // de banco permanece retida até o fim da transação.
+        em.flush();
+        em.clear();
+        barbeiros.deleteById(id);
         em.flush();
     }
 

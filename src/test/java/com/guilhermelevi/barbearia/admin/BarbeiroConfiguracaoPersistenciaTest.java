@@ -67,7 +67,7 @@ class BarbeiroConfiguracaoPersistenciaTest {
     }
     @Test void preservaBarbeiroComHistoricoMesmoCancelado() {
         var b=barbeiro("Histórico");
-        var cliente=new Cliente();em.persist(cliente);
+        var cliente=new Cliente();cliente.setNumeroTelefone("5588912345678");em.persist(cliente);
         var servico=new Servico();servico.setNome("Corte");servico.setBarbeiro(b);servico.setPreco(BigDecimal.TEN);servico.setDuracaoMinutos(30);em.persist(servico);
         var a=new Agendamento(cliente,b,servico,LocalDateTime.now().minusDays(2));a.setStatus(com.guilhermelevi.barbearia.domain.enums.StatusAgendamentoEnum.CANCELADO);em.persist(a);em.flush();
         var erro=assertThrows(ResponseStatusException.class,()->remocao.remover(b.getId(),"Histórico"));
