@@ -15,6 +15,7 @@ public class ConversaService {
     private final ClienteService clienteService;
     private final ConversaAgendamentoService agendamentoService;
     private final ConversaAdminService adminService;
+    private final AutorizacaoBarbeiroService autorizacaoBarbeiroService;
 
     public void processar(JsonNode payload) {
         JsonNode value = payload
@@ -46,6 +47,15 @@ public class ConversaService {
         Barbeiro barbeiro = barbeiroRepository
                 .findByWhatsappPhoneNumberId(phoneNumberId)
                 .orElseThrow();
+
+        // O administrador precisa continuar acessando Minha agenda para reativar.
+        // Mensagens ignoradas são concluídas pelo processamento do webhook,
+        // sem cadastrar clientes ou avançar sessões de agendamento.
+        if (!barbeiro.isRoboAtivo()
+                && !autorizacaoBarbeiroService.podeAdministrar(
+                        barbeiro.getId(), telefoneCliente)) {
+            return;
+        }
 
         Cliente cliente = clienteService.buscarOuCriar(
                 nomeCliente,
@@ -89,6 +99,10 @@ public class ConversaService {
             return;
         }
 
+        if (!barbeiro.isRoboAtivo()) {
+            return;
+        }
+
         agendamentoService.iniciar(
                 barbeiro,
                 cliente,
@@ -113,6 +127,10 @@ public class ConversaService {
                 barbeiro,
                 telefone
         )) {
+            return;
+        }
+
+        if (!barbeiro.isRoboAtivo()) {
             return;
         }
 
