@@ -74,11 +74,11 @@ jobs:
     # - name: Build with Gradle 8.9
     #   run: gradle build
 
-  dependency-submission:
+  dependency-report:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
 
     steps:
     - uses: actions/checkout@v4
@@ -88,7 +88,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
+    # O Dependency graph está desabilitado neste repositório.
+    # Mantemos a geração e publicamos o relatório como artefato, sem submissão.
     # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
-    - name: Generate and submit dependency graph
+    - name: Generate and upload dependency graph
       uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      with:
+        dependency-graph: generate-and-upload
