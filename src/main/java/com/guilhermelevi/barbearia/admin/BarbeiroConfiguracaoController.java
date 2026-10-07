@@ -36,6 +36,8 @@ public class BarbeiroConfiguracaoController {
                                Double latitude, Double longitude) {}
     public record Bloqueio(@NotNull @FutureOrPresent LocalDate data,
                            @NotBlank @Size(max=255) String motivo) {}
+    public record EdicaoBloqueio(@NotNull LocalDate dataOriginal, @NotNull @FutureOrPresent LocalDate data,
+                                 @NotBlank @Size(max=255) String motivo) {}
     public record Liberacao(@NotNull @FutureOrPresent LocalDate data) {}
     public record BloqueioResumo(LocalDate data, String motivo) {}
 
@@ -155,6 +157,27 @@ public class BarbeiroConfiguracaoController {
         bloqueio.setMotivo(form.motivo().strip());
         bloqueios.save(bloqueio);
         return Map.of("mensagem", "Dia bloqueado.");
+    }
+
+    @PostMapping("/bloqueios/editar")
+    @Transactional
+    public Map<String,String> editarBloqueio(@PathVariable Long id, @Valid @RequestBody EdicaoBloqueio form) {
+        buscar(id, true);
+        var encontrados = em.createQuery("select b from BloqueioData b where b.barbeiro.id = :id and b.data = :data", BloqueioData.class)
+                .setParameter("id", id).setParameter("data", form.dataOriginal()).getResultList();
+        if (encontrados.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bloqueio não encontrado nesta barbearia.");
+        if (!form.dataOriginal().equals(form.data())) {
+            if (bloqueios.existsByBarbeiroIdAndData(id, form.data()))
+                throw new IllegalArgumentException("A nova data já está bloqueada.");
+            if (!bloqueioService.consultarAfetados(id, form.data()).isEmpty())
+                throw new IllegalArgumentException("Há agendamentos na nova data. O bloqueio original foi mantido.");
+        }
+        var bloqueio = encontrados.get(0);
+        bloqueio.setData(form.data());
+        bloqueio.setMotivo(form.motivo().strip());
+        em.flush();
+        return Map.of("mensagem", "Bloqueio atualizado.");
     }
 
     @PostMapping("/bloqueios/liberar")

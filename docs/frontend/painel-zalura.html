@@ -8,7 +8,7 @@
   <title>Painel Administrativo · ZaluraTech</title>
   <style>
     :root{--bg:#070a08;--surface:#0d120f;--surface2:#121915;--surface3:#17201b;--border:rgba(255,255,255,.075);--border2:rgba(255,255,255,.12);--text:#f4f7f5;--muted:#93a198;--muted2:#66736b;--green:#15ce78;--greenSoft:rgba(21,206,120,.10);--greenBorder:rgba(21,206,120,.25);--danger:#ff727e;--dangerSoft:rgba(255,114,126,.10);--warning:#f4c65d;--warningSoft:rgba(244,198,93,.10);--max:1180px;--radius:18px}
-    *{box-sizing:border-box}html{color-scheme:dark;scroll-behavior:smooth}body{margin:0;min-height:100vh;color:var(--text);background:radial-gradient(circle at 8% 0%,rgba(21,206,120,.075),transparent 28%),radial-gradient(circle at 92% 4%,rgba(21,206,120,.04),transparent 24%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}button,input{font:inherit}button{border:0}[hidden]{display:none!important}
+    *{box-sizing:border-box}html{color-scheme:dark;scroll-behavior:smooth}body{margin:0;min-height:100vh;color:var(--text);background:radial-gradient(circle at 8% 0%,rgba(21,206,120,.075),transparent 28%),radial-gradient(circle at 92% 4%,rgba(21,206,120,.04),transparent 24%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{border:0}[hidden]{display:none!important}
     .topbar{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--border);background:rgba(7,10,8,.82);backdrop-filter:blur(18px)}.topbar-inner{width:min(var(--max),calc(100% - 40px));min-height:72px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:inline-flex;align-items:center;gap:11px;color:var(--text);text-decoration:none;user-select:none}.brand-mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--greenBorder);background:linear-gradient(145deg,rgba(21,206,120,.18),rgba(21,206,120,.025));color:var(--green);font-weight:950;font-size:18px;letter-spacing:-1px}.brand-copy{display:flex;flex-direction:column;gap:4px;line-height:1}.brand-name{font-size:14px;font-weight:900;letter-spacing:.12em}.brand-name span{color:var(--green)}.brand-subtitle{color:var(--muted2);font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}.toolbar{display:flex;align-items:center;gap:10px}.user-pill{min-height:36px;padding:0 13px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.025);color:var(--muted);font-size:13px;font-weight:750}.user-pill:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(21,206,120,.10)}
     .btn{min-height:42px;padding:0 16px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-weight:850;transition:.18s ease}.btn-primary{background:var(--green);color:#031008;box-shadow:0 10px 30px rgba(21,206,120,.11)}.btn-primary:hover:not(:disabled){background:#1adc83;transform:translateY(-1px)}.btn-danger{border:1px solid rgba(255,114,126,.4);color:var(--danger);background:var(--dangerSoft)}.btn-secondary{border:1px solid var(--border2);color:var(--text);background:rgba(255,255,255,.035)}.btn-secondary:hover:not(:disabled){background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.18)}.btn-danger{border:1px solid rgba(255,114,126,.38);color:#ffd5d9;background:var(--dangerSoft)}.btn-danger:hover:not(:disabled){background:rgba(255,114,126,.16);border-color:rgba(255,114,126,.55)}button:disabled{opacity:.5;cursor:wait}button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--green);outline-offset:3px}
     .notice{width:min(var(--max),calc(100% - 40px));margin:18px auto 0;padding:13px 15px;min-height:48px;display:flex;align-items:center;border:1px solid var(--greenBorder);border-radius:12px;color:#c8f8df;background:var(--greenSoft);font-size:14px;font-weight:700}.notice.error{border-color:rgba(255,114,126,.28);background:var(--dangerSoft);color:#ffd3d7}
@@ -21,6 +21,8 @@
     @media(max-width:900px){.login-shell{grid-template-columns:1fr;gap:32px;max-width:600px}.login-card{max-width:none;justify-self:stretch}.login-points{display:none}}@media(max-width:720px){.topbar-inner,.main,.notice{width:min(100% - 24px,var(--max))}.topbar-inner{min-height:64px}.brand-subtitle{display:none}.brand-mark{width:34px;height:34px}.user-pill{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.main{padding-top:28px}.page-head{align-items:flex-start;flex-direction:column;gap:18px}.page-actions,.page-actions .btn{width:100%}.stats{grid-template-columns:1fr}.stat{min-height:96px}.card-head{align-items:flex-start;flex-direction:column}.form-grid{grid-template-columns:1fr;gap:16px}.form-grid+.form-grid,.form-grid+label,label+.form-grid{margin-top:16px}.form-actions{flex-direction:column-reverse}.form-actions .btn{width:100%}.link-row{grid-template-columns:1fr}.link-row .btn{width:100%}.login-shell{width:min(100% - 24px,600px);min-height:calc(100vh - 64px);padding:36px 0 50px}.login-copy h1{font-size:clamp(40px,13vw,58px)}.login-card{padding:22px}h1{font-size:36px}}@media(max-width:520px){.brand-copy{display:none}.toolbar{gap:7px}.user-pill{max-width:100px;padding:0 10px}#logout{padding:0 12px}.card-body{padding:18px}.card-head{padding:18px}}
   
     .config-days{display:grid;gap:12px}.config-day{padding:16px;border:1px solid var(--border2);border-radius:12px;background:var(--surface2)}.day-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.toggle{display:flex;align-items:center;gap:10px}.toggle input{width:20px;min-height:20px;margin:0;accent-color:var(--green)}.period-row{display:flex;align-items:end;gap:10px;margin-top:12px}.period-row label{flex:1}.period-row .btn{flex:0 0 auto}.config-section{margin-top:28px;padding-top:24px;border-top:1px solid var(--border)}.config-section h3{margin-bottom:8px}.config-actions{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.config-status{color:var(--warning);font-size:13px}.map-link{color:var(--green);display:inline-block;margin-top:14px}.service-note{padding:14px 15px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.02);color:var(--muted);font-size:13px;line-height:1.6}.danger-zone{border-top-color:rgba(255,114,126,.2)}.danger-zone h3{color:#ffd5d9}.block-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}.row-actions{display:flex;gap:8px}.config-error{color:var(--danger);line-height:1.5}.config-note{color:var(--muted);font-size:13px;line-height:1.6}.config-day .btn{min-height:36px;font-size:12px}@media(max-width:520px){.period-row{flex-wrap:wrap}.period-row label{min-width:95px}.day-head{align-items:flex-start;flex-wrap:wrap}}
+    select{width:100%;min-height:46px;margin-top:8px;padding:0 12px;border:1px solid var(--border2);border-radius:11px;background:#0a0f0c;color:var(--text)}
+    fieldset{min-width:0;border:0;margin:0;padding:0}.day-controls{margin-top:14px}.day-mode{max-width:320px}.break-fields{border-left:3px solid var(--green);padding-left:16px;margin-top:16px}.service-item{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--border)}.service-item p{margin:6px 0 0;color:var(--muted);font-size:13px}.service-item .config-actions{margin:0}.service-item strong{overflow-wrap:anywhere}.section-feedback{color:var(--green);line-height:1.5}.editor{margin-top:18px;padding:20px;border:1px solid var(--greenBorder);border-radius:12px;background:var(--surface2)}.editor h4{margin:0 0 16px}.editor .toggle{margin-top:18px}.day-summary{color:var(--green);font-size:12px;margin:14px 0 0}.section-nav{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 22px}.section-nav a{color:var(--green);font-size:13px;text-decoration:none;padding:8px 12px;border:1px solid var(--greenBorder);border-radius:9px}[id$="-section"]{scroll-margin-top:90px}@media(max-width:720px){.service-item{align-items:flex-start;flex-direction:column}.service-item .btn{min-height:40px}.editor{padding:14px}}
   </style>
 </head>
 <body>
@@ -67,7 +69,7 @@
 
   <main id="panel" class="main" hidden>
     <div class="page-head">
-      <div><p class="eyebrow">PAINEL ADMINISTRATIVO</p><h1>Clientes</h1><p class="lead">Cadastre barbeiros e conecte o WhatsApp de cada operação.</p></div>
+      <div><p class="eyebrow">PAINEL ADMINISTRATIVO</p><h1>Clientes</h1><p class="lead">Gerencie barbeiros, serviços, horários e intervalos em um só lugar.</p></div>
       <div class="page-actions">
         <button id="refresh" class="btn btn-secondary" type="button">Atualizar</button>
         <button id="new" class="btn btn-primary" type="button">+ Cadastrar barbeiro</button>
@@ -110,14 +112,29 @@
 
 
     <section id="config-box" class="card" hidden aria-labelledby="config-title">
-      <div class="card-head"><div><p class="eyebrow">AGENDA E LOCALIZAÇÃO</p><h2 id="config-title">Configurar barbeiro</h2><p>Defina quando e onde o cliente será atendido.</p></div><button id="config-close" type="button" class="btn btn-secondary">Fechar</button></div>
+      <div class="card-head"><div><p class="eyebrow">CONFIGURAÇÃO COMPLETA</p><h2 id="config-title">Configurar barbeiro</h2><p>Dados, cortes, expediente, intervalos e localização de cada barbeiro.</p></div><button id="config-close" type="button" class="btn btn-secondary">Fechar</button></div>
       <div class="card-body">
         <p id="config-loading" role="status">Carregando configurações…</p>
         <p id="config-error" class="config-error" role="alert" hidden></p>
-        <form id="config-form" hidden>
+        <nav id="config-nav" class="section-nav" aria-label="Configuração" hidden><a href="#profile-section">Dados</a><a href="#schedule-section">Horários e intervalo</a><a href="#services-section">Cortes e serviços</a><a href="#blocks-section">Folgas</a></nav>
+        <section id="profile-section" hidden>
+          <h3>Dados do barbeiro</h3>
+          <form id="profile-form">
+            <fieldset id="profile-fields">
+              <label>Nome do barbeiro ou estabelecimento<input name="nome" maxlength="120" required></label>
+              <div class="form-grid">
+                <label>WhatsApp do administrador<input name="numeroWhatsAppAdministrador" type="tel" pattern="[1-9][0-9]{7,14}" inputmode="numeric" required><span class="hint">País + DDD + número. Este número terá acesso administrativo pelo WhatsApp.</span></label>
+                <label>WhatsApp para notificações<input name="numeroWhatsAppNotificacao" type="tel" pattern="[1-9][0-9]{7,14}" inputmode="numeric" required></label>
+              </div>
+              <p id="profile-status" class="section-feedback" role="status"></p>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Salvar dados</button></div>
+            </fieldset>
+          </form>
+        </section>
+        <form id="config-form" class="config-section" hidden>
           <fieldset id="config-fields" style="border:0;padding:0;margin:0;min-width:0">
-            <h3>Expediente semanal</h3>
-            <p class="config-note">Adicione os períodos de atendimento de cada dia. Para almoço ou outra pausa, deixe um intervalo entre os períodos. Os horários seguem o fuso configurado na sua operação.</p>
+            <h3 id="schedule-section">Expediente semanal</h3>
+            <p class="config-note">Escolha os dias abertos, a entrada e a saída. Em cada dia, selecione sem intervalo ou com intervalo e informe a pausa do almoço. Para mais pausas, use múltiplos períodos. Os horários seguem o fuso da operação.</p>
             <div class="config-actions"><button id="close-week" class="btn btn-secondary" type="button">Fechar todos os dias</button><button id="copy-week" class="btn btn-secondary" type="button">Copiar segunda para terça a sexta</button></div>
             <div id="config-days" class="config-days"></div>
             <div class="config-section">
@@ -132,25 +149,37 @@
               <p class="hint">Use a localização atual somente se estiver na barbearia.</p>
               <a id="map-link" class="map-link" target="_blank" rel="noopener noreferrer" hidden>Abrir ponto no Google Maps ↗</a>
             </div>
-            <div class="config-section">
-              <h3>Cortes, preços e duração</h3>
-              <div class="service-note">
-                O backend atual já possui o cadastro e a edição de serviços no fluxo administrativo do WhatsApp, mas ainda não expõe essas operações por REST para este painel. Para não criar uma tela que aparenta salvar sem persistir, use o fluxo existente: pelo número administrador, envie <strong>Minha agenda</strong> ao WhatsApp conectado e escolha cadastrar ou editar serviço. Lá você informa nome do corte, preço e duração em minutos.
-              </div>
-              <div class="config-actions"><button id="copy-admin-command" class="btn btn-secondary" type="button">Copiar “Minha agenda”</button></div>
-            </div>
             <p class="config-note">Mudanças de expediente valem para novos horários disponíveis. Agendamentos já confirmados continuam registrados.</p>
             <p id="config-status" class="config-status" role="status"></p>
             <div class="form-actions"><button class="btn btn-primary" id="config-save" type="submit">Salvar horários e localização</button></div>
           </fieldset>
         </form>
+        <section id="services-section" class="config-section" hidden>
+          <h3>Cortes e serviços</h3>
+          <p class="config-note">Cadastre cortes, barba e combos. Preço e duração são usados pelo bot nos próximos agendamentos. Desativar retira o serviço das opções sem apagar reservas existentes.</p>
+          <p id="services-status" class="section-feedback" role="status"></p>
+          <div class="config-actions"><button id="service-new" class="btn btn-secondary" type="button">+ Adicionar serviço</button><button id="service-refresh" class="btn btn-secondary" type="button">Atualizar serviços</button></div>
+          <div id="services-list"></div>
+          <form id="service-form" class="editor" hidden>
+            <fieldset id="service-fields">
+              <h4 id="service-title">Adicionar serviço</h4>
+              <label>Nome do corte ou serviço<input name="nome" maxlength="100" placeholder="Ex.: Corte degradê" required></label>
+              <div class="form-grid">
+                <label>Preço (R$)<input name="preco" type="number" min="0" max="9999999999.99" step="0.01" placeholder="35,00" required></label>
+                <label>Duração (minutos)<input name="duracaoMinutos" type="number" min="1" max="1439" step="1" placeholder="30" required></label>
+              </div>
+              <label class="toggle"><input name="ativo" type="checkbox" checked>Disponível para novos agendamentos</label>
+              <div class="form-actions"><button id="service-cancel" class="btn btn-secondary" type="button">Cancelar</button><button class="btn btn-primary" type="submit">Salvar serviço</button></div>
+            </fieldset>
+          </form>
+        </section>
         <section id="blocks-section" class="config-section" hidden>
           <h3>Folgas e datas bloqueadas</h3>
           <p class="config-note">Bloqueie o dia inteiro para feriados, férias ou imprevistos. Datas com agendamentos futuros precisam ser tratadas antes; esta tela não cancela reservas.</p>
           <div id="blocks-list"></div>
-          <form id="block-form">
+          <form id="block-form"><fieldset id="block-fields">
             <div class="form-grid"><label>Data<input name="data" type="date" required></label><label>Motivo<input name="motivo" maxlength="255" placeholder="Ex.: feriado" required></label></div>
-            <div class="form-actions"><button class="btn btn-secondary" type="submit">Bloquear data</button></div>
+            <p id="block-status" class="section-feedback" role="status"></p><div class="form-actions"><button id="block-cancel" class="btn btn-secondary" type="button" hidden>Cancelar edição</button><button id="block-save" class="btn btn-secondary" type="submit">Bloquear data</button></div></fieldset>
           </form>
         </section>
         <section id="remove-section" class="config-section danger-zone" hidden>
@@ -180,10 +209,11 @@ const API='https://api.zaluratech.com.br';
 const $=id=>document.getElementById(id);
 let csrf=null;
 let configId=null, configBarber=null, configDirty=false, configGeneration=0, configSaving=false;
+let profileDirty=false,serviceDirty=false,blockDirty=false,blockOriginal=null,serviceId=null, mutationPending=false;
 
 function notice(message,error=false){$('notice').textContent=message;$('notice').hidden=!message;$('notice').classList.toggle('error',error)}
 function updateStats(data){const linked=data.filter(x=>x.vinculoRegistrado).length;$('stat-total').textContent=data.length;$('stat-linked').textContent=linked;$('stat-pending').textContent=data.length-linked}
-function loggedOut(){configGeneration++;configId=null;configBarber=null;configDirty=false;configSaving=false;$('config-form').reset();$('config-days').replaceChildren();$('blocks-list').replaceChildren();$('remove-section').hidden=true;$('config-box').hidden=true;$('login-view').hidden=false;$('panel').hidden=true;$('logout').hidden=true;$('user-wrap').hidden=true;$('user').textContent='';$('rows').replaceChildren();$('link-value').value='';$('link-box').hidden=true;$('new-box').hidden=true;updateStats([])}
+function loggedOut(){blockDirty=false;blockOriginal=null;profileDirty=false;serviceDirty=false;serviceId=null;mutationPending=false;$('service-form').reset();$('services-list').replaceChildren();configGeneration++;configId=null;configBarber=null;configDirty=false;configSaving=false;$('config-form').reset();$('config-days').replaceChildren();$('blocks-list').replaceChildren();$('remove-section').hidden=true;$('config-box').hidden=true;$('login-view').hidden=false;$('panel').hidden=true;$('logout').hidden=true;$('user-wrap').hidden=true;$('user').textContent='';$('rows').replaceChildren();$('link-value').value='';$('link-box').hidden=true;$('new-box').hidden=true;updateStats([])}
 
 async function request(path,options={}){
   const headers={...options.headers};
@@ -195,7 +225,7 @@ async function request(path,options={}){
     if(response.status===401){loggedOut();throw new Error(path.endsWith('/login')?'Usuário ou senha inválidos.':'Entre novamente para acessar o painel.')}
     if(response.status===403){csrf=null;loggedOut();throw new Error('Sessão inválida ou acesso negado. Entre novamente.')}
     let body={};try{body=await response.json()}catch{}
-    throw new Error(body.erro||'Não foi possível concluir a operação ('+response.status+').')
+    throw new Error(body.erro||body.detail||body.message||'Não foi possível concluir a operação ('+response.status+').')
   }
   return response.status===204?null:response.json()
 }
@@ -231,33 +261,48 @@ async function list(){
 async function showPanel(){const s=await request('/api/admin/session');$('user').textContent=s.username;$('user-wrap').hidden=false;$('login-view').hidden=true;$('panel').hidden=false;$('logout').hidden=false;await list()}
 
 $('login-form').addEventListener('submit',e=>{e.preventDefault();busy(e.submitter,async()=>{await getCsrf();await request('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(e.target))});e.target.reset();await getCsrf();notice('');await showPanel()})});
-$('logout').addEventListener('click',e=>busy(e.currentTarget,async()=>{await request('/api/admin/logout',{method:'POST'});csrf=null;$('create-form').reset();loggedOut();notice('Sessão encerrada.')}));
+$('logout').addEventListener('click',e=>busy(e.currentTarget,async()=>{if(mutationPending||configSaving||!confirmDiscard())return;await request('/api/admin/logout',{method:'POST'});csrf=null;$('create-form').reset();loggedOut();notice('Sessão encerrada.')}));
 $('new').addEventListener('click',()=>{$('new-box').hidden=false;$('new-box').scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>$('create-form').elements.nome.focus(),300)});
 $('cancel').addEventListener('click',()=>{$('create-form').reset();$('new-box').hidden=true});
 $('refresh').addEventListener('click',e=>busy(e.currentTarget,async()=>{await list();notice('Lista atualizada.')}));
-$('create-form').addEventListener('submit',e=>{e.preventDefault();busy(e.submitter,async()=>{const data=Object.fromEntries(new FormData(e.target));if(data.fimExpediente<=data.inicioExpediente)throw new Error('O fim do expediente deve ser depois do início.');await request('/api/admin/barbeiros',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});e.target.reset();$('new-box').hidden=true;notice('Barbeiro cadastrado. Clique em Configurar para definir os dias e períodos de atendimento antes de conectar o WhatsApp.');await list()})});
+$('create-form').addEventListener('submit',e=>{
+  e.preventDefault();if(mutationPending||configSaving)return;
+  busy(e.submitter,async()=>{
+    const data=Object.fromEntries(new FormData(e.target));
+    if(data.fimExpediente<=data.inicioExpediente)throw new Error('O fim do expediente deve ser depois do início.');
+    if(!confirmDiscard())return;
+    let created;mutationPending=true;
+    try{
+      created=await request('/api/admin/barbeiros',jsonPost(data));e.target.reset();$('new-box').hidden=true;
+      configDirty=false;profileDirty=false;serviceDirty=false;blockDirty=false;
+      notice('Barbeiro cadastrado. Defina a semana e adicione os serviços abaixo para liberar horários no bot.');await list();
+    }finally{mutationPending=false}
+    await openConfig(created);
+  });
+});
 $('copy').addEventListener('click',async()=>{const v=$('link-value').value;if(!v)return;try{await navigator.clipboard.writeText(v);$('copy-status').textContent='Link copiado para a área de transferência.'}catch{$('link-value').select();$('copy-status').textContent='Selecione o link acima e copie manualmente.'}});
 
 
 
 async function removeBarber(b,button){
-  if(configSaving)return;
-  if(configId===b.id&&!confirmDiscard())return;
+  if(configSaving||mutationPending)return;
+  if(!confirmDiscard())return;
   const answer=window.prompt('Excluir '+b.nome+' do sistema Zalura? Os serviços, horários e links pendentes desse cadastro serão removidos. A conta na Meta não será excluída. Cadastros com histórico de agendamentos são preservados.\n\nDigite o nome exato para confirmar: '+b.nome);
   if(answer===null)return;
   if(answer!==b.nome){notice('Nome diferente. Nenhum barbeiro foi excluído.',true);return}
-  await busy(button,async()=>{
+  mutationPending=true;
+  try{await busy(button,async()=>{
     await request('/api/admin/barbeiros/'+b.id+'/remover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nomeConfirmacao:answer})});
-    if(configId===b.id){configGeneration++;configDirty=false;configId=null;$('config-box').hidden=true}
+    if(configId===b.id){configGeneration++;configDirty=false;profileDirty=false;serviceDirty=false;blockDirty=false;configId=null;configBarber=null;$('config-box').hidden=true}
     $('link-value').value='';$('link-box').hidden=true;
     notice('Barbeiro excluído do sistema. A conta do WhatsApp na Meta não foi alterada.');await list();
-  });
+  })}finally{mutationPending=false}
 }
 
 const weekdays=[['MONDAY','Segunda-feira'],['TUESDAY','Terça-feira'],['WEDNESDAY','Quarta-feira'],['THURSDAY','Quinta-feira'],['FRIDAY','Sexta-feira'],['SATURDAY','Sábado'],['SUNDAY','Domingo']];
 function configError(message=''){$('config-error').textContent=message;$('config-error').hidden=!message}
 function markDirty(){configDirty=true;$('config-status').textContent='Alterações ainda não salvas.'}
-function confirmDiscard(){return !configDirty||window.confirm('Descartar as alterações de horários e localização ainda não salvas?')}
+function confirmDiscard(){return !(configDirty||profileDirty||serviceDirty||blockDirty)||window.confirm('Descartar as alterações ainda não salvas neste barbeiro?')}
 function addPeriod(container,value={inicio:'',fim:''}){
   const row=document.createElement('div');row.className='period-row';
   for(const [key,label] of [['inicio','Das'],['fim','Até']]){
@@ -265,25 +310,75 @@ function addPeriod(container,value={inicio:'',fim:''}){
   }
   const remove=document.createElement('button');remove.type='button';remove.className='btn btn-secondary';remove.textContent='Remover';remove.addEventListener('click',()=>{row.remove();markDirty()});row.append(remove);container.append(row);
 }
+function timeField(parent, label, key, value=''){
+  const l=document.createElement('label');l.textContent=label;
+  const i=document.createElement('input');i.type='time';i.step='60';i.required=true;i.dataset.field=key;i.value=(value||'').slice(0,5);l.append(i);parent.append(l);return i;
+}
 function renderWeek(week){
   $('config-days').replaceChildren();
   for(const [key,title] of weekdays){
     const d=week.find(x=>x.diaSemana===key)||{aberto:false,periodos:[]};
+    const values=[...(d.periodos||[])].sort((a,b)=>a.inicio.localeCompare(b.inicio));
     const card=document.createElement('div');card.className='config-day';card.dataset.day=key;
     const head=document.createElement('div');head.className='day-head';
-    const label=document.createElement('label');label.className='toggle';const toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=d.aberto;toggle.dataset.open='true';label.append(toggle,document.createTextNode(title));
-    const add=document.createElement('button');add.type='button';add.className='btn btn-secondary';add.textContent='+ Período';head.append(label,add);
-    const periods=document.createElement('div');periods.className='periods';
-    for(const p of d.periodos||[])addPeriod(periods,p);
+    const label=document.createElement('label');label.className='toggle';const toggle=document.createElement('input');toggle.type='checkbox';toggle.checked=d.aberto;toggle.dataset.open='true';label.append(toggle,document.createTextNode(title));head.append(label);
+    const controls=document.createElement('div');controls.className='day-controls';
+    const modeLabel=document.createElement('label');modeLabel.className='day-mode';modeLabel.textContent='Intervalo';
+    const mode=document.createElement('select');mode.dataset.mode='true';
+    for(const [v,t] of [['none','Sem intervalo'],['break','Com intervalo (ex.: almoço)'],['custom','Múltiplos períodos / pausas']]){const o=document.createElement('option');o.value=v;o.textContent=t;mode.append(o)}
+    mode.value=values.length>2?'custom':values.length===2?(values[0].fim<values[1].inicio?'break':'custom'):'none';modeLabel.append(mode);controls.append(modeLabel);
+    const hours=document.createElement('div');hours.className='form-grid';
+    const start=timeField(hours,'Entrada','start',values[0]?.inicio||configBarber?.inicioExpediente||''),end=timeField(hours,'Saída','end',values.at(-1)?.fim||configBarber?.fimExpediente||'');controls.append(hours);
+    const pause=document.createElement('div');pause.className='form-grid break-fields';
+    const pauseStart=timeField(pause,'Início do intervalo','break-start',values.length===2?values[0].fim:''),pauseEnd=timeField(pause,'Fim do intervalo','break-end',values.length===2?values[1].inicio:'');controls.append(pause);
+    const advanced=document.createElement('div');advanced.className='advanced-periods';const periods=document.createElement('div');periods.className='periods';
+    for(const p of values)addPeriod(periods,p);
+    const add=document.createElement('button');add.type='button';add.className='btn btn-secondary';add.textContent='+ Período de atendimento';advanced.append(periods,add);controls.append(advanced);
+    const summary=document.createElement('p');summary.className='day-summary';controls.append(summary);
     const closed=document.createElement('p');closed.className='hint';closed.textContent='Fechado — sem novos horários neste dia.';
-    function refreshDay(){periods.hidden=!toggle.checked;closed.hidden=toggle.checked;add.disabled=!toggle.checked;periods.querySelectorAll('input').forEach(i=>i.disabled=!toggle.checked)}
-    toggle.addEventListener('change',()=>{if(toggle.checked&&!periods.children.length)addPeriod(periods);refreshDay();markDirty()});
-    add.addEventListener('click',()=>{if(periods.children.length>=12){configError('Limite de 12 períodos por dia.');return}addPeriod(periods);markDirty()});
-    card.append(head,periods,closed);$('config-days').append(card);refreshDay();
+    function refreshDay(){
+      controls.hidden=!toggle.checked;closed.hidden=toggle.checked;
+      const custom=mode.value==='custom',withBreak=mode.value==='break';hours.hidden=custom;pause.hidden=custom||!withBreak;advanced.hidden=!custom;
+      mode.disabled=!toggle.checked;
+      for(const i of hours.querySelectorAll('input'))i.disabled=!toggle.checked||custom;
+      for(const i of pause.querySelectorAll('input'))i.disabled=!toggle.checked||!withBreak;
+      for(const i of periods.querySelectorAll('input'))i.disabled=!toggle.checked||!custom;
+      add.disabled=!toggle.checked||!custom;
+      summary.textContent=custom?'Somente os períodos cadastrados ficam disponíveis.':withBreak?'O bot não oferece horários que atravessem o intervalo.':'Atendimento contínuo entre a entrada e a saída.';
+    }
+    let lastMode=mode.value;
+    mode.addEventListener('change',()=>{
+      if(lastMode==='custom'&&mode.value!=='custom'){
+        const rows=[...periods.querySelectorAll('.period-row')].map(row=>({inicio:row.querySelector('[data-field=inicio]').value,fim:row.querySelector('[data-field=fim]').value})).sort((a,b)=>a.inicio.localeCompare(b.inicio));
+        if(rows.length>2&&!window.confirm('A configuração simplificada substituirá os múltiplos períodos. Continuar?')){mode.value=lastMode;return}
+        start.value=rows[0]?.inicio||'';end.value=rows.at(-1)?.fim||'';
+        pauseStart.value=rows.length===2?rows[0].fim:'';pauseEnd.value=rows.length===2?rows[1].inicio:'';
+      }
+      if(mode.value==='custom'){
+        periods.replaceChildren();
+        if(lastMode==='break'){addPeriod(periods,{inicio:start.value,fim:pauseStart.value});addPeriod(periods,{inicio:pauseEnd.value,fim:end.value})}
+        else addPeriod(periods,{inicio:start.value,fim:end.value});
+      }
+      lastMode=mode.value;refreshDay();markDirty();
+    });
+    toggle.addEventListener('change',()=>{refreshDay();markDirty()});
+    add.addEventListener('click',()=>{if(periods.children.length>=12){configError('Limite de 12 períodos por dia.');return}addPeriod(periods);refreshDay();markDirty()});
+    card.append(head,controls,closed);$('config-days').append(card);refreshDay();
   }
 }
 function readWeek(){
-  return [...$('config-days').children].map(card=>({diaSemana:card.dataset.day,aberto:card.querySelector('[data-open]').checked,periodos:card.querySelector('[data-open]').checked?[...card.querySelectorAll('.period-row')].map(row=>({inicio:row.querySelector('[data-field=inicio]').value,fim:row.querySelector('[data-field=fim]').value})):[]}));
+  return [...$('config-days').children].map(card=>{
+    const diaSemana=card.dataset.day,aberto=card.querySelector('[data-open]').checked;
+    if(!aberto)return {diaSemana,aberto,periodos:[]};
+    const mode=card.querySelector('[data-mode]').value,v=k=>card.querySelector('[data-field="'+k+'"]').value;
+    let periodos;
+    if(mode==='custom')periodos=[...card.querySelectorAll('.period-row')].map(row=>({inicio:row.querySelector('[data-field=inicio]').value,fim:row.querySelector('[data-field=fim]').value}));
+    else if(mode==='break'){
+      if(!v('break-start')||!v('break-end')||v('break-start')>=v('break-end'))throw new Error(weekdays.find(x=>x[0]===diaSemana)[1]+': o fim do intervalo deve ser depois do início.');
+      periodos=[{inicio:v('start'),fim:v('break-start')},{inicio:v('break-end'),fim:v('end')}];
+    }else periodos=[{inicio:v('start'),fim:v('end')}];
+    return {diaSemana,aberto,periodos};
+  });
 }
 function validateWeek(week){
   for(const d of week){
@@ -302,29 +397,48 @@ function coordinates(){
   return {latitude,longitude};
 }
 async function openConfig(b){
-  if(configSaving||!confirmDiscard())return;
-  const generation=++configGeneration;configId=b.id;configBarber=b;configDirty=false;
-  $('config-title').textContent='Configurar '+b.nome;$('config-box').hidden=false;$('config-loading').hidden=false;$('config-form').hidden=true;$('blocks-section').hidden=true;$('remove-section').hidden=false;configError();$('map-link').hidden=true;$('config-status').textContent='';$('block-form').reset();
+  if(configSaving||mutationPending||!confirmDiscard())return;
+  const generation=++configGeneration;configId=b.id;configBarber=b;configDirty=false;profileDirty=false;serviceDirty=false;serviceId=null;
+  $('config-title').textContent='Configurar '+b.nome;$('config-box').hidden=false;$('config-loading').hidden=false;$('config-form').hidden=true;$('blocks-section').hidden=true;$('remove-section').hidden=false;configError();$('map-link').hidden=true;$('config-status').textContent='';resetBlockEditor();
+  $('profile-section').hidden=true;$('services-section').hidden=true;$('config-nav').hidden=true;$('service-form').hidden=true;$('services-list').replaceChildren();$('services-status').textContent='';$('profile-status').textContent='';
   $('config-box').scrollIntoView({behavior:'smooth',block:'start'});
   try{
-    const c=await request('/api/admin/barbeiros/'+b.id+'/configuracao');if(generation!==configGeneration)return;
+    const [c,profile]=await Promise.all([request('/api/admin/barbeiros/'+b.id+'/configuracao'),request('/api/admin/barbeiros/'+b.id+'/dados')]);if(generation!==configGeneration)return;configBarber=profile;for(const key of ['nome','numeroWhatsAppAdministrador','numeroWhatsAppNotificacao'])$('profile-form').elements[key].value=profile[key]||'';$('profile-section').hidden=false;$('services-section').hidden=false;$('config-nav').hidden=false;
     renderWeek(c.semana);$('config-address').value=c.endereco||'';$('config-lat').value=c.latitude??'';$('config-lng').value=c.longitude??'';$('config-form').hidden=false;$('blocks-section').hidden=false;
-    await loadBlocks(b.id,generation);
+    await Promise.all([loadBlocks(b.id,generation),loadServices(b.id,generation)]);
   }catch(e){if(generation===configGeneration)configError(e.message.includes('(404)')?'A API ainda não tem a configuração de agenda. Instale a atualização do backend incluída com este painel.':e.message)}
   finally{if(generation===configGeneration)$('config-loading').hidden=true}
 }
+function resetBlockEditor(){blockDirty=false;blockOriginal=null;$('block-form').reset();$('block-save').textContent='Bloquear data';$('block-cancel').hidden=true;$('block-status').textContent=''}
 async function loadBlocks(id,generation){
   const items=await request('/api/admin/barbeiros/'+id+'/bloqueios');if(id!==configId||generation!==configGeneration)return;
   $('blocks-list').replaceChildren();
   if(!items.length){const p=document.createElement('p');p.className='hint';p.textContent='Nenhuma data bloqueada de hoje em diante.';$('blocks-list').append(p)}
-  for(const item of items){const row=document.createElement('div');row.className='block-item';const text=document.createElement('span');text.textContent=item.data.split('-').reverse().join('/')+' · '+item.motivo;const btn=document.createElement('button');btn.type='button';btn.className='btn btn-secondary';btn.textContent='Liberar';btn.addEventListener('click',()=>busy(btn,async()=>{await request('/api/admin/barbeiros/'+id+'/bloqueios/liberar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:item.data})});await loadBlocks(id,generation);notice('Data liberada. O expediente semanal continua valendo.')}));row.append(text,btn);$('blocks-list').append(row)}
+  for(const item of items){
+    const row=document.createElement('div');row.className='block-item';const text=document.createElement('span');text.textContent=item.data.split('-').reverse().join('/')+' · '+item.motivo;
+    const actions=document.createElement('div');actions.className='config-actions';const edit=document.createElement('button');edit.type='button';edit.className='btn btn-secondary';edit.textContent='Editar';
+    edit.addEventListener('click',()=>{
+      if(mutationPending||configSaving)return;
+      if(blockDirty&&!window.confirm('Descartar o bloqueio ainda não salvo?'))return;
+      blockOriginal=item.data;blockDirty=false;$('block-form').elements.data.value=item.data;$('block-form').elements.motivo.value=item.motivo;$('block-save').textContent='Salvar bloqueio';$('block-cancel').hidden=false;$('block-status').textContent='Editando bloqueio de '+item.data.split('-').reverse().join('/');
+    });
+    const btn=document.createElement('button');btn.type='button';btn.className='btn btn-secondary';btn.textContent='Liberar';
+    btn.addEventListener('click',()=>{
+      if(mutationPending||configSaving||!window.confirm('Liberar a data '+item.data.split('-').reverse().join('/')+'? O expediente semanal voltará a valer.'))return;
+      if(blockDirty&&blockOriginal===item.data){configError('Salve ou cancele a edição do bloqueio antes de liberar.');return}
+      mutateSection($('block-fields'),async()=>{
+        await request('/api/admin/barbeiros/'+id+'/bloqueios/liberar',jsonPost({data:item.data}));
+        if(generation===configGeneration&&blockOriginal===item.data)resetBlockEditor();await loadBlocks(id,generation);notice('Data liberada. O expediente semanal continua valendo.');
+      });
+    });actions.append(edit,btn);row.append(text,actions);$('blocks-list').append(row);
+  }
 }
 $('config-form').addEventListener('input',markDirty);
-$('config-close').addEventListener('click',()=>{if(configSaving||!confirmDiscard())return;configGeneration++;configDirty=false;configId=null;configBarber=null;$('remove-section').hidden=true;$('config-box').hidden=true});
+$('config-close').addEventListener('click',()=>{if(configSaving||mutationPending||!confirmDiscard())return;configGeneration++;configDirty=false;profileDirty=false;serviceDirty=false;blockDirty=false;configId=null;configBarber=null;$('remove-section').hidden=true;$('config-box').hidden=true});
 $('close-week').addEventListener('click',()=>{renderWeek(weekdays.map(([diaSemana])=>({diaSemana,aberto:false,periodos:[]})));markDirty()});
-$('copy-week').addEventListener('click',()=>{const week=readWeek();for(let i=1;i<=4;i++){week[i].aberto=week[0].aberto;week[i].periodos=week[0].periodos.map(p=>({...p}))}renderWeek(week);markDirty()});
+$('copy-week').addEventListener('click',()=>{try{const week=readWeek();for(let i=1;i<=4;i++){week[i].aberto=week[0].aberto;week[i].periodos=week[0].periodos.map(p=>({...p}))}renderWeek(week);markDirty();configError()}catch(e){configError(e.message)}});
 $('config-form').addEventListener('submit',async e=>{
-  e.preventDefault();if(configSaving)return;configError();const id=configId,generation=configGeneration;
+  e.preventDefault();if(configSaving||mutationPending)return;configError();const id=configId,generation=configGeneration;
   try{
     const semana=readWeek();validateWeek(semana);const payload={semana,endereco:$('config-address').value.trim(),...coordinates()};
     configSaving=true;$('config-fields').disabled=true;$('config-close').disabled=true;
@@ -339,10 +453,106 @@ $('use-location').addEventListener('click',()=>{
   const generation=configGeneration;$('use-location').disabled=true;
   navigator.geolocation.getCurrentPosition(p=>{$('use-location').disabled=false;if(generation!==configGeneration)return;$('config-lat').value=p.coords.latitude.toFixed(6);$('config-lng').value=p.coords.longitude.toFixed(6);markDirty()},()=>{$('use-location').disabled=false;if(generation===configGeneration)configError('Não foi possível obter a localização. Você pode preencher as coordenadas manualmente.')},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 });
-$('block-form').addEventListener('submit',e=>{e.preventDefault();const id=configId,generation=configGeneration;busy(e.submitter,async()=>{const body=Object.fromEntries(new FormData(e.target));body.motivo=body.motivo.trim();if(!body.motivo)throw new Error('Informe o motivo do bloqueio.');await request('/api/admin/barbeiros/'+id+'/bloqueios',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(generation===configGeneration)e.target.reset();await loadBlocks(id,generation);notice('Data bloqueada.');})});
-$('copy-admin-command').addEventListener('click',async()=>{try{await navigator.clipboard.writeText('Minha agenda');notice('Comando “Minha agenda” copiado. Envie-o ao WhatsApp conectado usando o número administrador.')}catch{notice('Não foi possível copiar automaticamente. Use o comando: Minha agenda',true)}});
-$('remove-barber').addEventListener('click',e=>{const b=configBarber;if(!b||configSaving)return;const typed=window.prompt('Para remover este barbeiro, digite exatamente o nome abaixo:\n\n'+b.nome);if(typed===null)return;if(typed!==b.nome){notice('O nome digitado não confere. O barbeiro não foi removido.',true);return}busy(e.currentTarget,async()=>{await request('/api/admin/barbeiros/'+b.id+'/remover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nomeConfirmacao:typed})});configGeneration++;configId=null;configBarber=null;configDirty=false;$('remove-section').hidden=true;$('config-box').hidden=true;notice('Barbeiro removido do sistema. O número da Meta não foi desconectado.');await list()})});
-window.addEventListener('beforeunload',e=>{if(configDirty){e.preventDefault();e.returnValue=''}});
+$('block-form').addEventListener('input',()=>{blockDirty=true});
+$('block-cancel').addEventListener('click',()=>{if(!blockDirty||window.confirm('Descartar a edição deste bloqueio?'))resetBlockEditor()});
+$('block-form').addEventListener('submit',e=>{
+  e.preventDefault();const id=configId,generation=configGeneration,original=blockOriginal,body=Object.fromEntries(new FormData(e.target));body.motivo=body.motivo.trim();
+  if(!body.motivo){configError('Informe o motivo do bloqueio.');return}
+  if(original)body.dataOriginal=original;
+  mutateSection($('block-fields'),async()=>{
+    await request('/api/admin/barbeiros/'+id+'/bloqueios'+(original?'/editar':''),jsonPost(body));
+    if(generation===configGeneration)resetBlockEditor();await loadBlocks(id,generation);notice(original?'Bloqueio atualizado.':'Data bloqueada.');
+  });
+});
+$('remove-barber').addEventListener('click',e=>{if(configBarber)removeBarber(configBarber,e.currentTarget)});
+function jsonPost(body){return {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}}
+function resetServiceEditor(){serviceId=null;serviceDirty=false;$('service-form').reset();$('service-form').hidden=true}
+function editService(service=null){
+  if(mutationPending||configSaving)return;
+  if(serviceDirty&&!window.confirm('Descartar o serviço ainda não salvo?'))return;
+  serviceId=service?.id??null;serviceDirty=false;
+  const form=$('service-form');form.reset();
+  form.elements.nome.value=service?.nome??'';
+  form.elements.preco.value=service?.preco??'';
+  form.elements.duracaoMinutos.value=service?.duracaoMinutos??'';
+  form.elements.ativo.checked=service?.ativo??true;
+  $('service-title').textContent=service?'Editar '+service.nome:'Adicionar serviço';
+  form.hidden=false;form.elements.nome.focus();
+}
+// Bloqueia a navegação durante a gravação e preserva os rascunhos de outras seções.
+async function mutateSection(fieldset,task){
+  if(mutationPending||configSaving||configId===null)return;
+  mutationPending=true;fieldset.disabled=true;configError();
+  try{await task()}catch(e){configError(e.message);notice(e.message,true)}
+  finally{mutationPending=false;fieldset.disabled=false}
+}
+async function loadServices(id,generation){
+  let items;
+  try{items=await request('/api/admin/barbeiros/'+id+'/servicos')}
+  catch(e){if(generation===configGeneration)$('services-status').textContent='Não foi possível carregar os serviços. '+e.message;throw e}
+  if(id!==configId||generation!==configGeneration)return;
+  $('services-list').replaceChildren();
+  $('services-status').textContent=items.length?items.filter(s=>s.ativo).length+' serviço(s) disponível(is) para novos agendamentos.':'Nenhum serviço cadastrado. Adicione o primeiro para oferecer horários no bot.';
+  for(const service of items){
+    const row=document.createElement('div');row.className='service-item';
+    const copy=document.createElement('div'),name=document.createElement('strong'),details=document.createElement('p');
+    name.textContent=service.nome;
+    details.textContent=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(service.preco)+' · '+service.duracaoMinutos+' min · '+(service.ativo?'Ativo':'Desativado');copy.append(name,details);
+    const actions=document.createElement('div');actions.className='config-actions';
+    const edit=document.createElement('button');edit.type='button';edit.className='btn btn-secondary';edit.textContent='Editar';edit.addEventListener('click',()=>editService(service));
+    const toggle=document.createElement('button');toggle.type='button';toggle.className='btn btn-secondary';toggle.textContent=service.ativo?'Desativar':'Reativar';
+    toggle.addEventListener('click',()=>{
+      if(id!==configId||generation!==configGeneration||mutationPending||configSaving)return;
+      if(serviceId===service.id&&serviceDirty){configError('Salve ou cancele a edição deste serviço antes de alterar seu status.');return}
+      mutateSection($('service-fields'),async()=>{
+        await request('/api/admin/barbeiros/'+id+'/servicos/'+service.id+'/status',jsonPost({ativo:!service.ativo}));
+        if(generation!==configGeneration)return;
+        if(serviceId===service.id)resetServiceEditor();
+        notice(service.ativo?'Serviço desativado. Reservas existentes foram preservadas.':'Serviço reativado.');
+        await loadServices(id,generation);
+      });
+    });
+    const remove=document.createElement('button');remove.type='button';remove.className='btn btn-danger';remove.textContent='Excluir';
+    remove.addEventListener('click',()=>{
+      if(id!==configId||generation!==configGeneration||mutationPending||configSaving)return;
+      if(serviceId===service.id&&serviceDirty){configError('Salve ou cancele a edição deste serviço antes de excluí-lo.');return}
+      if(!window.confirm('Excluir o serviço “'+service.nome+'”? Se houver agendamentos ou conversas vinculadas, use Desativar para preservar o histórico.'))return;
+      mutateSection($('service-fields'),async()=>{
+        await request('/api/admin/barbeiros/'+id+'/servicos/'+service.id+'/remover',{method:'POST'});
+        if(generation!==configGeneration)return;
+        if(serviceId===service.id)resetServiceEditor();
+        notice('Serviço excluído.');await loadServices(id,generation);
+      });
+    });
+    actions.append(edit,toggle,remove);row.append(copy,actions);$('services-list').append(row);
+  }
+}
+$('profile-form').addEventListener('input',()=>{profileDirty=true;$('profile-status').textContent='Dados ainda não salvos.'});
+$('profile-form').addEventListener('submit',e=>{
+  e.preventDefault();const id=configId,generation=configGeneration,body=Object.fromEntries(new FormData(e.target));body.nome=body.nome.trim();
+  if(!body.nome){configError('Informe o nome do barbeiro.');return}
+  mutateSection($('profile-fields'),async()=>{
+    const result=await request('/api/admin/barbeiros/'+id+'/dados',jsonPost(body));
+    if(generation!==configGeneration)return;
+    configBarber=result;profileDirty=false;$('config-title').textContent='Configurar '+result.nome;$('profile-status').textContent='Dados salvos.';notice('Dados do barbeiro atualizados.');await list();
+  });
+});
+$('service-form').addEventListener('input',()=>{serviceDirty=true});
+$('service-new').addEventListener('click',()=>editService());
+$('service-cancel').addEventListener('click',()=>{if(!serviceDirty||window.confirm('Descartar a edição deste serviço?'))resetServiceEditor()});
+$('service-refresh').addEventListener('click',e=>busy(e.currentTarget,async()=>{if(configId!==null&&!mutationPending)await loadServices(configId,configGeneration)}));
+$('service-form').addEventListener('submit',e=>{
+  e.preventDefault();const id=configId,generation=configGeneration,editing=serviceId;
+  const form=e.target,body={nome:form.elements.nome.value.trim(),preco:Number(form.elements.preco.value),duracaoMinutos:Number(form.elements.duracaoMinutos.value),ativo:form.elements.ativo.checked};
+  if(!body.nome||!Number.isFinite(body.preco)||body.preco<0||!Number.isInteger(body.duracaoMinutos)||body.duracaoMinutos<1||body.duracaoMinutos>1439){configError('Informe nome, preço e duração válidos.');return}
+  mutateSection($('service-fields'),async()=>{
+    await request('/api/admin/barbeiros/'+id+'/servicos'+(editing!==null?'/'+editing:''),jsonPost(body));
+    if(generation!==configGeneration)return;
+    resetServiceEditor();notice(editing!==null?'Serviço atualizado.':'Serviço cadastrado.');await loadServices(id,generation);
+  });
+});
+
+window.addEventListener('beforeunload',e=>{if(configDirty||profileDirty||serviceDirty||blockDirty||mutationPending||configSaving){e.preventDefault();e.returnValue=''}});
 
 (async()=>{notice('Conectando ao painel…');try{await getCsrf();await showPanel();notice('')}catch(e){loggedOut();if(!['Entre novamente para acessar o painel.','Entre para acessar o painel.'].includes(e.message))notice(e.message,true);else notice('')}})();
 </script>

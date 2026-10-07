@@ -47,3 +47,62 @@ Não há alteração de tabelas nem novas dependências.
 Testes incluídos para validação, persistência da semana e coordenadas, atualização sem colisão da chave única, isolamento de bloqueios por barbeiro, exclusão com dependências, preservação de histórico e proteção ADMIN/CSRF. A CI executa `./gradlew build`.
 
 A sintaxe JavaScript foi verificada localmente. O navegador automatizado não foi executado neste ambiente (Chromium indisponível); o fluxo visual/produção deve ser conferido após a instalação na Hostinger.
+
+
+## Gestão completa pelo painel
+
+O HTML `docs/frontend/painel-zalura.html` inclui agora:
+
+- Cadastro de barbeiros e edição de nome, WhatsApp administrador e WhatsApp de notificações.
+- Expediente para os sete dias, dia fechado, sem intervalo, com intervalo de almoço ou múltiplos períodos.
+- Cadastro/edição de cortes, barba e combos com nome, preço, duração em minutos e situação ativo/inativo.
+- Exclusão de serviço sem vínculos; desativação/reativação de serviços vinculados a conversas ou reservas.
+- Edição de endereço e coordenadas, bloqueio/edição/liberação de datas e remoção de barbeiros sem histórico.
+
+As seções Dados, Horários e Serviços têm gravação própria. As alterações vão para a API e o banco; não ficam apenas no navegador. Ao cadastrar um barbeiro, a configuração abre automaticamente. Complete a semana e adicione pelo menos um serviço ativo antes de disponibilizar o bot.
+
+### Intervalo
+
+Sem intervalo: entrada 08:00, saída 18:00 gera um único período 08:00–18:00.
+Com intervalo: entrada 08:00, almoço 12:00–13:30, saída 18:00 gera os períodos 08:00–12:00 e 13:30–18:00. As pontas do intervalo precisam ficar dentro do expediente. Horários que atravessariam a pausa não são oferecidos pelo bot.
+A escolha é persistida pelos períodos já existentes no banco, sem uma coluna redundante. Configurações com mais de dois períodos são abertas no modo múltiplos períodos, sem perda de dados. Fechar todos os dias interrompe a oferta de novos horários após salvar; reservas existentes continuam registradas.
+
+### Novos contratos REST
+
+Todas as rotas exigem sessão ADMIN; todos os POSTs exigem CSRF. São usados DTOs sem tokens da Meta.
+
+| Método | Rota após `/api/admin/barbeiros/{id}` | Corpo/retorno |
+|---|---|---|
+| GET | `/dados` | Resumo do barbeiro sem credenciais |
+| POST | `/dados` | `nome`, `numeroWhatsAppAdministrador`, `numeroWhatsAppNotificacao` |
+| GET | `/servicos` | Lista de serviços ativos e inativos deste barbeiro |
+| POST | `/servicos` | `nome`, `preco`, `duracaoMinutos`, `ativo`; retorna 201 |
+| POST | `/servicos/{servicoId}` | Os mesmos quatro campos; retorna serviço atualizado |
+| POST | `/servicos/{servicoId}/status` | `ativo` booleano |
+| POST | `/servicos/{servicoId}/remover` | Sem corpo; retorna 204 ou 409 se houver vínculos |
+| POST | `/bloqueios/editar` | `dataOriginal`, `data`, `motivo` |
+
+O preço é não negativo, com até duas casas decimais; duração entre 1 e 1439 minutos. Os serviços são sempre consultados pelo par barbeiro/serviço. Escritas compartilham a trava do barbeiro usada no agendamento. Alterar a duração de um serviço não reescreve a duração das reservas existentes.
+
+Não se apaga histórico automaticamente. Serviços com reservas (inclusive canceladas) ou referências em conversas devem ser desativados. Barbeiros com histórico não podem ser excluídos; é possível fechar a semana pelo painel. Uma mudança de expediente também não cancela reservas automaticamente. A grade atual do bot mantém passos de 30 minutos entre os horários iniciais, embora a duração de cada serviço seja configurável em minutos.
+
+### Instalação
+
+Esta branch reúne as mudanças das PRs #19 e #20 e a gestão completa. Atualize a API com esta versão e depois publique `docs/frontend/painel-zalura.html` como `painel/index.html` na Hostinger. O frontend depende das novas rotas. Não é necessário criar novas tabelas nem configurar novas credenciais.
+
+Teste após a publicação: criar barbeiro, salvar semana com almoço, cadastrar serviço, recarregar o painel e conferir persistência; editar preço/duração e desativar/reativar; conferir as opções no WhatsApp. Confirme que o almoço não aparece e que nenhum corte cruza a pausa. Repita escolhendo sem intervalo.
+
+
+### Validação desta entrega
+
+- `node --check`: sintaxe do JavaScript do HTML.
+- `src/test/frontend/painel.cjs`: integração do DOM com API simulada, usando jsdom 26.1.0. Cobre almoço/sem intervalo, intervalo inválido, múltiplos períodos, dias fechados, dados, serviços, falha de gravação, rascunhos, bloqueios, recarga e CSRF.
+- `PainelGestaoTest`: testes JUnit de persistência, isolamento por barbeiro, segurança/validação HTTP, proteção de histórico e disponibilidade durante o almoço.
+- Os testes Java precisam ser executados com `./gradlew test` antes do merge/deploy. Neste ambiente o download do Gradle foi bloqueado pela rede. Testes de DOM não substituem a conferência visual em navegador nem um teste integrado após o deploy.
+
+Para executar o teste do painel sem adicionar dependências à aplicação Java:
+
+```bash
+npm install --prefix /tmp/zalura-ui-test jsdom@26.1.0 --no-audit --no-fund
+NODE_PATH=/tmp/zalura-ui-test/node_modules node src/test/frontend/painel.cjs
+```
