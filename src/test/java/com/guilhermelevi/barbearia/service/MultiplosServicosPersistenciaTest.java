@@ -34,7 +34,7 @@ class MultiplosServicosPersistenciaTest {
     @BeforeEach void preparar() {
         profissional = Barbeiro.builder().nome("Clínica estética").segmento("Estética").build();
         em.persist(profissional);
-        cliente = Cliente.builder().nome("Cliente").numeroTelefone("5588999000000").build();em.persist(cliente);
+        cliente = Cliente.builder().nomeCompleto("Cliente").numeroTelefone("5588999000000").build();em.persist(cliente);
         consulta = servico(profissional,"Avaliação",30,"50.00");
         retorno = servico(profissional,"Tratamento",60,"100.00");
         var expediente = ExpedienteSemanal.builder().barbeiro(profissional).diaSemana(dia.getDayOfWeek()).aberto(true).build();
