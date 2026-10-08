@@ -24,10 +24,7 @@ class SchedulerServiceTest {
 
         when(primeira.getId()).thenReturn(1L);
         when(segunda.getId()).thenReturn(2L);
-        when(repository.findByStatusOrderByCriadaEmAscIdAsc(
-                eq(NotificacaoPendente.Status.PENDENTE),
-                any()
-        )).thenReturn(List.of(primeira, segunda));
+        when(repository.buscarPendentesDeRobosAtivos(eq(NotificacaoPendente.Status.PENDENTE), any())).thenReturn(List.of(primeira, segunda));
 
         doThrow(new RuntimeException("falha"))
                 .when(envio)

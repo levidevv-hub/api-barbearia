@@ -467,6 +467,7 @@ public class ConversaAgendamentoService {
         sessao.setConfirmacaoId(null);
 
         if (horarios.isEmpty()) {
+            String avisoBloqueio = disponibilidadeService.mensagemBloqueio(barbeiro, sessao.getDataSelecionada());
             sessao.setDataSelecionada(null);
             sessao.setEtapa(EtapaConversaEnum.ESCOLHENDO_DATA);
             salvarSessao(sessao);
@@ -474,7 +475,7 @@ public class ConversaAgendamentoService {
             whatsapp.enviarTextoAposCommit(
                     barbeiro.getWhatsappPhoneNumberId(),
                     cliente.getNumeroTelefone(),
-                    "Não há horários disponíveis nesse dia. Escolha outra data."
+                    avisoBloqueio == null ? "Não há horários disponíveis nesse dia. Escolha outra data." : avisoBloqueio
             );
 
             whatsapp.enviarDatas(

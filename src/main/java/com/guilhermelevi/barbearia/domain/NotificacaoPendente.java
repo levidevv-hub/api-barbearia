@@ -66,10 +66,17 @@ public class NotificacaoPendente {
     @Column(columnDefinition = "text")
     private String ultimoErro;
 
+    @Column(name = "motivo_bloqueio", length = 255)
+    private String motivoBloqueio;
+
     public NotificacaoPendente(
             Agendamento agendamento,
             String mensagem
     ) {
+        this(agendamento, mensagem, null);
+    }
+
+    public NotificacaoPendente(Agendamento agendamento, String mensagem, String motivoBloqueio) {
         this.agendamento = agendamento;
         this.tipo = Tipo.CANCELAMENTO_POR_BLOQUEIO;
         this.status = Status.PENDENTE;
@@ -78,6 +85,7 @@ public class NotificacaoPendente {
                 agendamento.getBarbeiro().getWhatsappPhoneNumberId();
         this.mensagem = mensagem;
         this.criadaEm = LocalDateTime.now();
+        this.motivoBloqueio = MensagemBloqueio.normalizar(motivoBloqueio);
     }
 
     public void registrarTentativa() {

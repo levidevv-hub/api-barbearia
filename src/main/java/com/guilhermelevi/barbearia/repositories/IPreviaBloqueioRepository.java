@@ -9,9 +9,13 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 public interface IPreviaBloqueioRepository
         extends JpaRepository<PreviaBloqueio, UUID> {
+
+    Optional<PreviaBloqueio> findFirstByBarbeiroIdAndNumeroAdministradorAndConsumidaFalseAndExpiraEmAfterOrderByExpiraEmDesc(
+            Long barbeiroId, String numeroAdministrador, LocalDateTime agora);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""

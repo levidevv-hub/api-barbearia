@@ -1,0 +1,23 @@
+{
+  "name": "cancelamento_por_bloqueio_cliente_motivo",
+  "language": "pt_BR",
+  "category": "UTILITY",
+  "components": [
+    {
+      "type": "BODY",
+      "text": "Olá, {{1}}. A barbearia precisou cancelar o seu agendamento de {{2}} com {{3}}, marcado para {{4}} às {{5}}, pois não haverá atendimento nessa data. Mensagem da barbearia: {{6}}. Pedimos desculpas pelo imprevisto. Para consultar as opções disponíveis e escolher uma nova data, responda oi nesta conversa. O horário anterior foi cancelado.",
+      "example": {
+        "body_text": [
+          [
+            "João",
+            "Corte",
+            "Barbearia Teste",
+            "12/10/2026",
+            "10:00",
+            "Não atenderei por uma consulta médica."
+          ]
+        ]
+      }
+    }
+  ]
+}
