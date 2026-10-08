@@ -35,9 +35,11 @@ public class BarbeiroConfiguracaoController {
                                @Size(max=255) String endereco,
                                Double latitude, Double longitude) {}
     public record Bloqueio(@NotNull @FutureOrPresent LocalDate data,
-                           @NotBlank @Size(max=255) String motivo) {}
+                           @Size(max=255) String motivo, List<@NotNull Long> idsConfirmados) {
+        public Bloqueio(LocalDate data, String motivo) { this(data, motivo, null); }
+    }
     public record EdicaoBloqueio(@NotNull LocalDate dataOriginal, @NotNull @FutureOrPresent LocalDate data,
-                                 @NotBlank @Size(max=255) String motivo) {}
+                                 @Size(max=255) String motivo) {}
     public record Liberacao(@NotNull @FutureOrPresent LocalDate data) {}
     public record BloqueioResumo(LocalDate data, String motivo) {}
 
@@ -145,18 +147,22 @@ public class BarbeiroConfiguracaoController {
     @PostMapping("/bloqueios")
     @Transactional
     public Map<String,String> bloquear(@PathVariable Long id, @Valid @RequestBody Bloqueio form) {
-        Barbeiro b = buscar(id, true);
+        buscar(id, true);
         if (bloqueios.existsByBarbeiroIdAndData(id, form.data()))
             throw new IllegalArgumentException("Essa data já está bloqueada.");
-        // Nunca cancela reservas nem dispara mensagens a partir desta tela.
-        if (!bloqueioService.consultarAfetados(id, form.data()).isEmpty())
-            throw new IllegalArgumentException("Há agendamentos nesta data. Gerencie os cancelamentos antes de bloquear o dia.");
-        BloqueioData bloqueio = new BloqueioData();
-        bloqueio.setBarbeiro(b);
-        bloqueio.setData(form.data());
-        bloqueio.setMotivo(form.motivo().strip());
-        bloqueios.save(bloqueio);
-        return Map.of("mensagem", "Dia bloqueado.");
+        if (form.idsConfirmados() == null && !bloqueioService.consultarAfetados(id, form.data()).isEmpty())
+            throw new IllegalArgumentException("Consulte a prévia e confirme os clientes afetados antes de bloquear.");
+        int cancelados = bloqueioService.confirmarBloqueio(id, form.data(), form.motivo(),
+                form.idsConfirmados() == null ? List.of() : form.idsConfirmados());
+        return Map.of("mensagem", "Dia bloqueado. Avisos registrados: " + cancelados + ".");
+    }
+
+    @PostMapping("/bloqueios/previa")
+    @Transactional(readOnly=true)
+    public List<BloqueioDataService.ReservaAfetada> previaBloqueio(@PathVariable Long id,
+                                                               @Valid @RequestBody Liberacao form) {
+        buscar(id, false);
+        return bloqueioService.consultarAfetados(id, form.data());
     }
 
     @PostMapping("/bloqueios/editar")
@@ -175,7 +181,7 @@ public class BarbeiroConfiguracaoController {
         }
         var bloqueio = encontrados.get(0);
         bloqueio.setData(form.data());
-        bloqueio.setMotivo(form.motivo().strip());
+        bloqueio.setMotivo(MensagemBloqueio.normalizar(form.motivo()));
         em.flush();
         return Map.of("mensagem", "Bloqueio atualizado.");
     }

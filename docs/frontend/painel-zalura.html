@@ -175,10 +175,10 @@
         </section>
         <section id="blocks-section" class="config-section" hidden>
           <h3>Folgas e datas bloqueadas</h3>
-          <p class="config-note">Bloqueie o dia inteiro para feriados, férias ou imprevistos. Datas com agendamentos futuros precisam ser tratadas antes; esta tela não cancela reservas.</p>
+          <p class="config-note">Bloqueie o dia inteiro para feriados, férias ou imprevistos. Antes de confirmar, confira os clientes afetados. As reservas futuras do dia serão canceladas e os avisos entrarão na fila de envio.</p>
           <div id="blocks-list"></div>
           <form id="block-form"><fieldset id="block-fields">
-            <div class="form-grid"><label>Data<input name="data" type="date" required></label><label>Motivo<input name="motivo" maxlength="255" placeholder="Ex.: feriado" required></label></div>
+            <div class="form-grid"><label>Data<input name="data" type="date" required></label><label>Mensagem aos clientes (opcional)<input name="motivo" maxlength="255" placeholder="Ex.: Não atenderei neste dia por um imprevisto."></label></div>
             <p id="block-status" class="section-feedback" role="status"></p><div class="form-actions"><button id="block-cancel" class="btn btn-secondary" type="button" hidden>Cancelar edição</button><button id="block-save" class="btn btn-secondary" type="submit">Bloquear data</button></div></fieldset>
           </form>
         </section>
@@ -415,12 +415,12 @@ async function loadBlocks(id,generation){
   $('blocks-list').replaceChildren();
   if(!items.length){const p=document.createElement('p');p.className='hint';p.textContent='Nenhuma data bloqueada de hoje em diante.';$('blocks-list').append(p)}
   for(const item of items){
-    const row=document.createElement('div');row.className='block-item';const text=document.createElement('span');text.textContent=item.data.split('-').reverse().join('/')+' · '+item.motivo;
+    const row=document.createElement('div');row.className='block-item';const text=document.createElement('span');text.textContent=item.data.split('-').reverse().join('/')+' · '+(item.motivo||'Sem mensagem');
     const actions=document.createElement('div');actions.className='config-actions';const edit=document.createElement('button');edit.type='button';edit.className='btn btn-secondary';edit.textContent='Editar';
     edit.addEventListener('click',()=>{
       if(mutationPending||configSaving)return;
       if(blockDirty&&!window.confirm('Descartar o bloqueio ainda não salvo?'))return;
-      blockOriginal=item.data;blockDirty=false;$('block-form').elements.data.value=item.data;$('block-form').elements.motivo.value=item.motivo;$('block-save').textContent='Salvar bloqueio';$('block-cancel').hidden=false;$('block-status').textContent='Editando bloqueio de '+item.data.split('-').reverse().join('/');
+      blockOriginal=item.data;blockDirty=false;$('block-form').elements.data.value=item.data;$('block-form').elements.motivo.value=item.motivo||'';$('block-save').textContent='Salvar bloqueio';$('block-cancel').hidden=false;$('block-status').textContent='Editando bloqueio de '+item.data.split('-').reverse().join('/');
     });
     const btn=document.createElement('button');btn.type='button';btn.className='btn btn-secondary';btn.textContent='Liberar';
     btn.addEventListener('click',()=>{
@@ -457,11 +457,17 @@ $('block-form').addEventListener('input',()=>{blockDirty=true});
 $('block-cancel').addEventListener('click',()=>{if(!blockDirty||window.confirm('Descartar a edição deste bloqueio?'))resetBlockEditor()});
 $('block-form').addEventListener('submit',e=>{
   e.preventDefault();const id=configId,generation=configGeneration,original=blockOriginal,body=Object.fromEntries(new FormData(e.target));body.motivo=body.motivo.trim();
-  if(!body.motivo){configError('Informe o motivo do bloqueio.');return}
   if(original)body.dataOriginal=original;
   mutateSection($('block-fields'),async()=>{
-    await request('/api/admin/barbeiros/'+id+'/bloqueios'+(original?'/editar':''),jsonPost(body));
-    if(generation===configGeneration)resetBlockEditor();await loadBlocks(id,generation);notice(original?'Bloqueio atualizado.':'Data bloqueada.');
+    if(!original){
+      const previa=await request('/api/admin/barbeiros/'+id+'/bloqueios/previa',jsonPost({data:body.data}));
+      const clientes=previa.slice(0,10).map(r=>r.cliente+' — '+r.inicio.slice(11,16)).join('\n');
+      const aviso='Bloquear '+body.data.split('-').reverse().join('/')+'?\n\nReservas futuras que serão canceladas: '+previa.length+'.'+(clientes?'\n'+clientes:'')+(previa.length>10?'\nE mais '+(previa.length-10)+' reservas.':'')+'\n\nMensagem aos clientes: '+(body.motivo||'Aviso padrão de cancelamento.')+'\n\nOs avisos serão registrados para envio.';
+      if(!window.confirm(aviso))return;
+      body.idsConfirmados=previa.map(r=>r.agendamentoId);
+    }
+    const resultado=await request('/api/admin/barbeiros/'+id+'/bloqueios'+(original?'/editar':''),jsonPost(body));
+    if(generation===configGeneration)resetBlockEditor();await loadBlocks(id,generation);notice(resultado.mensagem||(original?'Bloqueio atualizado.':'Data bloqueada.'));
   });
 });
 $('remove-barber').addEventListener('click',e=>{if(configBarber)removeBarber(configBarber,e.currentTarget)});

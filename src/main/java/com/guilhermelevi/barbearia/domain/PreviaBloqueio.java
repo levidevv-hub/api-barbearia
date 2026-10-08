@@ -50,6 +50,9 @@ public class PreviaBloqueio {
     @Column(nullable = false)
     private boolean consumida;
 
+    @Column(length = 255)
+    private String motivo;
+
     public PreviaBloqueio(
             Barbeiro barbeiro,
             String numeroAdministrador,
@@ -83,5 +86,10 @@ public class PreviaBloqueio {
 
     public void consumir() {
         consumida = true;
+    }
+
+    public void definirMotivo(String motivo) {
+        validarParaConfirmar();
+        this.motivo = MensagemBloqueio.normalizar(motivo);
     }
 }

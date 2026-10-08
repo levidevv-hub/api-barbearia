@@ -117,7 +117,7 @@ class PreviaBloqueioServiceTest {
         when(bloqueios.confirmarBloqueio(
                 eq(1L),
                 eq(data),
-                anyString(),
+                isNull(),
                 argThat(ids -> ids.containsAll(Set.of(10L, 11L)))
         )).thenReturn(2);
 

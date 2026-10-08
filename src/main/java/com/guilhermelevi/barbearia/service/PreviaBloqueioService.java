@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -74,6 +75,11 @@ public class PreviaBloqueioService {
             Long barbeiroId,
             String numeroAdministrador
     ) {
+        return confirmar(previaId, barbeiroId, numeroAdministrador, false);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED, noRollbackFor = OperacaoAdministrativaException.class)
+    public int confirmar(UUID previaId, Long barbeiroId, String numeroAdministrador, boolean semMensagem) {
         // Mantém a autorização estável durante a operação.
         barbeiroRepository.buscarParaAgendar(barbeiroId)
                 .orElseThrow(() -> new OperacaoAdministrativaException(
@@ -97,13 +103,40 @@ public class PreviaBloqueioService {
         int cancelados = bloqueioDataService.confirmarBloqueio(
                 barbeiroId,
                 previa.getData(),
-                "Bloqueio confirmado pelo administrador via WhatsApp",
+                semMensagem ? null : previa.getMotivo(),
                 new ArrayList<>(previa.getIdsAgendamentos())
         );
 
         previa.consumir();
 
         return cancelados;
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED, noRollbackFor = OperacaoAdministrativaException.class)
+    public PreviaBloqueio definirMensagem(Long barbeiroId, String numeroAdministrador, String mensagem) {
+        // Trava na mesma ordem da confirmação, antes de ler a prévia.
+        barbeiroRepository.buscarParaAgendar(barbeiroId)
+                .orElseThrow(() -> new OperacaoAdministrativaException("Barbeiro não encontrado."));
+        validarAutorizacao(barbeiroId, numeroAdministrador);
+        var candidata = repository
+                .findFirstByBarbeiroIdAndNumeroAdministradorAndConsumidaFalseAndExpiraEmAfterOrderByExpiraEmDesc(
+                        barbeiroId, numeroAdministrador, LocalDateTime.now());
+        if (candidata.isEmpty()) return null;
+        var previa = repository.buscarParaConfirmar(candidata.get().getId(), barbeiroId, numeroAdministrador)
+                .orElseThrow(() -> new OperacaoAdministrativaException("Prévia não encontrada."));
+        previa.definirMotivo(mensagem);
+        return previa;
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED, noRollbackFor = OperacaoAdministrativaException.class)
+    public void cancelar(UUID previaId, Long barbeiroId, String numeroAdministrador) {
+        barbeiroRepository.buscarParaAgendar(barbeiroId)
+                .orElseThrow(() -> new OperacaoAdministrativaException("Barbeiro não encontrado."));
+        validarAutorizacao(barbeiroId, numeroAdministrador);
+        var previa = repository.buscarParaConfirmar(previaId, barbeiroId, numeroAdministrador)
+                .orElseThrow(() -> new OperacaoAdministrativaException("Prévia não encontrada para este administrador."));
+        previa.validarParaConfirmar();
+        previa.consumir();
     }
 
     private void validarAutorizacao(

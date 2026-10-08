@@ -20,7 +20,7 @@ Os campos de início/fim gerais do cadastro são um resumo legado. Um barbeiro r
 - Endereço é texto livre; não calcula coordenadas. Latitude de -90 a 90; longitude de -180 a 180. Informe ou remova as duas juntas.
 - A atualização de agenda e localização é transacional e usa a mesma trava por barbeiro do agendamento.
 - Reservas já confirmadas não são canceladas nem remarcadas quando o expediente muda.
-- Bloqueios fecham o dia inteiro e continuam valendo após editar a semana. Datas com reservas futuras não são bloqueadas por esta tela; não há cancelamento automático nem envio de mensagens.
+- Bloqueios fecham o dia inteiro e continuam valendo após editar a semana. O painel consulta a prévia e pede confirmação antes de cancelar as reservas futuras do dia e registrar seus avisos. A mensagem aos clientes é opcional e fica visível a quem tentar agendar nessa data. Veja `bloqueio-mensagem-clientes.md` para templates e deploy.
 - A exclusão exige digitar o nome exato. Recusa qualquer histórico de agendamentos, inclusive cancelados/passados (HTTP 409). Para interromper novas reservas preservando histórico, feche todos os dias.
 - Sem histórico, a exclusão remove o cadastro e seus períodos, expediente, bloqueios, serviços, sessões, prévias e links pendentes. Clientes globais e outros barbeiros são preservados. Vínculos adicionais que impeçam excluir provocam rollback. A conta/número na Meta não é apagada ou desconectada remotamente.
 - O fuso, a duração dos serviços e o passo atual de 30 minutos na oferta de horários continuam definidos pelo backend existente.
@@ -34,7 +34,7 @@ Base `/api/admin/barbeiros/{id}`; todas exigem ADMIN; mutações exigem CSRF. GE
 | GET | `/configuracao` | Retorna semana, endereço, latitude e longitude |
 | POST | `/configuracao` | Salva `{semana:[{diaSemana,aberto,periodos:[{inicio,fim}]}],endereco,latitude,longitude}` |
 | GET | `/bloqueios` | Retorna datas bloqueadas a partir de hoje |
-| POST | `/bloqueios` | Recebe `{data,motivo}` |
+| POST | `/bloqueios` | Recebe `{data,motivo,idsConfirmados}`; use `/bloqueios/previa` para consultar os afetados |
 | POST | `/bloqueios/liberar` | Recebe `{data}` |
 | POST | `/remover` | Recebe `{nomeConfirmacao}`, retorna 204 após excluir |
 

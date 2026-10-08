@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.ArrayList;
 
 @Slf4j
 @Service
@@ -58,18 +59,25 @@ public class EnvioNotificacaoService {
             if (usarTemplate) {
                 Agendamento agendamento = notificacao.getAgendamento();
 
-                List<String> dados = List.of(
+                List<String> dados = new ArrayList<>(List.of(
                         agendamento.getCliente().getNomeCompleto(),
                         agendamento.getServico().getNome(),
                         agendamento.getBarbeiro().getNome(),
                         agendamento.getInicio().format(FORMATO_DATA),
                         agendamento.getInicio().format(FORMATO_HORA)
-                );
+                ));
+
+                String template = "cancelamento_por_bloqueio_cliente";
+                if (notificacao.getMotivoBloqueio() != null) {
+                    template = "cancelamento_por_bloqueio_cliente_motivo";
+                    // Parâmetros de template são enviados em uma única linha.
+                    dados.add(notificacao.getMotivoBloqueio().replaceAll("\\s+", " ").strip());
+                }
 
                 mensagemId = whatsappClient.enviarTemplate(
                         notificacao.getPhoneNumberId(),
                         notificacao.getDestinatario(),
-                        "cancelamento_por_bloqueio_cliente",
+                        template,
                         dados
                 );
             } else {
