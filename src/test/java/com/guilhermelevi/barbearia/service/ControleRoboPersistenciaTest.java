@@ -55,7 +55,7 @@ class ControleRoboPersistenciaTest {
 
     @Test
     void colunaTemDefaultAtivoParaInsercaoSemCampo() {
-        em.createNativeQuery("insert into barbeiros (nome) values ('Cadastro SQL')").executeUpdate();
+        em.createNativeQuery("insert into profissionals (nome) values ('Cadastro SQL')").executeUpdate();
         var ativo = em.createNativeQuery("select robo_ativo from barbeiros where nome = 'Cadastro SQL'")
                 .getSingleResult();
         assertEquals(Boolean.TRUE, ativo);

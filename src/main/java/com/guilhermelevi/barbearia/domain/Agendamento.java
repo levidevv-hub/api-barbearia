@@ -31,6 +31,16 @@ public class Agendamento {
     @JoinColumn(name = "servico_id")
     private Servico servico;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "agendamento_itens", joinColumns = @JoinColumn(name = "agendamento_id"))
+    @OrderColumn(name = "ordem")
+    @Builder.Default
+    private java.util.List<ItemServico> itens = new java.util.ArrayList<>();
+
+    public String descricaoServicos() {
+        return itens == null || itens.isEmpty() ? servico.getNome() : ItemServico.nomes(itens);
+    }
+
     private LocalDateTime inicio;
 
     @Enumerated(EnumType.STRING)

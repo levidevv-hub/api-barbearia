@@ -31,6 +31,6 @@ public class BarbeiroRemocaoController {
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String,String> vinculos(DataIntegrityViolationException e) {
-        return Map.of("erro", "O barbeiro possui outros vínculos no sistema. A exclusão foi desfeita e os dados foram preservados.");
+        return Map.of("erro", "O profissional possui outros vínculos no sistema. A exclusão foi desfeita e os dados foram preservados.");
     }
 }

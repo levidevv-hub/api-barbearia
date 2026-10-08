@@ -69,10 +69,10 @@
 
   <main id="panel" class="main" hidden>
     <div class="page-head">
-      <div><p class="eyebrow">PAINEL ADMINISTRATIVO</p><h1>Clientes</h1><p class="lead">Gerencie barbeiros, serviços, horários e intervalos em um só lugar.</p></div>
+      <div><p class="eyebrow">PAINEL ADMINISTRATIVO</p><h1>Clientes</h1><p class="lead">Gerencie profissionais, serviços, horários e intervalos em um só lugar.</p></div>
       <div class="page-actions">
         <button id="refresh" class="btn btn-secondary" type="button">Atualizar</button>
-        <button id="new" class="btn btn-primary" type="button">+ Cadastrar barbeiro</button>
+        <button id="new" class="btn btn-primary" type="button">+ Cadastrar profissional</button>
       </div>
     </div>
 
@@ -92,10 +92,11 @@
     </section>
 
     <section id="new-box" class="card" hidden>
-      <div class="card-head"><div><p class="eyebrow">NOVO CLIENTE</p><h2>Cadastrar barbeiro</h2><p>Cadastre os dados básicos. Depois, use Configurar para definir a agenda semanal.</p></div></div>
+      <div class="card-head"><div><p class="eyebrow">NOVO CLIENTE</p><h2>Cadastrar profissional</h2><p>Cadastre os dados básicos. Depois, use Configurar para definir a agenda semanal.</p></div></div>
       <div class="card-body">
         <form id="create-form">
-          <label>Nome do barbeiro ou estabelecimento<input name="nome" maxlength="120" placeholder="Ex.: Barbearia Central" required></label>
+          <label>Segmento<input name="segmento" maxlength="80" placeholder="Ex.: Estética, consultoria, barbearia"></label>
+          <label>Nome do profissional ou estabelecimento<input name="nome" maxlength="120" placeholder="Ex.: Estética Central" required></label>
           <div class="form-grid">
             <label>WhatsApp do administrador<input name="numeroWhatsAppAdministrador" type="tel" inputmode="numeric" pattern="[1-9][0-9]{7,14}" placeholder="5588999999999" required><span class="hint">País + DDD + número, somente dígitos.</span></label>
             <label>WhatsApp para notificações<input name="numeroWhatsAppNotificacao" type="tel" inputmode="numeric" pattern="[1-9][0-9]{7,14}" placeholder="5588999999999" required><span class="hint">Pode ser o mesmo número do administrador.</span></label>
@@ -105,23 +106,24 @@
             <label>Fim geral de referência<input name="fimExpediente" type="time" required></label>
           </div>
           <label>Endereço<input name="endereco" maxlength="255" placeholder="Ex.: Russas - CE"><span class="hint">Opcional. O endereço não define automaticamente latitude e longitude.</span></label>
-          <div class="form-actions"><button id="cancel" class="btn btn-secondary" type="button">Cancelar</button><button class="btn btn-primary" type="submit">Cadastrar barbeiro</button></div>
+          <div class="form-actions"><button id="cancel" class="btn btn-secondary" type="button">Cancelar</button><button class="btn btn-primary" type="submit">Cadastrar profissional</button></div>
         </form>
       </div>
     </section>
 
 
     <section id="config-box" class="card" hidden aria-labelledby="config-title">
-      <div class="card-head"><div><p class="eyebrow">CONFIGURAÇÃO COMPLETA</p><h2 id="config-title">Configurar barbeiro</h2><p>Dados, cortes, expediente, intervalos e localização de cada barbeiro.</p></div><button id="config-close" type="button" class="btn btn-secondary">Fechar</button></div>
+      <div class="card-head"><div><p class="eyebrow">CONFIGURAÇÃO COMPLETA</p><h2 id="config-title">Configurar profissional</h2><p>Dados, serviços, expediente, intervalos e localização de cada profissional.</p></div><button id="config-close" type="button" class="btn btn-secondary">Fechar</button></div>
       <div class="card-body">
         <p id="config-loading" role="status">Carregando configurações…</p>
         <p id="config-error" class="config-error" role="alert" hidden></p>
         <nav id="config-nav" class="section-nav" aria-label="Configuração" hidden><a href="#profile-section">Dados</a><a href="#schedule-section">Horários e intervalo</a><a href="#services-section">Cortes e serviços</a><a href="#blocks-section">Folgas</a></nav>
         <section id="profile-section" hidden>
-          <h3>Dados do barbeiro</h3>
+          <h3>Dados do profissional</h3>
           <form id="profile-form">
             <fieldset id="profile-fields">
-              <label>Nome do barbeiro ou estabelecimento<input name="nome" maxlength="120" required></label>
+              <label>Segmento<input name="segmento" maxlength="80" placeholder="Ex.: Estética, consultoria, barbearia"></label>
+          <label>Nome do profissional ou estabelecimento<input name="nome" maxlength="120" required></label>
               <div class="form-grid">
                 <label>WhatsApp do administrador<input name="numeroWhatsAppAdministrador" type="tel" pattern="[1-9][0-9]{7,14}" inputmode="numeric" required><span class="hint">País + DDD + número. Este número terá acesso administrativo pelo WhatsApp.</span></label>
                 <label>WhatsApp para notificações<input name="numeroWhatsAppNotificacao" type="tel" pattern="[1-9][0-9]{7,14}" inputmode="numeric" required></label>
@@ -183,16 +185,16 @@
           </form>
         </section>
         <section id="remove-section" class="config-section danger-zone" hidden>
-          <h3>Remover barbeiro</h3>
+          <h3>Remover profissional</h3>
           <p class="config-note">Exclua somente cadastros sem histórico de agendamentos. A remoção exige digitar o nome exato e não desconecta o número na Meta.</p>
-          <div class="config-actions"><button id="remove-barber" class="btn btn-danger" type="button">Remover este barbeiro</button></div>
+          <div class="config-actions"><button id="remove-barber" class="btn btn-danger" type="button">Remover este profissional</button></div>
         </section>
       </div>
     </section>
 
     <section class="card">
       <div class="card-head"><div><p class="eyebrow">OPERAÇÕES</p><h2 id="count">Clientes cadastrados</h2><p>Visualize o status e gere um novo link de conexão quando necessário.</p></div></div>
-      <p id="empty" class="empty" hidden>Nenhum barbeiro cadastrado ainda.</p>
+      <p id="empty" class="empty" hidden>Nenhum profissional cadastrado ainda.</p>
       <div id="table-wrap" class="table-wrap">
         <table>
           <thead><tr><th>Cliente</th><th>Administrador</th><th>Expediente</th><th>WhatsApp</th><th>Ação</th></tr></thead>
@@ -275,7 +277,7 @@ $('create-form').addEventListener('submit',e=>{
     try{
       created=await request('/api/admin/barbeiros',jsonPost(data));e.target.reset();$('new-box').hidden=true;
       configDirty=false;profileDirty=false;serviceDirty=false;blockDirty=false;
-      notice('Barbeiro cadastrado. Defina a semana e adicione os serviços abaixo para liberar horários no bot.');await list();
+      notice('Profissional cadastrado. Defina a semana e adicione os serviços abaixo para liberar horários no bot.');await list();
     }finally{mutationPending=false}
     await openConfig(created);
   });
@@ -289,20 +291,20 @@ async function removeBarber(b,button){
   if(!confirmDiscard())return;
   const answer=window.prompt('Excluir '+b.nome+' do sistema Zalura? Os serviços, horários e links pendentes desse cadastro serão removidos. A conta na Meta não será excluída. Cadastros com histórico de agendamentos são preservados.\n\nDigite o nome exato para confirmar: '+b.nome);
   if(answer===null)return;
-  if(answer!==b.nome){notice('Nome diferente. Nenhum barbeiro foi excluído.',true);return}
+  if(answer!==b.nome){notice('Nome diferente. Nenhum profissional foi excluído.',true);return}
   mutationPending=true;
   try{await busy(button,async()=>{
     await request('/api/admin/barbeiros/'+b.id+'/remover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nomeConfirmacao:answer})});
     if(configId===b.id){configGeneration++;configDirty=false;profileDirty=false;serviceDirty=false;blockDirty=false;configId=null;configBarber=null;$('config-box').hidden=true}
     $('link-value').value='';$('link-box').hidden=true;
-    notice('Barbeiro excluído do sistema. A conta do WhatsApp na Meta não foi alterada.');await list();
+    notice('Profissional excluído do sistema. A conta do WhatsApp na Meta não foi alterada.');await list();
   })}finally{mutationPending=false}
 }
 
 const weekdays=[['MONDAY','Segunda-feira'],['TUESDAY','Terça-feira'],['WEDNESDAY','Quarta-feira'],['THURSDAY','Quinta-feira'],['FRIDAY','Sexta-feira'],['SATURDAY','Sábado'],['SUNDAY','Domingo']];
 function configError(message=''){$('config-error').textContent=message;$('config-error').hidden=!message}
 function markDirty(){configDirty=true;$('config-status').textContent='Alterações ainda não salvas.'}
-function confirmDiscard(){return !(configDirty||profileDirty||serviceDirty||blockDirty)||window.confirm('Descartar as alterações ainda não salvas neste barbeiro?')}
+function confirmDiscard(){return !(configDirty||profileDirty||serviceDirty||blockDirty)||window.confirm('Descartar as alterações ainda não salvas neste profissional?')}
 function addPeriod(container,value={inicio:'',fim:''}){
   const row=document.createElement('div');row.className='period-row';
   for(const [key,label] of [['inicio','Das'],['fim','Até']]){
@@ -403,7 +405,7 @@ async function openConfig(b){
   $('profile-section').hidden=true;$('services-section').hidden=true;$('config-nav').hidden=true;$('service-form').hidden=true;$('services-list').replaceChildren();$('services-status').textContent='';$('profile-status').textContent='';
   $('config-box').scrollIntoView({behavior:'smooth',block:'start'});
   try{
-    const [c,profile]=await Promise.all([request('/api/admin/barbeiros/'+b.id+'/configuracao'),request('/api/admin/barbeiros/'+b.id+'/dados')]);if(generation!==configGeneration)return;configBarber=profile;for(const key of ['nome','numeroWhatsAppAdministrador','numeroWhatsAppNotificacao'])$('profile-form').elements[key].value=profile[key]||'';$('profile-section').hidden=false;$('services-section').hidden=false;$('config-nav').hidden=false;
+    const [c,profile]=await Promise.all([request('/api/admin/barbeiros/'+b.id+'/configuracao'),request('/api/admin/barbeiros/'+b.id+'/dados')]);if(generation!==configGeneration)return;configBarber=profile;for(const key of ['nome','segmento','numeroWhatsAppAdministrador','numeroWhatsAppNotificacao'])$('profile-form').elements[key].value=profile[key]||'';$('profile-section').hidden=false;$('services-section').hidden=false;$('config-nav').hidden=false;
     renderWeek(c.semana);$('config-address').value=c.endereco||'';$('config-lat').value=c.latitude??'';$('config-lng').value=c.longitude??'';$('config-form').hidden=false;$('blocks-section').hidden=false;
     await Promise.all([loadBlocks(b.id,generation),loadServices(b.id,generation)]);
   }catch(e){if(generation===configGeneration)configError(e.message.includes('(404)')?'A API ainda não tem a configuração de agenda. Instale a atualização do backend incluída com este painel.':e.message)}
@@ -536,11 +538,11 @@ async function loadServices(id,generation){
 $('profile-form').addEventListener('input',()=>{profileDirty=true;$('profile-status').textContent='Dados ainda não salvos.'});
 $('profile-form').addEventListener('submit',e=>{
   e.preventDefault();const id=configId,generation=configGeneration,body=Object.fromEntries(new FormData(e.target));body.nome=body.nome.trim();
-  if(!body.nome){configError('Informe o nome do barbeiro.');return}
+  if(!body.nome){configError('Informe o nome do profissional.');return}
   mutateSection($('profile-fields'),async()=>{
     const result=await request('/api/admin/barbeiros/'+id+'/dados',jsonPost(body));
     if(generation!==configGeneration)return;
-    configBarber=result;profileDirty=false;$('config-title').textContent='Configurar '+result.nome;$('profile-status').textContent='Dados salvos.';notice('Dados do barbeiro atualizados.');await list();
+    configBarber=result;profileDirty=false;$('config-title').textContent='Configurar '+result.nome;$('profile-status').textContent='Dados salvos.';notice('Dados do profissional atualizados.');await list();
   });
 });
 $('service-form').addEventListener('input',()=>{serviceDirty=true});

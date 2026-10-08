@@ -33,11 +33,15 @@ public class DisponibilidadeService {
             Servico servico,
             LocalDate data
     ) {
+        return buscarHorariosPorDuracao(barbeiro, servico.getDuracaoMinutos(), data);
+    }
+
+    public List<LocalTime> buscarHorariosPorDuracao(Barbeiro barbeiro, Integer duracaoMinutos, LocalDate data) {
         LocalDateTime agora = LocalDateTime.now();
 
         if (data.isBefore(agora.toLocalDate())
-                || servico.getDuracaoMinutos() == null
-                || servico.getDuracaoMinutos() <= 0) {
+                || duracaoMinutos == null
+                || duracaoMinutos <= 0) {
             return List.of();
         }
 
@@ -101,7 +105,7 @@ public class DisponibilidadeService {
             LocalDateTime fimPeriodo = data.atTime(periodo.getFim());
 
             for (LocalDateTime inicio = data.atTime(periodo.getInicio());
-                 !inicio.plusMinutes(servico.getDuracaoMinutos())
+                 !inicio.plusMinutes(duracaoMinutos)
                          .isAfter(fimPeriodo);
                  inicio = inicio.plusMinutes(30)) {
 
@@ -111,7 +115,7 @@ public class DisponibilidadeService {
 
                 PeriodoAgendamento novo = new PeriodoAgendamento(
                         inicio,
-                        inicio.plusMinutes(servico.getDuracaoMinutos())
+                        inicio.plusMinutes(duracaoMinutos)
                 );
 
                 boolean conflito = existentes.stream()

@@ -97,7 +97,7 @@ public class WhatsAppClient {
     public void enviarMeusHorarios(String phoneNumberId, String numero, List<Agendamento> agendamentos) {
         if (agendamentos.isEmpty()) {
             enviarTextoAposCommit(phoneNumberId, numero,
-                    "Você não tem agendamentos futuros nesta barbearia.");
+                    "Você não tem agendamentos futuros neste estabelecimento.");
             return;
         }
 
@@ -109,7 +109,7 @@ public class WhatsAppClient {
                     Data: %s
                     Horário: %s às %s
 
-                    """.formatted(i + 1, agendamento.getServico().getNome(),
+                    """.formatted(i + 1, agendamento.descricaoServicos(),
                     agendamento.getInicio().format(FORMATO_DATA),
                     agendamento.getInicio().format(FORMATO_HORA),
                     agendamento.calcularFim().format(FORMATO_HORA));
@@ -127,7 +127,7 @@ public class WhatsAppClient {
     public void enviarOpcoesCancelamento(String phoneNumberId, String numero, List<Agendamento> agendamentos) {
         if (agendamentos.isEmpty()) {
             enviarTextoAposCommit(phoneNumberId, numero,
-                    "Você não tem agendamentos futuros para cancelar nesta barbearia.");
+                    "Você não tem agendamentos futuros para cancelar neste estabelecimento.");
             return;
         }
 
@@ -139,7 +139,7 @@ public class WhatsAppClient {
                             "id", "ESCOLHER_CANCELAMENTO_" + a.getId(),
                             "title", a.getInicio().format(FORMATO_DATA) + " às "
                                     + a.getInicio().format(FORMATO_HORA),
-                            "description", descricaoServico(a.getServico().getNome())))
+                            "description", descricaoServico(a.descricaoServicos())))
                     .toList();
             String texto = "Escolha o agendamento que deseja cancelar. Você ainda vai confirmar a escolha.";
             if (totalListas > 1) {
@@ -163,7 +163,7 @@ public class WhatsAppClient {
                 Serviço: %s
                 Data: %s
                 Horário: %s às %s
-                """.formatted(agendamento.getServico().getNome(),
+                """.formatted(agendamento.descricaoServicos(),
                 agendamento.getInicio().format(FORMATO_DATA),
                 agendamento.getInicio().format(FORMATO_HORA),
                 agendamento.calcularFim().format(FORMATO_HORA));
@@ -450,6 +450,27 @@ public class WhatsAppClient {
         enviarAposCommit(phoneNumberId, body);
     }
 
+    public void enviarBotaoRevisarServicos(String phoneNumberId, String numero) {
+        enviarAposCommit(phoneNumberId, Map.of("messaging_product", "whatsapp", "to", numero,
+                "type", "interactive", "interactive", Map.of("type", "button",
+                "body", Map.of("text", "Já escolheu o que precisa? Volte ao resumo para continuar."),
+                "action", Map.of("buttons", List.of(botao("REVISAR_SERVICOS", "Voltar ao resumo"))))));
+    }
+
+    public void enviarResumoServicos(String phoneNumberId, String numero, SessaoConversa sessao) {
+        var itens = sessao.getItensSelecionados();
+        var moeda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"));
+        // Máximo 8 nomes de 100 caracteres: cabe no corpo interativo (1024 caracteres).
+        String mensagem = "Serviços: " + sessao.descricaoServicos()
+                + "\nTotal: " + moeda.format(com.guilhermelevi.barbearia.domain.ItemServico.precoTotal(itens))
+                + "\nDuração: " + com.guilhermelevi.barbearia.domain.ItemServico.duracaoTotal(itens) + " minutos"
+                + "\nDeseja adicionar outro serviço ou continuar?";
+        enviarAposCommit(phoneNumberId, Map.of("messaging_product", "whatsapp", "to", numero,
+                "type", "interactive", "interactive", Map.of("type", "button", "body", Map.of("text", mensagem),
+                "action", Map.of("buttons", List.of(botao("ADICIONAR_SERVICO", "Adicionar serviço"),
+                        botao("CONTINUAR_AGENDAMENTO", "Continuar"), botao("REFAZER_SERVICOS", "Refazer seleção"))))));
+    }
+
     public void enviarConfirmacao(String phoneNumberId, String numero, SessaoConversa sessao) {
 
         NumberFormat moeda = NumberFormat.getCurrencyInstance(
@@ -467,7 +488,7 @@ public class WhatsAppClient {
                 : duracao + " minutos";
 
         String mensagem = """
-        Confirme seu agendamento 💈
+        Confirme seu agendamento
 
         Serviço: %s
         Preço: %s
@@ -475,7 +496,7 @@ public class WhatsAppClient {
         Data: %s
         Horário: %s
         """.formatted(
-                sessao.getServicoSelecionado().getNome(),
+                sessao.descricaoServicos(),
                 preco,
                 duracaoTexto,
                 sessao.getDataSelecionada().format(FORMATO_DATA),
@@ -552,7 +573,7 @@ public class WhatsAppClient {
         int inicio = pagina * 8;
         var opcoes = new ArrayList<Map<String, Object>>();
         for (var b : barbeiros.subList(inicio, Math.min(inicio + 8, barbeiros.size()))) {
-            String nome = b.getNome() == null || b.getNome().isBlank() ? "Barbearia" : b.getNome();
+            String nome = b.getNome() == null || b.getNome().isBlank() ? "Estabelecimento" : b.getNome();
             opcoes.add(Map.of("id", "CENTRAL_SELECIONAR_" + b.getId(),
                     "title", nome.length() > 24 ? nome.substring(0, 24) : nome,
                     "description", "Agenda #" + b.getId()));
@@ -561,9 +582,9 @@ public class WhatsAppClient {
         if (inicio + 8 < barbeiros.size()) opcoes.add(Map.of("id", "CENTRAL_PAGINA_" + (pagina + 1), "title", "Próxima página"));
         enviarAposCommit(phoneNumberId, Map.of(
                 "messaging_product", "whatsapp", "to", numero, "type", "interactive",
-                "interactive", Map.of("type", "list", "body", Map.of("text", "Qual barbearia deseja administrar?"),
-                        "action", Map.of("button", "Escolher barbearia", "sections", List.of(
-                                Map.of("title", "Suas barbearias", "rows", opcoes))))));
+                "interactive", Map.of("type", "list", "body", Map.of("text", "Qual estabelecimento deseja administrar?"),
+                        "action", Map.of("button", "Escolher negócio", "sections", List.of(
+                                Map.of("title", "Seus negócios", "rows", opcoes))))));
     }
 
     public void enviarMenuAdministrador(
@@ -621,7 +642,7 @@ public class WhatsAppClient {
                         "type", "list",
                         "body", Map.of(
                                 "text",
-                                "Gestão da barbearia 💈\nO que deseja fazer?"
+                                "Gestão do estabelecimento\nO que deseja fazer?"
                         ),
                         "action", Map.of(
                                 "button", "Ver opções",
@@ -642,7 +663,7 @@ public class WhatsAppClient {
         String texto = ativo
                 ? "🤖 Robô ATIVO.\nO atendimento automático aos clientes está habilitado."
                 : "⏸️ Robô PAUSADO.\nNenhuma nova resposta automática será enviada aos clientes "
-                        + "desta barbearia até você reativar.\n\nAvisos pendentes aos clientes aguardam "
+                        + "deste estabelecimento até você reativar.\n\nAvisos pendentes aos clientes aguardam "
                         + "a reativação. Minha agenda continua disponível.";
         enviarBotoesControleRobo(phoneNumberId, numero, texto, List.of(
                 botao(ativo ? "ADMIN_PAUSAR_ROBO" : "ADMIN_REATIVAR_ROBO",
@@ -652,7 +673,7 @@ public class WhatsAppClient {
 
     public void enviarConfirmacaoPausaRobo(String phoneNumberId, String numero) {
         enviarBotoesControleRobo(phoneNumberId, numero,
-                "Pausar o atendimento automático para todos os clientes desta barbearia?\n\n"
+                "Pausar o atendimento automático para todos os clientes deste estabelecimento?\n\n"
                         + "O robô ficará pausado até você reativar em Minha agenda → Controle do robô.",
                 List.of(botao("ADMIN_CONFIRMAR_PAUSA_ROBO", "Sim, pausar"),
                         botao("ADMIN_VOLTAR_CONTROLE_ROBO", "Voltar")));
@@ -758,7 +779,7 @@ public class WhatsAppClient {
                 """.formatted(
                     agendamento.getId(),
                     agendamento.getCliente().getNomeCompleto(),
-                    agendamento.getServico().getNome(),
+                    agendamento.descricaoServicos(),
                     agendamento.getInicio().format(FORMATO_HORA),
                     agendamento.calcularFim().format(FORMATO_HORA)
             );

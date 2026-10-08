@@ -10,6 +10,8 @@ import java.time.LocalTime;
 public class BarbeiroForm {
     @NotBlank(message = "Informe o nome.") @Size(max = 120)
     private String nome;
+    @Size(max = 80)
+    private String segmento;
     @NotBlank(message = "Informe o WhatsApp do administrador.")
     @Pattern(regexp = "[1-9][0-9]{7,14}", message = "Use apenas digitos, com codigo do pais e DDD.")
     private String numeroWhatsAppAdministrador;

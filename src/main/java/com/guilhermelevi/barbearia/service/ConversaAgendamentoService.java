@@ -182,6 +182,49 @@ public class ConversaAgendamentoService {
             return;
         }
 
+        if ("ADICIONAR_SERVICO".equals(id) || "CONTINUAR_AGENDAMENTO".equals(id)
+                || "REFAZER_SERVICOS".equals(id)) {
+            if (!validarEtapa(sessao, EtapaConversaEnum.REVISANDO_SERVICOS, barbeiro, cliente)) return;
+            if ("REFAZER_SERVICOS".equals(id)) {
+                processarOpcao("AGENDAR", sessao, cliente, barbeiro);
+                return;
+            }
+            if (sessao.getItensSelecionados().isEmpty()) {
+                processarOpcao("AGENDAR", sessao, cliente, barbeiro);
+                return;
+            }
+            if ("CONTINUAR_AGENDAMENTO".equals(id)) {
+                sessao.setEtapa(EtapaConversaEnum.ESCOLHENDO_DATA);
+                salvarSessao(sessao);
+                whatsapp.enviarDatas(barbeiro.getWhatsappPhoneNumberId(), cliente.getNumeroTelefone());
+            } else {
+                List<Servico> restantes = servicoRepository.findByBarbeiroIdAndAtivoTrue(barbeiro.getId())
+                        .stream().filter(servico -> sessao.getItensSelecionados().stream()
+                                .noneMatch(item -> item.getServicoId().equals(servico.getId()))).toList();
+                if (restantes.isEmpty() || sessao.getItensSelecionados().size() >= 8) {
+                    whatsapp.enviarTextoAposCommit(barbeiro.getWhatsappPhoneNumberId(), cliente.getNumeroTelefone(),
+                            restantes.isEmpty() ? "Você já selecionou todos os serviços disponíveis."
+                                    : "Você pode selecionar até 8 serviços por reserva.");
+                    whatsapp.enviarResumoServicos(barbeiro.getWhatsappPhoneNumberId(), cliente.getNumeroTelefone(), sessao);
+                } else {
+                    sessao.setEtapa(EtapaConversaEnum.ESCOLHENDO_SERVICO);
+                    salvarSessao(sessao);
+                    whatsapp.enviarServicos(barbeiro.getWhatsappPhoneNumberId(), cliente.getNumeroTelefone(), restantes);
+                    whatsapp.enviarBotaoRevisarServicos(barbeiro.getWhatsappPhoneNumberId(), cliente.getNumeroTelefone());
+                }
+            }
+            return;
+        }
+        if ("REVISAR_SERVICOS".equals(id)) {
+            if (!validarEtapa(sessao, EtapaConversaEnum.ESCOLHENDO_SERVICO, barbeiro, cliente)) return;
+            if (!sessao.getItensSelecionados().isEmpty()) {
+                sessao.setEtapa(EtapaConversaEnum.REVISANDO_SERVICOS);
+                salvarSessao(sessao);
+                whatsapp.enviarResumoServicos(barbeiro.getWhatsappPhoneNumberId(), cliente.getNumeroTelefone(), sessao);
+            }
+            return;
+        }
+
         if (id.startsWith("SERVICO_")) {
             if (!validarEtapa(
                     sessao,
@@ -192,9 +235,20 @@ public class ConversaAgendamentoService {
                 return;
             }
 
-            Long servicoId = Long.valueOf(
-                    id.substring("SERVICO_".length())
-            );
+            Long servicoId;
+            try {
+                servicoId = Long.valueOf(id.substring("SERVICO_".length()));
+            } catch (NumberFormatException e) {
+                whatsapp.enviarTextoAposCommit(barbeiro.getWhatsappPhoneNumberId(), cliente.getNumeroTelefone(),
+                        "Serviço inválido. Use a lista mais recente.");
+                return;
+            }
+            if (sessao.getItensSelecionados().stream().anyMatch(item -> item.getServicoId().equals(servicoId))) {
+                whatsapp.enviarTextoAposCommit(barbeiro.getWhatsappPhoneNumberId(), cliente.getNumeroTelefone(),
+                        "Esse serviço já está na sua seleção. Escolha outro ou volte ao resumo.");
+                return;
+            }
+            if (sessao.getItensSelecionados().size() >= 8) return;
 
             Servico servico = servicoRepository
                     .findByIdAndBarbeiroIdAndAtivoTrue(
@@ -221,19 +275,23 @@ public class ConversaAgendamentoService {
                 return;
             }
 
-            sessao.setServicoSelecionado(servico);
+            if (servico.getPreco() == null || servico.getDuracaoMinutos() == null
+                    || servico.getDuracaoMinutos() <= 0
+                    || (long) ItemServico.duracaoTotal(sessao.getItensSelecionados()) + servico.getDuracaoMinutos() > 1439) {
+                whatsapp.enviarTextoAposCommit(barbeiro.getWhatsappPhoneNumberId(), cliente.getNumeroTelefone(),
+                        "Esse serviço não pode ser adicionado à seleção. Escolha outro serviço ou volte ao resumo.");
+                return;
+            }
+            if (sessao.getServicoSelecionado() == null) sessao.setServicoSelecionado(servico);
+            sessao.getItensSelecionados().add(ItemServico.de(servico));
             sessao.setDataSelecionada(null);
             sessao.setHorarioSelecionado(null);
             sessao.setConfirmacaoId(null);
             sessao.limparValoresConfirmacao();
 
-            sessao.setEtapa(EtapaConversaEnum.ESCOLHENDO_DATA);
+            sessao.setEtapa(EtapaConversaEnum.REVISANDO_SERVICOS);
             salvarSessao(sessao);
-
-            whatsapp.enviarDatas(
-                    barbeiro.getWhatsappPhoneNumberId(),
-                    cliente.getNumeroTelefone()
-            );
+            whatsapp.enviarResumoServicos(barbeiro.getWhatsappPhoneNumberId(), cliente.getNumeroTelefone(), sessao);
 
             return;
         }
@@ -305,11 +363,7 @@ public class ConversaAgendamentoService {
             );
 
             List<LocalTime> disponiveis =
-                    disponibilidadeService.buscarHorarios(
-                            barbeiro,
-                            sessao.getServicoSelecionado(),
-                            sessao.getDataSelecionada()
-                    );
+                    buscarHorariosSelecionados(sessao, barbeiro);
 
             if (!disponiveis.contains(horario)) {
                 whatsapp.enviarTextoAposCommit(
@@ -325,11 +379,13 @@ public class ConversaAgendamentoService {
             sessao.setHorarioSelecionado(horario);
 
             sessao.setPrecoServicoNaConfirmacao(
-                    sessao.getServicoSelecionado().getPreco()
+                    sessao.getItensSelecionados().isEmpty() ? sessao.getServicoSelecionado().getPreco()
+                            : ItemServico.precoTotal(sessao.getItensSelecionados())
             );
 
             sessao.setDuracaoServicoNaConfirmacao(
-                    sessao.getServicoSelecionado().getDuracaoMinutos()
+                    sessao.getItensSelecionados().isEmpty() ? sessao.getServicoSelecionado().getDuracaoMinutos()
+                            : ItemServico.duracaoTotal(sessao.getItensSelecionados())
             );
 
             sessao.setConfirmacaoId(UUID.randomUUID());
@@ -371,7 +427,7 @@ public class ConversaAgendamentoService {
             Agendamento agendamento;
 
             try {
-                agendamento = agendamentoService.agendar(
+                agendamento = sessao.getItensSelecionados().isEmpty() ? agendamentoService.agendar(
                         cliente,
                         barbeiro,
                         sessao.getServicoSelecionado(),
@@ -381,7 +437,8 @@ public class ConversaAgendamentoService {
                         ),
                         sessao.getPrecoServicoNaConfirmacao(),
                         sessao.getDuracaoServicoNaConfirmacao()
-                );
+                ) : agendamentoService.agendarMultiplos(cliente, barbeiro, sessao.getItensSelecionados(),
+                        LocalDateTime.of(sessao.getDataSelecionada(), sessao.getHorarioSelecionado()));
             }
             catch (ServicoAlteradoException e) {
                 sessao.limpar();
@@ -437,10 +494,18 @@ public class ConversaAgendamentoService {
                     Serviço: %s
                     Data: %s
                     Horário: %s
-                    """.formatted(agendamento.getServico().getNome(),
+                    """.formatted(agendamento.descricaoServicos(),
                             agendamento.getInicio().toLocalDate(),
                             agendamento.getInicio().toLocalTime()));
         }
+    }
+
+    private List<LocalTime> buscarHorariosSelecionados(SessaoConversa sessao, Barbeiro barbeiro) {
+        // Sessões abertas antes do deploy mantêm o caminho de serviço único.
+        return sessao.getItensSelecionados().isEmpty()
+                ? disponibilidadeService.buscarHorarios(barbeiro, sessao.getServicoSelecionado(), sessao.getDataSelecionada())
+                : disponibilidadeService.buscarHorariosPorDuracao(barbeiro,
+                        ItemServico.duracaoTotal(sessao.getItensSelecionados()), sessao.getDataSelecionada());
     }
 
     private void mostrarHorarios(
@@ -457,11 +522,7 @@ public class ConversaAgendamentoService {
             Barbeiro barbeiro,
             int pagina
     ) {
-        List<LocalTime> horarios = disponibilidadeService.buscarHorarios(
-                barbeiro,
-                sessao.getServicoSelecionado(),
-                sessao.getDataSelecionada()
-        );
+        List<LocalTime> horarios = buscarHorariosSelecionados(sessao, barbeiro);
 
         sessao.setHorarioSelecionado(null);
         sessao.setConfirmacaoId(null);

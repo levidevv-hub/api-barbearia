@@ -22,7 +22,7 @@ public class ConversaCentralService {
         if (!remetente.matches("[1-9][0-9]{7,14}")) return;
         var permitidos = barbeiros.findByNumeroWhatsAppAdministradorOrderByIdAsc(remetente);
         if (permitidos.isEmpty()) {
-            resposta(linhaCentral, remetente, "Seu número não está cadastrado como administrador de uma barbearia.");
+            resposta(linhaCentral, remetente, "Seu número não está cadastrado como administrador de umo estabelecimento.");
             return;
         }
         String tipo = mensagem.path("type").asText();
@@ -37,7 +37,7 @@ public class ConversaCentralService {
     }
 
     private void texto(String linha, String remetente, String texto, List<Barbeiro> permitidos) {
-        if ("minha agenda".equalsIgnoreCase(texto) || "trocar barbearia".equalsIgnoreCase(texto)) {
+        if ("minha agenda".equalsIgnoreCase(texto) || "trocar estabelecimento".equalsIgnoreCase(texto) || "trocar barbearia".equalsIgnoreCase(texto)) {
             if (permitidos.size() > 1) { escolher(linha, remetente, permitidos, 0); return; }
             selecionar(linha, remetente, permitidos.get(0));
             return;
@@ -54,7 +54,7 @@ public class ConversaCentralService {
         try (var escopo = RespostaCentralWhatsapp.abrir(linha, barbeiro.getId())) {
             if (!admin.processarTexto(texto, barbeiro, remetente)) {
                 whatsapp.enviarTextoAposCommit(linha, remetente,
-                        "Envie Minha agenda para ver as opções ou Trocar barbearia para selecionar outra agenda.");
+                        "Envie Minha agenda para ver as opções ou Trocar estabelecimento para selecionar outra agenda.");
             }
         }
     }

@@ -19,6 +19,14 @@ public class Barbeiro {
     private Long id;
     private String nome;
 
+    /** Segmento comercial livre: estética, consultoria, barbearia etc. */
+    @Column(length = 80)
+    private String segmento;
+
+    public String segmentoExibicao() {
+        return segmento == null || segmento.isBlank() ? "Serviços" : segmento;
+    }
+
     @Builder.Default
     @Column(name = "robo_ativo", nullable = false, columnDefinition = "boolean default true")
     private boolean roboAtivo = true;

@@ -40,7 +40,7 @@ public class PreviaBloqueioService {
 
         Barbeiro barbeiro = barbeiroRepository.findById(barbeiroId)
                 .orElseThrow(() -> new OperacaoAdministrativaException(
-                        "Barbeiro não encontrado."
+                        "Profissional não encontrado."
                 ));
 
         List<BloqueioDataService.ReservaAfetada> afetados =
@@ -83,7 +83,7 @@ public class PreviaBloqueioService {
         // Mantém a autorização estável durante a operação.
         barbeiroRepository.buscarParaAgendar(barbeiroId)
                 .orElseThrow(() -> new OperacaoAdministrativaException(
-                        "Barbeiro não encontrado."
+                        "Profissional não encontrado."
                 ));
 
         validarAutorizacao(barbeiroId, numeroAdministrador);
@@ -116,7 +116,7 @@ public class PreviaBloqueioService {
     public PreviaBloqueio definirMensagem(Long barbeiroId, String numeroAdministrador, String mensagem) {
         // Trava na mesma ordem da confirmação, antes de ler a prévia.
         barbeiroRepository.buscarParaAgendar(barbeiroId)
-                .orElseThrow(() -> new OperacaoAdministrativaException("Barbeiro não encontrado."));
+                .orElseThrow(() -> new OperacaoAdministrativaException("Profissional não encontrado."));
         validarAutorizacao(barbeiroId, numeroAdministrador);
         var candidata = repository
                 .findFirstByBarbeiroIdAndNumeroAdministradorAndConsumidaFalseAndExpiraEmAfterOrderByExpiraEmDesc(
@@ -131,7 +131,7 @@ public class PreviaBloqueioService {
     @Transactional(isolation = Isolation.READ_COMMITTED, noRollbackFor = OperacaoAdministrativaException.class)
     public void cancelar(UUID previaId, Long barbeiroId, String numeroAdministrador) {
         barbeiroRepository.buscarParaAgendar(barbeiroId)
-                .orElseThrow(() -> new OperacaoAdministrativaException("Barbeiro não encontrado."));
+                .orElseThrow(() -> new OperacaoAdministrativaException("Profissional não encontrado."));
         validarAutorizacao(barbeiroId, numeroAdministrador);
         var previa = repository.buscarParaConfirmar(previaId, barbeiroId, numeroAdministrador)
                 .orElseThrow(() -> new OperacaoAdministrativaException("Prévia não encontrada para este administrador."));
