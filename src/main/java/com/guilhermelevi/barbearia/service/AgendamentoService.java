@@ -55,7 +55,7 @@ public class AgendamentoService {
     public boolean cancelar(Long agendamentoId, Cliente cliente, Barbeiro barbeiro) {
         // A mesma trava de agendar: confirmações e cancelamentos são serializados por barbeiro.
         barbeiroRepository.buscarParaAgendar(barbeiro.getId())
-                .orElseThrow(() -> new CancelamentoNaoPermitidoException("Barbearia não encontrada."));
+                .orElseThrow(() -> new CancelamentoNaoPermitidoException("Estabelecimento não encontrado."));
 
         Agendamento agendamento = buscarReservaDoCliente(agendamentoId, cliente, barbeiro);
         if (agendamento.getStatus() == StatusAgendamentoEnum.CANCELADO) {
@@ -71,7 +71,7 @@ public class AgendamentoService {
     private Agendamento buscarReservaDoCliente(Long agendamentoId, Cliente cliente, Barbeiro barbeiro) {
         return repository.buscarDoClienteNaBarbearia(agendamentoId, cliente.getId(), barbeiro.getId())
                 .orElseThrow(() -> new CancelamentoNaoPermitidoException(
-                        "Não encontrei esse agendamento entre suas reservas nesta barbearia."));
+                        "Não encontrei esse agendamento entre suas reservas neste estabelecimento."));
     }
 
     private void validarCancelamento(Agendamento agendamento) {
@@ -84,7 +84,7 @@ public class AgendamentoService {
         }
         if (!agendamento.getInicio().isAfter(LocalDateTime.now())) {
             throw new CancelamentoNaoPermitidoException(
-                    "Esse atendimento já começou ou passou. Entre em contato com a barbearia.");
+                    "Esse atendimento já começou ou passou. Entre em contato com o estabelecimento.");
         }
     }
 
@@ -104,81 +104,55 @@ public class AgendamentoService {
             BigDecimal precoApresentado,
             Integer duracaoApresentada
     ) {
-        Barbeiro barbeiroBloqueado = barbeiroRepository
-                .buscarParaAgendar(barbeiro.getId())
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Barbeiro não encontrado."
-                        )
-                );
-
         if (servico == null || servico.getId() == null) {
-            throw new ServicoIndisponivelException(
-                    "Selecione novamente o serviço para agendar."
-            );
+            throw new ServicoIndisponivelException("Selecione novamente o serviço para agendar.");
         }
+        return agendarMultiplos(cliente, barbeiro,
+                List.of(new ItemServico(servico.getId(), servico.getNome(), precoApresentado, duracaoApresentada)), inicio);
+    }
 
-        Servico servicoAtual = servicoRepository
-                .findByIdAndBarbeiroId(
-                        servico.getId(),
-                        barbeiroBloqueado.getId()
-                )
-                .orElseThrow(() ->
-                        new ServicoIndisponivelException(
-                                "Esse serviço não está mais disponível."
-                        )
-                );
-
-        // Recarrega os dados do banco após obter a trava.
-        entityManager.refresh(servicoAtual);
-
-        if (!servicoAtual.isAtivo()) {
-            throw new ServicoIndisponivelException(
-                    "Esse serviço não está mais disponível. Escolha outro serviço para agendar."
-            );
+    @Transactional(isolation = Isolation.READ_COMMITTED, noRollbackFor = {
+            HorarioIndisponivelException.class, ServicoIndisponivelException.class, ServicoAlteradoException.class})
+    public Agendamento agendarMultiplos(Cliente cliente, Barbeiro profissional,
+                                       List<ItemServico> apresentados, LocalDateTime inicio) {
+        Barbeiro bloqueado = barbeiroRepository.buscarParaAgendar(profissional.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Profissional não encontrado."));
+        if (apresentados == null || apresentados.isEmpty() || apresentados.size() > 8) {
+            throw new ServicoIndisponivelException("Escolha de 1 a 8 serviços para agendar.");
         }
-
-        validarServico(barbeiroBloqueado, servicoAtual);
-
-        if (precoApresentado == null
-                || duracaoApresentada == null
-                || servicoAtual.getPreco() == null
-                || precoApresentado.compareTo(
-                servicoAtual.getPreco()
-        ) != 0
-                || !duracaoApresentada.equals(
-                servicoAtual.getDuracaoMinutos()
-        )) {
-
-            throw new ServicoAlteradoException(
-                    "Precisamos atualizar sua confirmação: o preço ou a duração do serviço mudou, ou a confirmação é antiga. Selecione novamente o serviço e o horário para conferir as condições atuais."
-            );
+        var ids = new java.util.HashSet<Long>();
+        var atuais = new java.util.ArrayList<Servico>();
+        for (ItemServico item : apresentados) {
+            if (item == null || item.getServicoId() == null || !ids.add(item.getServicoId())) {
+                throw new ServicoIndisponivelException("Seleção de serviços inválida ou duplicada. Escolha novamente.");
+            }
+            Servico atual = servicoRepository.findByIdAndBarbeiroId(item.getServicoId(), bloqueado.getId())
+                    .orElseThrow(() -> new ServicoIndisponivelException("Esse serviço não está mais disponível."));
+            // Edições, exclusões e reservas usam a mesma trava por profissional.
+            entityManager.refresh(atual);
+            if (!atual.isAtivo()) {
+                throw new ServicoIndisponivelException("Esse serviço não está mais disponível. Escolha novamente.");
+            }
+            validarServico(bloqueado, atual);
+            if (!item.corresponde(atual)) {
+                throw new ServicoAlteradoException("Precisamos atualizar sua confirmação: um serviço mudou. "
+                        + "Selecione novamente os serviços e o horário para conferir as condições atuais.");
+            }
+            atuais.add(atual);
         }
-
-        LocalDateTime fim = inicio.plusMinutes(
-                servicoAtual.getDuracaoMinutos()
-        );
-
-        validarExpediente(barbeiroBloqueado, inicio, fim);
-
-        verificarConflito(
-                barbeiroBloqueado,
-                new PeriodoAgendamento(inicio, fim)
-        );
-
-        Agendamento agendamento = new Agendamento(
-                cliente,
-                barbeiroBloqueado,
-                servicoAtual,
-                inicio
-        );
-
-        agendamento.setStatus(StatusAgendamentoEnum.CONFIRMADO);
-
+        var itens = atuais.stream().map(ItemServico::de).toList();
+        long duracao = itens.stream().mapToLong(ItemServico::getDuracaoMinutos).sum();
+        if (duracao > 1439) {
+            throw new HorarioIndisponivelException("Os serviços selecionados não cabem em um dia. Faça reservas separadas.");
+        }
+        LocalDateTime fim = inicio.plusMinutes(duracao);
+        validarExpediente(bloqueado, inicio, fim);
+        verificarConflito(bloqueado, new PeriodoAgendamento(inicio, fim));
+        Agendamento agendamento = new Agendamento(cliente, bloqueado, atuais.get(0), inicio);
+        agendamento.setItens(new java.util.ArrayList<>(itens));
+        agendamento.setDuracaoMinutos((int) duracao);
         Agendamento salvo = repository.saveAndFlush(agendamento);
-
         notificacaoService.novoAgendamento(salvo);
-
         return salvo;
     }
 
@@ -189,7 +163,7 @@ public class AgendamentoService {
         }
         if (servico.getBarbeiro() == null
                 || !Objects.equals(servico.getBarbeiro().getId(), barbeiro.getId())) {
-            throw new IllegalArgumentException("O serviço não pertence a este barbeiro.");
+            throw new IllegalArgumentException("O serviço não pertence a este profissional.");
         }
     }
 
@@ -225,7 +199,7 @@ public class AgendamentoService {
 
         if (!expediente.isAberto()) {
             throw new HorarioIndisponivelException(
-                    "A barbearia está fechada nesse dia. Escolha outra data."
+                    "O estabelecimento está fechada nesse dia. Escolha outra data."
             );
         }
 
@@ -242,7 +216,7 @@ public class AgendamentoService {
                     || !periodo.getFim().isAfter(periodo.getInicio())) {
                 throw new HorarioIndisponivelException(
                         "O expediente desse dia está inválido. "
-                                + "Entre em contato com a barbearia."
+                                + "Entre em contato com o estabelecimento."
                 );
             }
 
@@ -250,7 +224,7 @@ public class AgendamentoService {
                     && periodo.getInicio().isBefore(fimAnterior)) {
                 throw new HorarioIndisponivelException(
                         "Existem períodos sobrepostos nesse dia. "
-                                + "Entre em contato com a barbearia."
+                                + "Entre em contato com o estabelecimento."
                 );
             }
 
@@ -298,7 +272,7 @@ public class AgendamentoService {
     ) {
         if (barbeiroId == null || data == null) {
             throw new IllegalArgumentException(
-                    "Informe o barbeiro e a data da consulta."
+                    "Informe o profissional e a data da consulta."
             );
         }
 

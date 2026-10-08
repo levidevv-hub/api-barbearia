@@ -61,7 +61,7 @@ public class EnvioNotificacaoService {
 
                 List<String> dados = new ArrayList<>(List.of(
                         agendamento.getCliente().getNomeCompleto(),
-                        agendamento.getServico().getNome(),
+                        agendamento.descricaoServicos(),
                         agendamento.getBarbeiro().getNome(),
                         agendamento.getInicio().format(FORMATO_DATA),
                         agendamento.getInicio().format(FORMATO_HORA)

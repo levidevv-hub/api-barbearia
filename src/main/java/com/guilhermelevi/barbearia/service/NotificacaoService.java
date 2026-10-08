@@ -76,14 +76,14 @@ public class NotificacaoService {
                     agendamento.getBarbeiro().getWhatsappPhoneNumberId());
         } catch (IllegalStateException e) {
             // Configuração de avisos não pode impedir a reserva do cliente.
-            log.error("Agendamento {}: não foi possível preparar o aviso ao barbeiro: {}",
+            log.error("Agendamento {}: não foi possível preparar o aviso ao profissional: {}",
                     agendamentoId, e.getMessage());
             return;
         }
 
         List<String> dados = List.of(
                 agendamento.getCliente().getNomeCompleto(),
-                agendamento.getServico().getNome(),
+                agendamento.descricaoServicos(),
                 agendamento.getBarbeiro().getNome(),
                 agendamento.getInicio().format(FORMATO_DATA),
                 agendamento.getInicio().format(FORMATO_HORA)
@@ -94,7 +94,7 @@ public class NotificacaoService {
 
                 Cliente: %s
                 Serviço: %s
-                Barbeiro: %s
+                Profissional: %s
                 Data: %s
                 Horário: %s
                 """.formatted(

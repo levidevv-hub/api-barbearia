@@ -31,7 +31,7 @@ public class ConexaoWhatsAppPendenteService {
                 .findById(barbeiroId)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
-                                "Barbeiro não encontrado."
+                                "Profissional não encontrado."
                         )
                 );
 

@@ -28,6 +28,16 @@ public class SessaoConversa {
     private EtapaConversaEnum etapa;
     @ManyToOne
     private Servico servicoSelecionado;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "sessao_servicos", joinColumns = @JoinColumn(name = "sessao_id"))
+    @OrderColumn(name = "ordem")
+    @Builder.Default
+    private java.util.List<ItemServico> itensSelecionados = new java.util.ArrayList<>();
+
+    public String descricaoServicos() {
+        return itensSelecionados.isEmpty() ? servicoSelecionado.getNome() : ItemServico.nomes(itensSelecionados);
+    }
+
     private LocalDate dataSelecionada;
     private LocalTime horarioSelecionado;
     private LocalDateTime ultimaInteracao;
@@ -52,6 +62,7 @@ public class SessaoConversa {
     public void limpar() {
         this.etapa = EtapaConversaEnum.MENU;
         this.servicoSelecionado = null;
+        this.itensSelecionados.clear();
         this.dataSelecionada = null;
         this.horarioSelecionado = null;
         this.confirmacaoId = null;

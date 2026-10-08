@@ -18,7 +18,7 @@ public class ControleRoboService {
     public Barbeiro alterar(Long barbeiroId, String remetente, boolean ativo) {
         Barbeiro barbeiro = barbeiroRepository.buscarParaAgendar(barbeiroId)
                 .orElseThrow(() -> new OperacaoAdministrativaException(
-                        "Barbearia não encontrada."));
+                        "Estabelecimento não encontrado."));
 
         if (!autorizacao.podeAdministrar(barbeiroId, remetente)) {
             throw new OperacaoAdministrativaException(

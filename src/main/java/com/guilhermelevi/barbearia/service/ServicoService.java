@@ -36,7 +36,7 @@ public class ServicoService {
                 numeroRemetente
         )) {
             throw new OperacaoAdministrativaException(
-                    "Você não tem permissão para cadastrar serviços nesta barbearia."
+                    "Você não tem permissão para cadastrar serviços neste estabelecimento."
             );
         }
 
@@ -82,7 +82,7 @@ public class ServicoService {
         Barbeiro barbeiro = barbeiroRepository.findById(barbeiroId)
                 .orElseThrow(() ->
                         new OperacaoAdministrativaException(
-                                "Barbeiro não encontrado."
+                                "Profissional não encontrado."
                         )
                 );
 
@@ -113,7 +113,7 @@ public class ServicoService {
                 numeroRemetente
         )) {
             throw new OperacaoAdministrativaException(
-                    "Você não tem permissão para editar serviços nesta barbearia."
+                    "Você não tem permissão para editar serviços neste estabelecimento."
             );
         }
 
@@ -126,7 +126,7 @@ public class ServicoService {
         barbeiroRepository.buscarParaAgendar(barbeiroId)
                 .orElseThrow(() ->
                         new OperacaoAdministrativaException(
-                                "Barbeiro não encontrado."
+                                "Profissional não encontrado."
                         )
                 );
 
@@ -134,7 +134,7 @@ public class ServicoService {
                 .findByIdAndBarbeiroId(servicoId, barbeiroId)
                 .orElseThrow(() ->
                         new OperacaoAdministrativaException(
-                                "Serviço não encontrado nesta barbearia."
+                                "Serviço não encontrado neste estabelecimento."
                         )
                 );
 
@@ -199,7 +199,7 @@ public class ServicoService {
                 numeroRemetente
         )) {
             throw new OperacaoAdministrativaException(
-                    "Você não tem permissão para alterar serviços nesta barbearia."
+                    "Você não tem permissão para alterar serviços neste estabelecimento."
             );
         }
 
@@ -212,7 +212,7 @@ public class ServicoService {
         barbeiroRepository.buscarParaAgendar(barbeiroId)
                 .orElseThrow(() ->
                         new OperacaoAdministrativaException(
-                                "Barbeiro não encontrado."
+                                "Profissional não encontrado."
                         )
                 );
 
@@ -220,7 +220,7 @@ public class ServicoService {
                 .findByIdAndBarbeiroId(servicoId, barbeiroId)
                 .orElseThrow(() ->
                         new OperacaoAdministrativaException(
-                                "Serviço não encontrado nesta barbearia."
+                                "Serviço não encontrado neste estabelecimento."
                         )
                 );
 
