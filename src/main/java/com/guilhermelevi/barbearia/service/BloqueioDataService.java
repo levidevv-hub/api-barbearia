@@ -44,7 +44,7 @@ public class BloqueioDataService {
     ) {
         if (barbeiroId == null || data == null) {
             throw new OperacaoAdministrativaException(
-                    "Informe o barbeiro e a data do bloqueio."
+                    "Informe o profissional e a data do bloqueio."
             );
         }
 
@@ -56,7 +56,7 @@ public class BloqueioDataService {
 
         if (!barbeiroRepository.existsById(barbeiroId)) {
             throw new OperacaoAdministrativaException(
-                    "Barbeiro não encontrado."
+                    "Profissional não encontrado."
             );
         }
 
@@ -77,7 +77,7 @@ public class BloqueioDataService {
                 .map(agendamento -> new ReservaAfetada(
                         agendamento.getId(),
                         agendamento.getCliente().getNomeCompleto(),
-                        agendamento.getServico().getNome(),
+                        agendamento.descricaoServicos(),
                         agendamento.getInicio()
                 ))
                 .toList();
@@ -103,7 +103,7 @@ public class BloqueioDataService {
     ) {
         if (barbeiroId == null || data == null || idsConfirmados == null) {
             throw new OperacaoAdministrativaException(
-                    "Informe o barbeiro, a data e as reservas confirmadas."
+                    "Informe o profissional, a data e as reservas confirmadas."
             );
         }
 
@@ -119,7 +119,7 @@ public class BloqueioDataService {
         Barbeiro barbeiro = barbeiroRepository
                 .buscarParaAgendar(barbeiroId)
                 .orElseThrow(() -> new OperacaoAdministrativaException(
-                        "Barbeiro não encontrado."
+                        "Profissional não encontrado."
                 ));
 
         LocalDateTime agora = LocalDateTime.now();
@@ -177,7 +177,7 @@ public class BloqueioDataService {
                 && (barbeiro.getWhatsappPhoneNumberId() == null
                 || barbeiro.getWhatsappPhoneNumberId().isBlank())) {
             throw new OperacaoAdministrativaException(
-                    "O barbeiro está sem configuração de envio do WhatsApp."
+                    "O profissional está sem configuração de envio do WhatsApp."
             );
         }
 
@@ -201,10 +201,10 @@ public class BloqueioDataService {
             String mensagem = """
                 Olá, %s.
 
-                A barbearia precisou cancelar seu agendamento:
+                O estabelecimento precisou cancelar seu agendamento:
 
                 Serviço: %s
-                Barbeiro: %s
+                Profissional: %s
                 Data: %s
                 Horário: %s
 
@@ -212,14 +212,14 @@ public class BloqueioDataService {
                 Envie oi para escolher uma nova data.
                 """.formatted(
                     agendamento.getCliente().getNomeCompleto(),
-                    agendamento.getServico().getNome(),
+                    agendamento.descricaoServicos(),
                     barbeiro.getNome(),
                     agendamento.getInicio().format(formatoData),
                     agendamento.getInicio().format(formatoHora)
             );
 
             if (mensagemOpcional != null) {
-                mensagem += "\nMensagem da barbearia: " + mensagemOpcional;
+                mensagem += "\nMensagem do estabelecimento: " + mensagemOpcional;
             }
             notificacaoRepository.save(new NotificacaoPendente(agendamento, mensagem, mensagemOpcional));
         }
@@ -242,13 +242,13 @@ public class BloqueioDataService {
     ) {
         if (barbeiroId == null || data == null) {
             throw new OperacaoAdministrativaException(
-                    "Informe o barbeiro e a data."
+                    "Informe o profissional e a data."
             );
         }
 
         barbeiroRepository.buscarParaAgendar(barbeiroId)
                 .orElseThrow(() -> new OperacaoAdministrativaException(
-                        "Barbeiro não encontrado."
+                        "Profissional não encontrado."
                 ));
 
         if (!autorizacaoService.podeAdministrar(

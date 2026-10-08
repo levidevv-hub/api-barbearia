@@ -77,7 +77,7 @@ function button(root,text){return [...root.querySelectorAll('button')].find(b=>b
   const posts=requests.filter(r=>r.method==='POST').length;submit($('config-form'));await until(()=>!$('config-error').hidden);
   assert.equal(requests.filter(r=>r.method==='POST').length,posts,'Invalid break must not be saved');
   fill(monday.querySelector('[data-field="break-end"]'),'13:30');submit($('config-form'));await until(()=>configs.get(1).semana[0].periodos.length===2);await until(()=>!$('config-fields').disabled);
-  fill($('profile-form').elements.nome,'Barbearia Central');submit($('profile-form'));await until(()=>$('profile-status').textContent==='Dados salvos.');await until(()=>$('rows').textContent.includes('Barbearia Central'));
+  fill($('profile-form').elements.segmento,'Estética');fill($('profile-form').elements.nome,'Barbearia Central');submit($('profile-form'));await until(()=>$('profile-status').textContent==='Dados salvos.');await until(()=>$('rows').textContent.includes('Barbearia Central'));
   click($('service-new'));const f=$('service-form');fill(f.elements.nome,'Corte degradê');fill(f.elements.preco,'35.50');fill(f.elements.duracaoMinutos,'45');submit(f);
   await until(()=>$('services-list').children.length===1);assert.equal(services.get(1)[0].duracaoMinutos,45);assert.equal(services.get(2).length,0);
   click(button($('services-list'),'Editar'));fill(f.elements.preco,'42.90');fill(f.elements.duracaoMinutos,'60');submit(f);await until(()=>services.get(1)[0].duracaoMinutos===60);await until(()=>!$('service-fields').disabled);
@@ -104,6 +104,7 @@ function button(root,text){return [...root.querySelectorAll('button')].find(b=>b
 
   click($('config-close'));assert.equal($('config-box').hidden,true);
   click(button($('rows'),'Configurar'));await until(()=>$('profile-form').elements.nome.value==='Barbearia Central'&&$('config-loading').hidden);
+  assert.equal($('profile-form').elements.segmento.value,'Estética');
   assert.equal($('config-days').children[0].querySelector('select').value,'break');
   click($('config-close'));
   configs.get(1).semana[0].periodos=[{inicio:'08:00',fim:'10:00'},{inicio:'10:30',fim:'12:00'},{inicio:'14:00',fim:'18:00'}];

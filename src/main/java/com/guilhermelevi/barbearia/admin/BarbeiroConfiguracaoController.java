@@ -45,7 +45,7 @@ public class BarbeiroConfiguracaoController {
 
     private Barbeiro buscar(Long id, boolean travar) {
         return (travar ? barbeiros.buscarParaAgendar(id) : barbeiros.findById(id))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Barbeiro não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profissional não encontrado."));
     }
 
     @GetMapping("/configuracao")
@@ -172,7 +172,7 @@ public class BarbeiroConfiguracaoController {
         var encontrados = em.createQuery("select b from BloqueioData b where b.barbeiro.id = :id and b.data = :data", BloqueioData.class)
                 .setParameter("id", id).setParameter("data", form.dataOriginal()).getResultList();
         if (encontrados.isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bloqueio não encontrado nesta barbearia.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bloqueio não encontrado neste estabelecimento.");
         if (!form.dataOriginal().equals(form.data())) {
             if (bloqueios.existsByBarbeiroIdAndData(id, form.data()))
                 throw new IllegalArgumentException("A nova data já está bloqueada.");

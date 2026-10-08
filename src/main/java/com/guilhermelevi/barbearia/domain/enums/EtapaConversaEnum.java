@@ -4,6 +4,7 @@ public enum EtapaConversaEnum {
 
     MENU,
     ESCOLHENDO_SERVICO,
+    REVISANDO_SERVICOS,
     ESCOLHENDO_DATA,
     ESCOLHENDO_HORARIO,
     CONFIRMANDO,

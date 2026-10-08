@@ -19,22 +19,26 @@ public class BarbeiroRemocaoService {
     @Transactional
     public void remover(Long id, String nomeConfirmacao) {
         Barbeiro b = barbeiros.buscarParaAgendar(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Barbeiro não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profissional não encontrado."));
         if (nomeConfirmacao == null || !nomeConfirmacao.equals(b.getNome()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Digite o nome exato do barbeiro para confirmar.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Digite o nome exato do profissional para confirmar.");
 
         // Histórico de qualquer status é preservado, inclusive cancelamentos.
         long reservas = em.createQuery("select count(a) from Agendamento a where a.barbeiro.id = :id", Long.class)
                 .setParameter("id", id).getSingleResult();
         if (reservas > 0)
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Este barbeiro possui histórico de agendamentos e não pode ser excluído. Para interromper novos agendamentos, feche todos os dias em Configurar.");
+                    "Este profissional possui histórico de agendamentos e não pode ser excluído. Para interromper novos agendamentos, feche todos os dias em Configurar.");
 
         // Remoção por entidade para limpar também a coleção de IDs da prévia.
         for (PreviaBloqueio previa : em.createQuery("select p from PreviaBloqueio p where p.barbeiro.id = :id", PreviaBloqueio.class)
                 .setParameter("id", id).getResultList()) em.remove(previa);
         em.flush();
-        excluir("delete from SessaoConversa s where s.barbeiro.id = :id", id);
+        for (var sessao : em.createQuery("select s from SessaoConversa s where s.barbeiro.id = :id",
+                com.guilhermelevi.barbearia.domain.SessaoConversa.class).setParameter("id", id).getResultList()) {
+            em.remove(sessao);
+        }
+        em.flush();
         excluir("delete from ConexaoWhatsAppPendente c where c.barbeiro.id = :id", id);
         excluir("delete from BloqueioData b where b.barbeiro.id = :id", id);
         excluir("delete from PeriodoExpediente p where p.expedienteSemanal.id in (select e.id from ExpedienteSemanal e where e.barbeiro.id = :id)", id);

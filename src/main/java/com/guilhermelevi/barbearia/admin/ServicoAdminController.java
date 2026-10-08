@@ -40,11 +40,11 @@ public class ServicoAdminController {
     }
     private Barbeiro buscarBarbeiro(Long id, boolean travar) {
         return (travar ? barbeiros.buscarParaAgendar(id) : barbeiros.findById(id))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Barbeiro não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profissional não encontrado."));
     }
     private Servico buscarServico(Long barbeiroId, Long id) {
         return servicos.findByIdAndBarbeiroId(id, barbeiroId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Serviço não encontrado nesta barbearia."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Serviço não encontrado neste estabelecimento."));
     }
     private void preencher(Servico s, Form form) {
         s.setNome(form.nome().strip());
@@ -95,7 +95,11 @@ public class ServicoAdminController {
                 .setParameter("id", servicoId).getSingleResult();
         long conversas = em.createQuery("select count(s) from SessaoConversa s where s.servicoSelecionado.id = :id or s.servicoEmEdicao.id = :id", Long.class)
                 .setParameter("id", servicoId).getSingleResult();
-        if (reservas > 0 || conversas > 0)
+        long itens = em.createQuery("select count(a) from Agendamento a join a.itens i where i.servicoId = :id", Long.class)
+                .setParameter("id", servicoId).getSingleResult();
+        long selecoes = em.createQuery("select count(s) from SessaoConversa s join s.itensSelecionados i where i.servicoId = :id", Long.class)
+                .setParameter("id", servicoId).getSingleResult();
+        if (reservas > 0 || conversas > 0 || itens > 0 || selecoes > 0)
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Este serviço está vinculado a agendamentos ou conversas. Use Desativar para retirá-lo de novos agendamentos sem apagar o histórico.");
         servicos.delete(s);

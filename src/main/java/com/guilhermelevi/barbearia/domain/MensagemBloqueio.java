@@ -16,8 +16,8 @@ public final class MensagemBloqueio {
 
     public static String indisponibilidade(String motivo) {
         String mensagem = normalizar(motivo);
-        return "A barbearia não atenderá nessa data."
-                + (mensagem == null ? "" : "\n\nMensagem da barbearia: " + mensagem)
+        return "O estabelecimento não atenderá nessa data."
+                + (mensagem == null ? "" : "\n\nMensagem do estabelecimento: " + mensagem)
                 + "\n\nEscolha outro dia.";
     }
 }

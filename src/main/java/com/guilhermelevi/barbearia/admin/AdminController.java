@@ -31,11 +31,11 @@ public class AdminController {
     // DTO explicito: nunca serialize a entidade que contem credenciais da Meta.
     public record BarbeiroResumo(Long id, String nome, String numeroWhatsAppAdministrador,
             String numeroWhatsAppNotificacao, LocalTime inicioExpediente,
-            LocalTime fimExpediente, String endereco, boolean vinculoRegistrado) {
+            LocalTime fimExpediente, String endereco, boolean vinculoRegistrado, String segmento) {
         static BarbeiroResumo from(Barbeiro b) {
             return new BarbeiroResumo(b.getId(), b.getNome(), b.getNumeroWhatsAppAdministrador(),
                     b.getNumeroWhatsAppNotificacao(), b.getInicioExpediente(), b.getFimExpediente(),
-                    b.getEndereco(), b.getWhatsappPhoneNumberId() != null && !b.getWhatsappPhoneNumberId().isBlank());
+                    b.getEndereco(), b.getWhatsappPhoneNumberId() != null && !b.getWhatsappPhoneNumberId().isBlank(), b.segmentoExibicao());
         }
     }
     @GetMapping("/barbeiros")
@@ -48,6 +48,7 @@ public class AdminController {
             throw new IllegalArgumentException("O fim deve ser depois do início.");
         Barbeiro b = new Barbeiro();
         b.setNome(form.getNome().strip());
+        b.setSegmento(form.getSegmento() == null ? null : form.getSegmento().strip());
         b.setNumeroWhatsAppAdministrador(form.getNumeroWhatsAppAdministrador());
         b.setNumeroWhatsAppNotificacao(form.getNumeroWhatsAppNotificacao());
         b.setInicioExpediente(form.getInicioExpediente());

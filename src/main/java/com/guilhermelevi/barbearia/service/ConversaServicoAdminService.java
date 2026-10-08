@@ -391,7 +391,7 @@ public class ConversaServicoAdminService {
             whatsapp.enviarTextoAposCommit(
                     phoneNumberId,
                     telefone,
-                    "Esse serviço não está disponível nesta barbearia. Envie Minha agenda para recomeçar."
+                    "Esse serviço não está disponível neste estabelecimento. Envie Minha agenda para recomeçar."
             );
             return;
         }

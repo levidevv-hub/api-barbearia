@@ -18,20 +18,27 @@ public class BarbeiroDadosController {
     private final IBarbeiroRepository barbeiros;
     public record Dados(@NotBlank @Size(max=120) String nome,
                         @NotBlank @Pattern(regexp="[1-9][0-9]{7,14}") String numeroWhatsAppAdministrador,
-                        @NotBlank @Pattern(regexp="[1-9][0-9]{7,14}") String numeroWhatsAppNotificacao) {}
+                        @NotBlank @Pattern(regexp="[1-9][0-9]{7,14}") String numeroWhatsAppNotificacao,
+                        @Size(max=80) String segmento) {
+        public Dados(String nome, String administrador, String notificacao) {
+            this(nome, administrador, notificacao, null);
+        }
+    }
 
     @GetMapping
     @Transactional(readOnly=true)
     public AdminController.BarbeiroResumo consultar(@PathVariable Long id) {
         return AdminController.BarbeiroResumo.from(barbeiros.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Barbeiro não encontrado.")));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profissional não encontrado.")));
     }
     @PostMapping
     @Transactional
     public AdminController.BarbeiroResumo salvar(@PathVariable Long id, @Valid @RequestBody Dados dados) {
         var b = barbeiros.buscarParaAgendar(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Barbeiro não encontrado."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profissional não encontrado."));
         b.setNome(dados.nome().strip());
+        // Clientes antigos do painel podem omitir o campo.
+        if (dados.segmento() != null) b.setSegmento(dados.segmento().strip());
         b.setNumeroWhatsAppAdministrador(dados.numeroWhatsAppAdministrador());
         b.setNumeroWhatsAppNotificacao(dados.numeroWhatsAppNotificacao());
         return AdminController.BarbeiroResumo.from(barbeiros.saveAndFlush(b));
