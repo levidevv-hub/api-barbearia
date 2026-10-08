@@ -51,6 +51,11 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
+    - name: Test admin panel DOM
+      run: |
+        npm install --prefix /tmp/zalura-ui-test jsdom@26.1.0 --no-audit --no-fund
+        NODE_PATH=/tmp/zalura-ui-test/node_modules node src/test/frontend/painel.cjs
+
     - name: Build with Gradle Wrapper
       run: ./gradlew build
 

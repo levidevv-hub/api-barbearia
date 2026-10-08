@@ -685,6 +685,10 @@ public class WhatsAppClient {
             Ao confirmar, o dia será bloqueado e os avisos
             aos clientes serão preparados para envio.
 
+            Você pode escrever uma mensagem de até 255 caracteres
+            antes de confirmar. Ela também aparecerá a quem tentar
+            agendar nesse dia. Ou use Sem mensagem.
+
             Esta confirmação vale por 10 minutos
             a partir da criação da prévia.
             """.formatted(
@@ -704,6 +708,14 @@ public class WhatsAppClient {
                                         botao(
                                                 "ADMIN_CONFIRMAR_BLOQUEIO_" + previaId,
                                                 "Confirmar bloqueio"
+                                        ),
+                                        botao(
+                                                "ADMIN_BLOQUEIO_SEM_MENSAGEM_" + previaId,
+                                                "Sem mensagem"
+                                        ),
+                                        botao(
+                                                "ADMIN_CANCELAR_BLOQUEIO_" + previaId,
+                                                "Cancelar bloqueio"
                                         )
                                 )
                         )

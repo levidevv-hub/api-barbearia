@@ -4,6 +4,7 @@ import com.guilhermelevi.barbearia.domain.Agendamento;
 import com.guilhermelevi.barbearia.domain.Barbeiro;
 import com.guilhermelevi.barbearia.domain.BloqueioData;
 import com.guilhermelevi.barbearia.domain.NotificacaoPendente;
+import com.guilhermelevi.barbearia.domain.MensagemBloqueio;
 import com.guilhermelevi.barbearia.domain.enums.StatusAgendamentoEnum;
 import com.guilhermelevi.barbearia.domain.exception.OperacaoAdministrativaException;
 import com.guilhermelevi.barbearia.repositories.IAgendamentoRepository;
@@ -112,11 +113,7 @@ public class BloqueioDataService {
             );
         }
 
-        if (motivo == null || motivo.isBlank() || motivo.length() > 255) {
-            throw new OperacaoAdministrativaException(
-                    "Informe um motivo com até 255 caracteres."
-            );
-        }
+        String mensagemOpcional = MensagemBloqueio.normalizar(motivo);
 
         // Usa a mesma trava que protege a criação de agendamentos.
         Barbeiro barbeiro = barbeiroRepository
@@ -187,7 +184,7 @@ public class BloqueioDataService {
         BloqueioData bloqueio = BloqueioData.builder()
                 .barbeiro(barbeiro)
                 .data(data)
-                .motivo(motivo.strip())
+                .motivo(mensagemOpcional)
                 .build();
 
         bloqueioRepository.save(bloqueio);
@@ -221,9 +218,10 @@ public class BloqueioDataService {
                     agendamento.getInicio().format(formatoHora)
             );
 
-            notificacaoRepository.save(
-                    new NotificacaoPendente(agendamento, mensagem)
-            );
+            if (mensagemOpcional != null) {
+                mensagem += "\nMensagem da barbearia: " + mensagemOpcional;
+            }
+            notificacaoRepository.save(new NotificacaoPendente(agendamento, mensagem, mensagemOpcional));
         }
 
         // As entidades consultadas estão gerenciadas pelo JPA.

@@ -208,7 +208,9 @@ public class AgendamentoService {
                 barbeiro.getId(), inicio.toLocalDate()
         )) {
             throw new HorarioIndisponivelException(
-                    "A barbearia não atenderá nessa data. Escolha outro dia."
+                    com.guilhermelevi.barbearia.domain.MensagemBloqueio.indisponibilidade(
+                            bloqueioRepository.findByBarbeiroIdAndData(barbeiro.getId(), inicio.toLocalDate())
+                                    .map(com.guilhermelevi.barbearia.domain.BloqueioData::getMotivo).orElse(null))
             );
         }
 

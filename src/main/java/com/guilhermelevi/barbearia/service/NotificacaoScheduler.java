@@ -24,10 +24,7 @@ public class NotificacaoScheduler {
     )
     public void processarPendentes() {
         List<NotificacaoPendente> pendentes =
-                repository.findByStatusOrderByCriadaEmAscIdAsc(
-                        NotificacaoPendente.Status.PENDENTE,
-                        PageRequest.of(0, 20)
-                );
+                repository.buscarPendentesDeRobosAtivos(NotificacaoPendente.Status.PENDENTE, PageRequest.of(0, 20));
 
         for (NotificacaoPendente notificacao : pendentes) {
             try {

@@ -49,6 +49,24 @@ public class ConversaAdminService {
             return true;
         }
 
+        if (!"minha agenda".equalsIgnoreCase(texto) && !texto.isBlank()
+                && autorizacaoBarbeiroService.podeAdministrar(barbeiro.getId(), telefone)) {
+            try {
+                var previa = previaBloqueioService.definirMensagem(barbeiro.getId(), telefone, texto);
+                if (previa != null) {
+                    whatsapp.enviarTextoAposCommit(barbeiro.getWhatsappPhoneNumberId(), telefone,
+                            "Mensagem que será enviada aos clientes:\n\n" + previa.getMotivo()
+                                    + "\n\nO dia ainda não foi bloqueado. Confirme abaixo.");
+                    whatsapp.enviarConfirmacaoBloqueio(barbeiro.getWhatsappPhoneNumberId(), telefone,
+                            previa.getId(), previa.getData(), previa.getIdsAgendamentos().size());
+                    return true;
+                }
+            } catch (OperacaoAdministrativaException e) {
+                whatsapp.enviarTextoAposCommit(barbeiro.getWhatsappPhoneNumberId(), telefone, e.getMessage());
+                return true;
+            }
+        }
+
         if (!"minha agenda".equalsIgnoreCase(texto)) {
             return false;
         }
@@ -95,8 +113,19 @@ public class ConversaAdminService {
             return true;
         }
 
-        if (id.startsWith("ADMIN_CONFIRMAR_BLOQUEIO_")) {
+        if (id.startsWith("ADMIN_CONFIRMAR_BLOQUEIO_") || id.startsWith("ADMIN_BLOQUEIO_SEM_MENSAGEM_")) {
             confirmarBloqueio(id, barbeiro, telefone);
+            return true;
+        }
+
+        if (id.startsWith("ADMIN_CANCELAR_BLOQUEIO_")) {
+            try {
+                previaBloqueioService.cancelar(UUID.fromString(id.substring("ADMIN_CANCELAR_BLOQUEIO_".length())),
+                        barbeiro.getId(), telefone);
+                whatsapp.enviarTextoAposCommit(phoneNumberId, telefone, "Prévia descartada. Nenhum dia foi bloqueado.");
+            } catch (IllegalArgumentException | OperacaoAdministrativaException e) {
+                whatsapp.enviarTextoAposCommit(phoneNumberId, telefone, "Não foi possível descartar a prévia. " + e.getMessage());
+            }
             return true;
         }
 
@@ -142,7 +171,8 @@ public class ConversaAdminService {
                                     + "Bloquear 10/09/2026\n\n"
                                     + "Use a data desejada no formato dia/mês/ano. "
                                     + "Você verá os agendamentos afetados "
-                                    + "antes de confirmar."
+                                    + "antes de confirmar. Depois escreva uma mensagem opcional "
+                                    + "para os clientes ou confirme sem mensagem."
                     );
 
             case "ADMIN_LIBERAR_DIA" ->
@@ -210,10 +240,11 @@ public class ConversaAdminService {
             String telefone
     ) {
         UUID previaId;
+        boolean semMensagem = id.startsWith("ADMIN_BLOQUEIO_SEM_MENSAGEM_");
 
         try {
             previaId = UUID.fromString(
-                    id.substring("ADMIN_CONFIRMAR_BLOQUEIO_".length())
+                    id.substring((semMensagem ? "ADMIN_BLOQUEIO_SEM_MENSAGEM_" : "ADMIN_CONFIRMAR_BLOQUEIO_").length())
             );
         } catch (IllegalArgumentException e) {
             whatsapp.enviarTextoAposCommit(
@@ -228,7 +259,8 @@ public class ConversaAdminService {
             int cancelados = previaBloqueioService.confirmar(
                     previaId,
                     barbeiro.getId(),
-                    telefone
+                    telefone,
+                    semMensagem
             );
 
             whatsapp.enviarTextoAposCommit(

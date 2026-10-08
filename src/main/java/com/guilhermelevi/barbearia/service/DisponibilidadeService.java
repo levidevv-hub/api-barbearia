@@ -22,6 +22,12 @@ public class DisponibilidadeService {
     private final IBloqueioDataRepository bloqueioRepository;
     private final IPeriodoExpedienteRepository periodoRepository;
 
+    public String mensagemBloqueio(Barbeiro barbeiro, LocalDate data) {
+        return bloqueioRepository.findByBarbeiroIdAndData(barbeiro.getId(), data)
+                .map(bloqueio -> MensagemBloqueio.indisponibilidade(bloqueio.getMotivo()))
+                .orElse(null);
+    }
+
     public List<LocalTime> buscarHorarios(
             Barbeiro barbeiro,
             Servico servico,

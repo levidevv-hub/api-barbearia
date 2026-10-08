@@ -9,7 +9,7 @@ const barbers=[1,2].map(id=>({id,nome:'Barbeiro '+id,numeroWhatsAppAdministrador
 const configs=new Map(barbers.map(b=>[b.id,{semana:days.map(diaSemana=>({diaSemana,aberto:diaSemana!=='SUNDAY',periodos:diaSemana==='SUNDAY'?[]:[{inicio:'08:00',fim:'12:00'},{inicio:'13:30',fim:'18:00'}]})),endereco:'Rua Teste',latitude:-4.94,longitude:-37.97}]));
 const services=new Map([[1,[]],[2,[]]]),blocks=new Map([[1,[]],[2,[]]]);
 const requests=[],errors=[];
-let idCounter=1,acceptConfirm=true,failNextService=false;
+let idCounter=1,acceptConfirm=true,failNextService=false,affectedReservations=[];
 const dom=new JSDOM(html,{url:'https://zaluratech.com.br/painel/',runScripts:'dangerously',pretendToBeVisual:true,beforeParse(w){
   w.HTMLElement.prototype.scrollIntoView=function(){};
   w.confirm=()=>acceptConfirm;w.prompt=()=>null;
@@ -30,6 +30,7 @@ const dom=new JSDOM(html,{url:'https://zaluratech.com.br/painel/',runScripts:'da
     if(resource==='configuracao'){
       if(method==='POST')configs.set(id,body);return ok(configs.get(id));
     }
+    if(resource==='bloqueios/previa')return ok(affectedReservations);
     if(resource==='bloqueios'){
       if(method==='POST')blocks.get(id).push(body);return ok(method==='GET'?blocks.get(id):{mensagem:'OK'});
     }
@@ -89,6 +90,18 @@ function button(root,text){return [...root.querySelectorAll('button')].find(b=>b
   fill($('block-form').elements.data,'2027-01-10');fill($('block-form').elements.motivo,'Folga');submit($('block-form'));await until(()=>$('blocks-list').textContent.includes('Folga'));await until(()=>!$('block-fields').disabled);
   click(button($('blocks-list'),'Editar'));fill($('block-form').elements.data,'2027-01-11');fill($('block-form').elements.motivo,'Viagem');submit($('block-form'));await until(()=>$('blocks-list').textContent.includes('11/01/2027 · Viagem'));await until(()=>!$('block-fields').disabled);
   click(button($('blocks-list'),'Liberar'));await until(()=>blocks.get(1).length===0);await until(()=>!$('block-fields').disabled);
+  affectedReservations=[{agendamentoId:123,cliente:'Cliente teste',inicio:'2027-01-12T10:00:00',servico:'Corte'}];
+  fill($('block-form').elements.data,'2027-01-12');fill($('block-form').elements.motivo,'');
+  acceptConfirm=false;const beforeBlock=requests.filter(r=>r.route.endsWith('/bloqueios')&&r.method==='POST').length;
+  submit($('block-form'));await until(()=>!$('block-fields').disabled);acceptConfirm=true;
+  assert.equal(requests.filter(r=>r.route.endsWith('/bloqueios')&&r.method==='POST').length,beforeBlock,'Declining preview must not cancel reservations');
+  assert.equal($('block-form').elements.data.value,'2027-01-12','Declining must preserve draft');
+  submit($('block-form'));await until(()=>blocks.get(1).length===1);await until(()=>!$('block-fields').disabled);
+  const blockRequest=requests.filter(r=>r.route.endsWith('/bloqueios')&&r.method==='POST').at(-1);
+  assert.deepEqual(blockRequest.body.idsConfirmados,[123]);assert.equal(blockRequest.body.motivo,'');
+  assert.ok($('blocks-list').textContent.includes('Sem mensagem'));
+  affectedReservations=[];
+
   click($('config-close'));assert.equal($('config-box').hidden,true);
   click(button($('rows'),'Configurar'));await until(()=>$('profile-form').elements.nome.value==='Barbearia Central'&&$('config-loading').hidden);
   assert.equal($('config-days').children[0].querySelector('select').value,'break');
@@ -100,6 +113,6 @@ function button(root,text){return [...root.querySelectorAll('button')].find(b=>b
   assert.equal(configs.get(1).semana[0].periodos.length,3,'Existing multiple breaks must be preserved');
   assert.deepEqual(configs.get(1).semana[6].periodos,[],'Closed days have no availability');
   assert.deepEqual(errors,[]);
-  console.log('PASS: load, interval modes, invalid break, profile edit, service CRUD/status, failed save draft, unsaved navigation, block CRUD, reload and CSRF.');
+  console.log('PASS: load, interval modes, invalid break, profile edit, service CRUD/status, failed save draft, unsaved navigation, block CRUD, optional message, reservation preview/confirmation, cancelled preview, reload and CSRF.');
   dom.window.close();
 })().catch(e=>{console.error(e);dom.window.close();process.exitCode=1});
