@@ -201,10 +201,10 @@ public class BloqueioDataService {
             String mensagem = """
                 Olá, %s.
 
-                A barbearia precisou cancelar seu agendamento:
+                O estabelecimento precisou cancelar seu agendamento:
 
                 Serviço: %s
-                Barbeiro: %s
+                Profissional: %s
                 Data: %s
                 Horário: %s
 

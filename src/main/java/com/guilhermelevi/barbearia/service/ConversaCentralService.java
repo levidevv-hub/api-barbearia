@@ -22,7 +22,7 @@ public class ConversaCentralService {
         if (!remetente.matches("[1-9][0-9]{7,14}")) return;
         var permitidos = barbeiros.findByNumeroWhatsAppAdministradorOrderByIdAsc(remetente);
         if (permitidos.isEmpty()) {
-            resposta(linhaCentral, remetente, "Seu número não está cadastrado como administrador de umo estabelecimento.");
+            resposta(linhaCentral, remetente, "Seu número não está cadastrado como administrador de um estabelecimento.");
             return;
         }
         String tipo = mensagem.path("type").asText();

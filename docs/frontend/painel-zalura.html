@@ -250,7 +250,7 @@ async function list(){
   for(const b of data){
     const row=document.createElement('tr');
     const c1=cell(row),wrap=document.createElement('div'),avatar=document.createElement('span'),text=document.createElement('div'),name=document.createElement('div'),id=document.createElement('div');
-    wrap.className='client-main';avatar.className='client-avatar';avatar.textContent=initials(b.nome);name.className='client-name';name.textContent=b.nome||'Sem nome';id.className='client-id';id.textContent='ID #'+b.id;text.append(name,id);wrap.append(avatar,text);c1.append(wrap);
+    wrap.className='client-main';avatar.className='client-avatar';avatar.textContent=initials(b.nome);name.className='client-name';name.textContent=b.nome||'Sem nome';id.className='client-id';id.textContent=(b.segmento||'Serviços')+' · ID #'+b.id;text.append(name,id);wrap.append(avatar,text);c1.append(wrap);
     cell(row).textContent=formatPhone(b.numeroWhatsAppAdministrador);
     cell(row).textContent='Ver em Configurar';
     const status=cell(row),badge=document.createElement('span');badge.className=b.vinculoRegistrado?'badge badge-ok':'badge badge-pending';badge.textContent=b.vinculoRegistrado?'Vínculo registrado':'Pendente';status.append(badge);

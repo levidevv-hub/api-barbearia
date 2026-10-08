@@ -76,7 +76,7 @@ class CentralWhatsappIntegracaoTest {
         texto("5511999999999", "Minha agenda");
         assertTrue(sessoes.findById("990000:5511999999999").isEmpty());
         verify(whatsapp).enviarTextoAposCommit("990000", "5511999999999",
-                "Seu número não está cadastrado como administrador de umo estabelecimento.");
+                "Seu número não está cadastrado como administrador de um estabelecimento.");
         assertEquals(0L, em.createQuery("select count(c) from Cliente c", Long.class).getSingleResult());
     }
     @Test void administradorDeVariasBarbeariasSelecionaEEvitaBotoesDeContextoAnterior() {

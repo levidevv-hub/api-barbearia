@@ -37,7 +37,7 @@ class MultiplosServicosPersistenciaTest {
         cliente = Cliente.builder().nomeCompleto("Cliente").numeroTelefone("5588999000000").build();em.persist(cliente);
         consulta = servico(profissional,"Avaliação",30,"50.00");
         retorno = servico(profissional,"Tratamento",60,"100.00");
-        var expediente = ExpedienteSemanal.builder().barbeiro(profissional).diaSemana(dia.getDayOfWeek()).aberto(true).build();
+        var expediente = ExpedienteSemanal.builder().barbeiro(profissional).diaSemana(dia.getDayOfWeek()).aberto(true).inicio(LocalTime.of(8,0)).fim(LocalTime.of(12,0)).build();
         em.persist(expediente);
         var periodo = PeriodoExpediente.builder().expedienteSemanal(expediente).inicio(LocalTime.of(8,0)).fim(LocalTime.of(12,0)).build();
         em.persist(periodo);em.flush();

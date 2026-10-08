@@ -94,7 +94,7 @@ public class NotificacaoService {
 
                 Cliente: %s
                 Serviço: %s
-                Barbeiro: %s
+                Profissional: %s
                 Data: %s
                 Horário: %s
                 """.formatted(

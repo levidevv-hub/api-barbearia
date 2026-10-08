@@ -773,7 +773,7 @@ public class WhatsAppClient {
             String item = """
                 Reserva #%d
                 Cliente: %.100s
-                Serviço: %.100s
+                Serviço: %s
                 Horário: %s às %s
 
                 """.formatted(
