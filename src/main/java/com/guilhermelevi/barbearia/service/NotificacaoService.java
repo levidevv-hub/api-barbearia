@@ -25,6 +25,7 @@ public class NotificacaoService {
 
     private final WhatsAppClient whatsappClient;
     private final CentralWhatsappService centralWhatsappService;
+    private final com.guilhermelevi.barbearia.repositories.INotificacaoPendenteRepository pendentes;
 
     @Value("${whatsapp.notificacao.usar-template:false}")
     private boolean usarTemplate;
@@ -38,11 +39,10 @@ public class NotificacaoService {
     }
 
     public void agendamentoCancelado(Agendamento agendamento) {
-        prepararNotificacao(
-                agendamento,
-                "AGENDAMENTO CANCELADO",
-                "agendamento_cancelado_barbeiro"
-        );
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            throw new IllegalStateException("A notificação deve ser preparada dentro da transação.");
+        }
+        pendentes.save(com.guilhermelevi.barbearia.domain.NotificacaoPendente.cancelamentoBarbeiro(agendamento));
     }
 
     private void prepararNotificacao(

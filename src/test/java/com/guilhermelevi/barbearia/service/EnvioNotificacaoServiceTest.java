@@ -15,10 +15,38 @@ import static org.mockito.Mockito.*;
 class EnvioNotificacaoServiceTest {
 
     @Test
+    void cancelamentoBarbeiroUsaTemplateCentralMesmoPausadoEPersisteFalha() {
+        var repository = mock(INotificacaoPendenteRepository.class);
+        var whatsapp = mock(WhatsAppClient.class);
+        var central = mock(CentralWhatsappService.class);
+        var service = new EnvioNotificacaoService(repository, whatsapp, central);
+        var reserva = notificacao().getAgendamento();
+        reserva.getBarbeiro().setNumeroWhatsAppNotificacao("5588991111111");
+        reserva.getBarbeiro().setRoboAtivo(false);
+        var aviso = NotificacaoPendente.cancelamentoBarbeiro(reserva);
+        when(repository.buscarParaEnviar(1L)).thenReturn(Optional.of(aviso));
+        when(central.linhaNotificacao(anyString())).thenReturn("central");
+        when(whatsapp.enviarTemplate(anyString(),anyString(),anyString(),anyList()))
+                .thenThrow(new IllegalStateException("132001 template não encontrado"));
+        service.enviarPendente(1L);
+        assertEquals(NotificacaoPendente.Status.FALHA, aviso.getStatus());
+        assertTrue(aviso.getUltimoErro().contains("132001"));
+        assertEquals(1,aviso.getTentativas());
+        service.enviarPendente(1L);
+        assertEquals(1,aviso.getTentativas()); // Sem repetição silenciosa após falha.
+        aviso.solicitarReenvio();
+        doReturn("wamid.cancelado").when(whatsapp).enviarTemplate(anyString(),anyString(),anyString(),anyList());
+        service.enviarPendente(1L);
+        assertEquals(NotificacaoPendente.Status.ACEITA_PELA_API,aviso.getStatus());
+        verify(whatsapp,times(2)).enviarTemplate(eq("central"),eq("5588991111111"),eq("agendamento_cancelado_barbeiro"),argThat(d -> d.size()==5));
+        verify(whatsapp,never()).enviarTexto(anyString(),anyString(),anyString());
+    }
+
+    @Test
     void pausaMantemAvisoPendenteSemTentativasEReativacaoEnvia() {
         var repository = mock(INotificacaoPendenteRepository.class);
         var whatsapp = mock(WhatsAppClient.class);
-        var service = new EnvioNotificacaoService(repository, whatsapp);
+        var service = new EnvioNotificacaoService(repository, whatsapp, mock(CentralWhatsappService.class));
         var notificacao = notificacao();
         var barbeiro = notificacao.getAgendamento().getBarbeiro();
         barbeiro.setRoboAtivo(false);
@@ -44,7 +72,7 @@ class EnvioNotificacaoServiceTest {
                 mock(INotificacaoPendenteRepository.class);
         WhatsAppClient whatsapp = mock(WhatsAppClient.class);
         EnvioNotificacaoService service =
-                new EnvioNotificacaoService(repository, whatsapp);
+                new EnvioNotificacaoService(repository, whatsapp, mock(CentralWhatsappService.class));
         definirUsarTemplate(service, false);
 
         NotificacaoPendente notificacao = notificacao();
@@ -72,7 +100,7 @@ class EnvioNotificacaoServiceTest {
                 mock(INotificacaoPendenteRepository.class);
         WhatsAppClient whatsapp = mock(WhatsAppClient.class);
         EnvioNotificacaoService service =
-                new EnvioNotificacaoService(repository, whatsapp);
+                new EnvioNotificacaoService(repository, whatsapp, mock(CentralWhatsappService.class));
         definirUsarTemplate(service, false);
 
         NotificacaoPendente notificacao = notificacao();
@@ -93,7 +121,7 @@ class EnvioNotificacaoServiceTest {
                 mock(INotificacaoPendenteRepository.class);
         WhatsAppClient whatsapp = mock(WhatsAppClient.class);
         EnvioNotificacaoService service =
-                new EnvioNotificacaoService(repository, whatsapp);
+                new EnvioNotificacaoService(repository, whatsapp, mock(CentralWhatsappService.class));
         definirUsarTemplate(service, false);
 
         NotificacaoPendente notificacao = notificacao();

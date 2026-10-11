@@ -33,6 +33,7 @@ public class BloqueioDataService {
     private final IBloqueioDataRepository bloqueioRepository;
     private final INotificacaoPendenteRepository notificacaoRepository;
     private final AutorizacaoBarbeiroService autorizacaoService;
+    private final NotificacaoService notificacaoService;
 
     @Transactional(
             readOnly = true,
@@ -197,6 +198,7 @@ public class BloqueioDataService {
 
         for (Agendamento agendamento : afetados) {
             agendamento.setStatus(StatusAgendamentoEnum.CANCELADO);
+            notificacaoService.agendamentoCancelado(agendamento);
 
             String mensagem = """
                 Olá, %s.

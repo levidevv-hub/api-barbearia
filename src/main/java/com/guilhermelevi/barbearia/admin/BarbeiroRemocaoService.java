@@ -30,6 +30,11 @@ public class BarbeiroRemocaoService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Este profissional possui histórico de agendamentos e não pode ser excluído. Para interromper novos agendamentos, feche todos os dias em Configurar.");
 
+        long atendimentos = em.createQuery("select count(a) from AtendimentoHumano a where a.barbeiro.id = :id", Long.class)
+                .setParameter("id", id).getSingleResult();
+        if (atendimentos > 0) throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Este profissional possui histórico de atendimento humano e não pode ser excluído.");
+
         // Remoção por entidade para limpar também a coleção de IDs da prévia.
         for (PreviaBloqueio previa : em.createQuery("select p from PreviaBloqueio p where p.barbeiro.id = :id", PreviaBloqueio.class)
                 .setParameter("id", id).getResultList()) em.remove(previa);

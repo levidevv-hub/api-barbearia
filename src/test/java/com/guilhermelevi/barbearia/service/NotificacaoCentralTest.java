@@ -18,7 +18,8 @@ class NotificacaoCentralTest {
     private final IBarbeiroRepository repo = mock(IBarbeiroRepository.class);
     private final CentralWhatsappService central = new CentralWhatsappService(repo);
     private final WhatsAppClient whatsapp = mock(WhatsAppClient.class);
-    private final NotificacaoService notificacao = new NotificacaoService(whatsapp, central);
+    private final com.guilhermelevi.barbearia.repositories.INotificacaoPendenteRepository pendentes = mock(com.guilhermelevi.barbearia.repositories.INotificacaoPendenteRepository.class);
+    private final NotificacaoService notificacao = new NotificacaoService(whatsapp, central, pendentes);
     private void preparar() {
         ReflectionTestUtils.setField(central, "phoneNumberId", "990000");
         ReflectionTestUtils.setField(central, "numero", "5511977777777");
@@ -44,8 +45,8 @@ class NotificacaoCentralTest {
     @Test void cancelamentoTambemSaiPelaCentralMesmoComRoboDoBarbeiroPausado() {
         preparar(); var a = agendamento(1); a.getBarbeiro().setRoboAtivo(false);
         notificacao.agendamentoCancelado(a);
-        TransactionSynchronizationManager.getSynchronizations().get(0).afterCommit();
-        verify(whatsapp).enviarTemplate(eq("990000"), eq("5511980000001"), eq("agendamento_cancelado_barbeiro"), anyList());
+        verify(pendentes).save(argThat(n -> n.getTipo() == NotificacaoPendente.Tipo.CANCELAMENTO_BARBEIRO));
+        verifyNoInteractions(whatsapp);
     }
     @Test void erroDeConfiguracaoDeCentralNaoImpedeConfirmarReservaNemUsaLinhaErrada() {
         preparar(); when(repo.findByWhatsappPhoneNumberId("990000")).thenReturn(Optional.empty());

@@ -203,6 +203,17 @@
       </div>
       <div class="footer-note">“Vínculo registrado” indica que a conexão foi salva no sistema. Para validar a operação completa, faça um agendamento de teste no WhatsApp.</div>
     </section>
+    <section id="att-box" class="card" hidden>
+      <h2 id="att-title">Atendimento humano</h2>
+      <p>O robô fica pausado apenas para o cliente que pediu atendimento. Atualização a cada 10 segundos.</p>
+      <div class="row-actions"><button id="att-refresh" class="btn btn-secondary" type="button">Atualizar</button><button id="att-close" class="btn btn-secondary" type="button">Fechar</button></div>
+      <p id="att-status" role="status"></p><div id="att-list"></div>
+      <section id="att-chat" hidden>
+        <h3 id="att-chat-title"></h3><p>Últimas 100 mensagens, desde a solicitação de atendimento.</p><div id="att-messages" style="max-height:380px;overflow:auto;white-space:pre-wrap"></div>
+        <form id="att-form"><label for="att-text">Sua resposta</label><textarea id="att-text" maxlength="4096" required rows="3" style="width:100%"></textarea><button id="att-send" class="btn btn-primary" type="submit">Enviar resposta</button></form>
+      </section>
+      <h3>Notificações de cancelamento</h3><p>“Aceita pela API” ainda não confirma entrega. Antes de reenviar uma falha, confira se a mensagem chegou ao destinatário.</p><div id="att-notifications"></div>
+    </section>
   </main>
 
 <script>
@@ -213,9 +224,42 @@ let csrf=null;
 let configId=null, configBarber=null, configDirty=false, configGeneration=0, configSaving=false;
 let profileDirty=false,serviceDirty=false,blockDirty=false,blockOriginal=null,serviceId=null, mutationPending=false;
 
+let attBarber=null,attId=null,attTimer=null,attGeneration=0,attLoading=false,attSending=false;
+function closeAtendimento(){attGeneration++;attBarber=null;attId=null;clearInterval(attTimer);attTimer=null;$('att-box').hidden=true;$('att-chat').hidden=true;$('att-list').replaceChildren();$('att-messages').replaceChildren();$('att-notifications').replaceChildren();$('att-text').value=''}
+function attPath(){return '/api/admin/barbeiros/'+attBarber.id+'/atendimentos'}
+function attButton(parent,label,task){const b=document.createElement('button');b.type='button';b.className='btn btn-secondary';b.textContent=label;b.onclick=()=>busy(b,task);parent.append(b)}
+async function openAtendimento(b){if(attSending)return;closeAtendimento();attBarber=b;$('att-box').hidden=false;$('att-title').textContent='Atendimentos · '+b.nome;await refreshAtendimento();attTimer=setInterval(()=>{if(attBarber&&!document.hidden)refreshAtendimento()},10000);$('att-box').scrollIntoView({behavior:'smooth'})}
+async function refreshAtendimento(){
+  if(!attBarber||attLoading)return;attLoading=true;const generation=attGeneration,path=attPath();
+  try{
+    const [items,notifications]=await Promise.all([request(path),request(path+'/notificacoes')]);if(generation!==attGeneration)return;
+    $('att-list').replaceChildren();$('att-status').textContent=items.length?'Até 100 conversas recentes.':'Nenhuma solicitação de atendimento.';
+    for(const a of items){
+      const row=document.createElement('div');row.className='config-section';const title=document.createElement('p');title.textContent=(a.nome||'Cliente')+' · '+formatPhone(a.numero)+' · '+({AGUARDANDO:'Aguardando atendente',EM_ATENDIMENTO:'Em atendimento',AUTOMATICO:'Automático'}[a.estado]||a.estado)+(a.responsavel?' · '+a.responsavel:'');row.append(title);
+      if(a.erroAviso){const error=document.createElement('p');error.textContent=a.erroAviso;row.append(error)}
+      attButton(row,'Abrir conversa',async()=>{if(attSending)return;if(attId!==a.id&&$('att-text').value&&!window.confirm('Descartar a resposta não enviada?'))return;attId=a.id;$('att-text').value='';$('att-chat-title').textContent=(a.nome||'Cliente')+' · '+formatPhone(a.numero);$('att-chat').hidden=false;await refreshChat(path,generation)});
+      if(a.estado==='AGUARDANDO'&&a.aviso==='FALHA')attButton(row,'Reenviar aviso de atendimento',async()=>{if(!window.confirm('Confirma que corrigiu o template ou a conexão e deseja reenviar o aviso?'))return;await request(path+'/'+a.id+'/reenviar-aviso',{method:'POST'});await refreshAtendimento()});
+      if(a.estado!=='AUTOMATICO'){
+        if(a.estado==='AGUARDANDO')attButton(row,'Assumir atendimento',async()=>{await request(path+'/'+a.id+'/assumir',{method:'POST'});await refreshAtendimento()});
+        attButton(row,a.estado==='AGUARDANDO'?'Retomar robô':'Finalizar atendimento',async()=>{if(!window.confirm('Encerrar este atendimento e liberar o robô para este cliente?'))return;await request(path+'/'+a.id+'/finalizar',{method:'POST'});await refreshAtendimento()});
+      }
+      $('att-list').append(row);
+    }
+    const selected=items.find(a=>a.id===attId);$('att-send').disabled=attSending||!selected||selected.estado!=='EM_ATENDIMENTO'||!selected.podeResponder;
+    if(selected&&!selected.podeResponder)$('att-status').textContent='A janela de resposta desta conversa encerrou. Aguarde uma nova mensagem do cliente.';
+    $('att-notifications').replaceChildren();
+    for(const n of notifications){const row=document.createElement('div');row.className='config-section';const text=document.createElement('p');text.textContent='#'+n.id+' · '+n.tipo+' · '+n.estado+' · Tentativas: '+n.tentativas+(n.erro?' · '+n.erro:'');row.append(text);
+      if(n.estado==='FALHA')attButton(row,'Reenviar aviso',async()=>{if(!window.confirm('Confirma que corrigiu a causa da falha e deseja tentar enviar novamente?'))return;await request(path+'/notificacoes/'+n.id+'/reenviar',{method:'POST'});await refreshAtendimento()});$('att-notifications').append(row)}
+    if(attId)await refreshChat(path,generation);
+  }catch(e){if(generation===attGeneration)$('att-status').textContent=e.message}finally{attLoading=false}
+}
+async function refreshChat(path,generation){const selected=attId;const messages=await request(path+'/'+selected+'/mensagens');if(generation!==attGeneration||selected!==attId)return;$('att-messages').replaceChildren();for(const m of messages){const p=document.createElement('p');p.textContent=m.autor+' · '+m.criadaEm.replace('T',' ')+'\n'+m.texto;$('att-messages').append(p)}}
+$('att-refresh').onclick=()=>refreshAtendimento();$('att-close').onclick=()=>{if(!attSending)closeAtendimento()};
+$('att-form').onsubmit=async e=>{e.preventDefault();if(attSending||!attBarber||!attId)return;const path=attPath(),id=attId,generation=attGeneration,texto=$('att-text').value.trim();if(!texto)return;attSending=true;$('att-send').disabled=true;try{await request(path+'/'+id+'/responder',jsonPost({texto}));if(generation===attGeneration&&id===attId)$('att-text').value='';}catch(error){notice(error.message,true)}finally{attSending=false;await refreshAtendimento()}};
+
 function notice(message,error=false){$('notice').textContent=message;$('notice').hidden=!message;$('notice').classList.toggle('error',error)}
 function updateStats(data){const linked=data.filter(x=>x.vinculoRegistrado).length;$('stat-total').textContent=data.length;$('stat-linked').textContent=linked;$('stat-pending').textContent=data.length-linked}
-function loggedOut(){blockDirty=false;blockOriginal=null;profileDirty=false;serviceDirty=false;serviceId=null;mutationPending=false;$('service-form').reset();$('services-list').replaceChildren();configGeneration++;configId=null;configBarber=null;configDirty=false;configSaving=false;$('config-form').reset();$('config-days').replaceChildren();$('blocks-list').replaceChildren();$('remove-section').hidden=true;$('config-box').hidden=true;$('login-view').hidden=false;$('panel').hidden=true;$('logout').hidden=true;$('user-wrap').hidden=true;$('user').textContent='';$('rows').replaceChildren();$('link-value').value='';$('link-box').hidden=true;$('new-box').hidden=true;updateStats([])}
+function loggedOut(){closeAtendimento();blockDirty=false;blockOriginal=null;profileDirty=false;serviceDirty=false;serviceId=null;mutationPending=false;$('service-form').reset();$('services-list').replaceChildren();configGeneration++;configId=null;configBarber=null;configDirty=false;configSaving=false;$('config-form').reset();$('config-days').replaceChildren();$('blocks-list').replaceChildren();$('remove-section').hidden=true;$('config-box').hidden=true;$('login-view').hidden=false;$('panel').hidden=true;$('logout').hidden=true;$('user-wrap').hidden=true;$('user').textContent='';$('rows').replaceChildren();$('link-value').value='';$('link-box').hidden=true;$('new-box').hidden=true;updateStats([])}
 
 async function request(path,options={}){
   const headers={...options.headers};
@@ -256,7 +300,7 @@ async function list(){
     const status=cell(row),badge=document.createElement('span');badge.className=b.vinculoRegistrado?'badge badge-ok':'badge badge-pending';badge.textContent=b.vinculoRegistrado?'Vínculo registrado':'Pendente';status.append(badge);
     const action=cell(row),btn=document.createElement('button');btn.className='btn btn-secondary';btn.type='button';btn.textContent='Gerar link';
     btn.addEventListener('click',()=>busy(btn,async()=>{const r=await request('/api/admin/barbeiros/'+b.id+'/link',{method:'POST'});$('link-title').textContent='Conexão de '+b.nome;$('link-value').value=r.link;$('copy-status').textContent='';$('link-box').hidden=false;$('link-box').scrollIntoView({behavior:'smooth',block:'center'})}));
-    const configBtn=document.createElement('button');configBtn.type='button';configBtn.className='btn btn-secondary';configBtn.textContent='Configurar';configBtn.addEventListener('click',()=>openConfig(b));const actions=document.createElement('div');actions.className='row-actions';const removeBtn=document.createElement('button');removeBtn.type='button';removeBtn.className='btn btn-danger';removeBtn.textContent='Excluir';removeBtn.addEventListener('click',()=>removeBarber(b,removeBtn));actions.append(configBtn,btn,removeBtn);action.append(actions);$('rows').append(row)
+    const configBtn=document.createElement('button');configBtn.type='button';configBtn.className='btn btn-secondary';configBtn.textContent='Configurar';configBtn.addEventListener('click',()=>openConfig(b));const actions=document.createElement('div');actions.className='row-actions';const removeBtn=document.createElement('button');removeBtn.type='button';removeBtn.className='btn btn-danger';removeBtn.textContent='Excluir';removeBtn.addEventListener('click',()=>removeBarber(b,removeBtn));const attBtn=document.createElement('button');attBtn.type='button';attBtn.className='btn btn-secondary';attBtn.textContent='Atendimentos';attBtn.addEventListener('click',()=>openAtendimento(b));actions.append(configBtn,btn,attBtn,removeBtn);action.append(actions);$('rows').append(row)
   }
 }
 

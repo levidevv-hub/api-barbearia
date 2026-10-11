@@ -99,19 +99,19 @@ class BloqueioMensagemIntegracaoTest {
         assertEquals(StatusAgendamentoEnum.CANCELADO,em.find(Agendamento.class,b.getId()).getStatus());
         assertEquals(StatusAgendamentoEnum.CONFIRMADO,em.find(Agendamento.class,outraData.getId()).getStatus());
         assertEquals(StatusAgendamentoEnum.CONFIRMADO,em.find(Agendamento.class,outroTenant.getId()).getStatus());
-        var avisos = notificacoes.findAll(); assertEquals(2,avisos.size());
+        var avisos = notificacoes.findAll().stream().filter(n -> n.getTipo() == NotificacaoPendente.Tipo.CANCELAMENTO_POR_BLOQUEIO).toList(); assertEquals(2,avisos.size());
         for (var aviso : avisos) {
             assertEquals(motivo,aviso.getMotivoBloqueio()); assertTrue(aviso.getMensagem().contains(motivo));
             assertEquals("linha-a",aviso.getPhoneNumberId());
             assertEquals(NotificacaoPendente.Status.PENDENTE,aviso.getStatus());
         }
-        clique("ADMIN_CONFIRMAR_BLOQUEIO_"+id); assertEquals(2,notificacoes.count());
+        clique("ADMIN_CONFIRMAR_BLOQUEIO_"+id); assertEquals(4,notificacoes.count());
     }
     @Test void confirmarSemEscreverMensagemUsaAvisoPadraoETemplateAtual() {
         reservar(barbeiro,dia,10,"5511911111111"); consultarBloqueio();
         clique("ADMIN_CONFIRMAR_BLOQUEIO_"+previaDoBarbeiro().getId());
         assertNull(bloqueios.findByBarbeiroIdAndData(barbeiro.getId(),dia).orElseThrow().getMotivo());
-        var aviso = notificacoes.findAll().get(0);
+        var aviso = notificacoes.findAll().stream().filter(n -> n.getTipo() == NotificacaoPendente.Tipo.CANCELAMENTO_POR_BLOQUEIO).findFirst().orElseThrow();
         ReflectionTestUtils.setField(envio,"usarTemplate",true);
         try {
             envio.enviarPendente(aviso.getId());
@@ -124,7 +124,7 @@ class BloqueioMensagemIntegracaoTest {
         reservar(barbeiro,dia,10,"5511911111111"); consultarBloqueio(); texto("Imprevisto");
         clique("ADMIN_BLOQUEIO_SEM_MENSAGEM_"+previaDoBarbeiro().getId());
         assertNull(bloqueios.findByBarbeiroIdAndData(barbeiro.getId(),dia).orElseThrow().getMotivo());
-        assertNull(notificacoes.findAll().get(0).getMotivoBloqueio());
+        assertNull(notificacoes.findAll().stream().filter(n -> n.getTipo() == NotificacaoPendente.Tipo.CANCELAMENTO_POR_BLOQUEIO).findFirst().orElseThrow().getMotivoBloqueio());
     }
     @Test void cancelarPreviaNaoBloqueiaNemCancelaENaoReutilizaBotao() {
         var a = reservar(barbeiro,dia,10,"5511911111111"); consultarBloqueio();
@@ -170,7 +170,7 @@ class BloqueioMensagemIntegracaoTest {
     @Test void templateComMotivoEnviaSeisParametrosEFalhaNaoDesfazCancelamento() {
         var a = reservar(barbeiro,dia,10,"5511911111111"); consultarBloqueio(); texto("Consulta\nmédica.");
         clique("ADMIN_CONFIRMAR_BLOQUEIO_"+previaDoBarbeiro().getId());
-        var aviso = notificacoes.findAll().get(0);
+        var aviso = notificacoes.findAll().stream().filter(n -> n.getTipo() == NotificacaoPendente.Tipo.CANCELAMENTO_POR_BLOQUEIO).findFirst().orElseThrow();
         ReflectionTestUtils.setField(envio,"usarTemplate",true);
         try {
             when(whatsapp.enviarTemplate(anyString(),anyString(),anyString(),anyList()))
@@ -191,7 +191,7 @@ class BloqueioMensagemIntegracaoTest {
         var previa = painel.previaBloqueio(barbeiro.getId(),new BarbeiroConfiguracaoController.Liberacao(dia));
         assertEquals(List.of(a.getId()),previa.stream().map(BloqueioDataService.ReservaAfetada::agendamentoId).toList());
         painel.bloquear(barbeiro.getId(),new BarbeiroConfiguracaoController.Bloqueio(dia,null,List.of(a.getId())));
-        assertEquals(StatusAgendamentoEnum.CANCELADO,a.getStatus()); assertEquals(1,notificacoes.count());
+        assertEquals(StatusAgendamentoEnum.CANCELADO,a.getStatus()); assertEquals(2,notificacoes.count());
         assertEquals(StatusAgendamentoEnum.CONFIRMADO,b.getStatus());
     }
     @Test void reservaNovaDepoisDaPreviaImpedeCancelamentoParcial() {

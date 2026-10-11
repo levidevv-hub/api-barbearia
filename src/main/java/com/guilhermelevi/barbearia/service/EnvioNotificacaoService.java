@@ -27,6 +27,7 @@ public class EnvioNotificacaoService {
 
     private final INotificacaoPendenteRepository repository;
     private final WhatsAppClient whatsappClient;
+    private final CentralWhatsappService centralWhatsappService;
 
     @Value("${whatsapp.notificacao.cliente.usar-template:false}")
     private boolean usarTemplate;
@@ -47,7 +48,8 @@ public class EnvioNotificacaoService {
 
         // Avisos aos clientes ficam pendentes durante a pausa e voltam a ser
         // enviados pelo scheduler após a reativação, sem consumir tentativas.
-        if (!notificacao.getAgendamento().getBarbeiro().isRoboAtivo()) {
+        if (notificacao.getTipo() == NotificacaoPendente.Tipo.CANCELAMENTO_POR_BLOQUEIO
+                && !notificacao.getAgendamento().getBarbeiro().isRoboAtivo()) {
             return;
         }
 
@@ -56,7 +58,14 @@ public class EnvioNotificacaoService {
         try {
             String mensagemId;
 
-            if (usarTemplate) {
+            boolean avisoBarbeiro = notificacao.getTipo() == NotificacaoPendente.Tipo.CANCELAMENTO_BARBEIRO;
+            if (avisoBarbeiro) {
+                var b = notificacao.getAgendamento().getBarbeiro();
+                String destino = b.getNumeroWhatsAppNotificacao();
+                if (destino == null || destino.isBlank()) throw new IllegalStateException("Cadastre o número de notificação do profissional no painel.");
+                notificacao.configurarDestino(centralWhatsappService.linhaNotificacao(b.getWhatsappPhoneNumberId()), destino);
+            }
+            if (usarTemplate || avisoBarbeiro) {
                 Agendamento agendamento = notificacao.getAgendamento();
 
                 List<String> dados = new ArrayList<>(List.of(
@@ -68,12 +77,14 @@ public class EnvioNotificacaoService {
                 ));
 
                 String template = "cancelamento_por_bloqueio_cliente";
-                if (notificacao.getMotivoBloqueio() != null) {
+                if (!avisoBarbeiro && notificacao.getMotivoBloqueio() != null) {
                     template = "cancelamento_por_bloqueio_cliente_motivo";
                     // Parâmetros de template são enviados em uma única linha.
                     dados.add(notificacao.getMotivoBloqueio().replaceAll("\\s+", " ").strip());
                 }
 
+                if (avisoBarbeiro) template = "agendamento_cancelado_barbeiro";
+                dados.replaceAll(v -> v.replaceAll("\\s+", " ").strip());
                 mensagemId = whatsappClient.enviarTemplate(
                         notificacao.getPhoneNumberId(),
                         notificacao.getDestinatario(),
