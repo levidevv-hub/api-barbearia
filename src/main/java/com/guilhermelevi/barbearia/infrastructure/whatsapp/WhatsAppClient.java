@@ -193,48 +193,16 @@ public class WhatsAppClient {
     }
 
     public void enviarMenuPrincipal(String phoneNumberId, String numero) {
-
-        Map<String, Object> body = Map.of(
-                "messaging_product", "whatsapp",
-                "to", numero,
-                "type", "interactive",
-
+        enviarAposCommit(phoneNumberId, Map.of(
+                "messaging_product", "whatsapp", "to", numero, "type", "interactive",
                 "interactive", Map.of(
-                        "type", "button",
-
-                        "body", Map.of(
-                                "text",
-                                "Olá! O que deseja fazer?"
-                        ),
-
-                        "action", Map.of(
-                                "buttons", List.of(
-
-                                        botao(
-                                                "AGENDAR",
-                                                "Agendar horário"
-                                        ),
-
-                                        botao(
-                                                "CONSULTAR",
-                                                "Meus horários"
-                                        ),
-
-                                        botao(
-                                                "CANCELAR",
-                                                "Cancelar"
-                                        )
-                                )
-                        )
-                )
-        );
-
-        enviarAposCommit(phoneNumberId, body);
-        enviarAposCommit(phoneNumberId, Map.of("messaging_product", "whatsapp", "to", numero,
-                "type", "interactive", "interactive", Map.of("type", "button",
-                "body", Map.of("text", "Precisa de ajuda?"),
-                "action", Map.of("buttons", List.of(botao("FALAR_ATENDENTE", "Falar com atendente"))))));
-
+                        "type", "list", "body", Map.of("text", "Olá! O que deseja fazer?"),
+                        "action", Map.of("button", "Ver opções", "sections", List.of(Map.of(
+                                "title", "Atendimento", "rows", List.of(
+                                        Map.of("id", "AGENDAR", "title", "Agendar horário"),
+                                        Map.of("id", "CONSULTAR", "title", "Meus horários"),
+                                        Map.of("id", "CANCELAR", "title", "Cancelar"),
+                                        Map.of("id", "FALAR_ATENDENTE", "title", "Falar com atendente")))))));
     }
 
     private Map<String, Object> botao(String id, String titulo) {

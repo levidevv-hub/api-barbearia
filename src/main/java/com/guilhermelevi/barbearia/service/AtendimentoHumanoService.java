@@ -40,6 +40,7 @@ public class AtendimentoHumanoService {
         boolean solicitacao = "FALAR_ATENDENTE".equals(id) || solicitaAtendente(texto);
         barbeiros.buscarParaAgendar(barbeiro.getId()).orElseThrow();
         var existente = atendimentos.findByBarbeiroIdAndNumeroCliente(barbeiro.getId(), numero);
+        existente.ifPresent(this::expirarSeNecessario);
         if (!solicitacao && (existente.isEmpty() || existente.get().getEstado() == AtendimentoHumano.Estado.AUTOMATICO)) return false;
         var a = existente.orElseGet(AtendimentoHumano::new);
         boolean novaSolicitacao = a.getEstado() == AtendimentoHumano.Estado.AUTOMATICO;
@@ -61,7 +62,7 @@ public class AtendimentoHumanoService {
         registrar(a, "CLIENTE", conteudo, mensagem.path("id").asText(null));
         if (novaSolicitacao) {
             whatsapp.enviarTextoAposCommit(barbeiro.getWhatsappPhoneNumberId(), numero,
-                    "Solicitei seu atendimento. Você pode deixar sua dúvida aqui. O atendimento automático está pausado." + avisoExpediente(barbeiro.getId()));
+                    "Solicitei seu atendimento. Você pode deixar sua dúvida aqui. O robô ficará pausado por até 1 hora a partir deste pedido e depois voltará automaticamente." + avisoExpediente(barbeiro.getId()));
             // Aviso persistido na conversa; o scheduler tenta somente depois do commit.
         }
         return true;
@@ -99,6 +100,7 @@ public class AtendimentoHumanoService {
     @Transactional
     public void avisar(Long barbeiroId, Long id) {
         var a = buscarComTrava(barbeiroId, id);
+        expirarSeNecessario(a);
         if (a.getEstado() != AtendimentoHumano.Estado.AGUARDANDO || a.getAvisoMensagemId() != null || a.getErroAviso() != null) return;
         try {
             String destino = a.getBarbeiro().getNumeroWhatsAppNotificacao();
@@ -112,17 +114,19 @@ public class AtendimentoHumanoService {
         }
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = ResponseStatusException.class)
     public void assumir(Long barbeiroId, Long id, String operador) {
         var a = buscarComTrava(barbeiroId, id);
+        expirarSeNecessario(a);
         if (a.getEstado() == AtendimentoHumano.Estado.AUTOMATICO) throw conflito("Este atendimento já foi finalizado.");
         if (a.getEstado() == AtendimentoHumano.Estado.EM_ATENDIMENTO && !operador.equals(a.getResponsavel())) throw conflito("Outro atendente já assumiu esta conversa.");
         a.setEstado(AtendimentoHumano.Estado.EM_ATENDIMENTO); a.setResponsavel(operador);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = ResponseStatusException.class)
     public void responder(Long barbeiroId, Long id, String operador, String texto) {
         var a = buscarComTrava(barbeiroId, id);
+        expirarSeNecessario(a);
         if (a.getEstado() != AtendimentoHumano.Estado.EM_ATENDIMENTO || !operador.equals(a.getResponsavel())) throw conflito("Assuma este atendimento antes de responder.");
         validarJanela(a);
         String mensagemId = whatsapp.enviarTexto(a.getBarbeiro().getWhatsappPhoneNumberId(), a.getNumeroCliente(), texto.strip());
@@ -139,6 +143,24 @@ public class AtendimentoHumanoService {
         if (janelaAberta(a)) whatsapp.enviarTextoAposCommit(a.getBarbeiro().getWhatsappPhoneNumberId(), a.getNumeroCliente(),
                 "Atendimento finalizado. Para voltar ao agendamento automático, envie oi. As opções anteriores continuam sujeitas à disponibilidade.");
         // Não apaga a SessaoConversa. Qualquer confirmação posterior passa novamente pelas validações da reserva.
+    }
+
+    @Transactional
+    public void reativarExpirado(Long barbeiroId, Long id) {
+        expirarSeNecessario(buscarComTrava(barbeiroId, id));
+    }
+
+    private void expirarSeNecessario(AtendimentoHumano a) {
+        if (a.getEstado() == AtendimentoHumano.Estado.AUTOMATICO || a.getSolicitadoEm() == null
+                || a.getSolicitadoEm().plusHours(1).isAfter(agora())) return;
+        a.setEstado(AtendimentoHumano.Estado.AUTOMATICO);
+        a.setResponsavel(null);
+        registrar(a, "SISTEMA", "Prazo de 1 hora encerrado. Atendimento automático liberado.", null);
+        // A pausa individual não pode reativar um robô desabilitado para o estabelecimento.
+        if (a.getBarbeiro().isRoboAtivo() && janelaAberta(a)) {
+            whatsapp.enviarTextoAposCommit(a.getBarbeiro().getWhatsappPhoneNumberId(), a.getNumeroCliente(),
+                    "O prazo de 1 hora do atendimento humano terminou. O robô está disponível novamente. Envie oi para abrir o menu ou peça um novo atendimento.");
+        }
     }
 
     public AtendimentoHumano buscarComTrava(Long barbeiroId, Long id) {

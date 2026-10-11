@@ -12,6 +12,13 @@ public interface IAtendimentoHumanoRepository extends JpaRepository<AtendimentoH
         and a.avisoMensagemId is null and a.erroAviso is null order by a.solicitadoEm, a.id
         """)
     List<AvisoPendente> buscarAvisosPendentes(org.springframework.data.domain.Pageable pageable);
+    @org.springframework.data.jpa.repository.Query("""
+        select new com.guilhermelevi.barbearia.repositories.IAtendimentoHumanoRepository$AvisoPendente(a.id, a.barbeiro.id)
+        from AtendimentoHumano a where a.estado <> AUTOMATICO and a.solicitadoEm <= :limite
+        order by a.solicitadoEm, a.id
+        """)
+    List<AvisoPendente> buscarExpirados(@org.springframework.data.repository.query.Param("limite") java.time.LocalDateTime limite,
+                                       org.springframework.data.domain.Pageable pageable);
     Optional<AtendimentoHumano> findByBarbeiroIdAndNumeroCliente(Long barbeiroId, String numero);
     Optional<AtendimentoHumano> findByIdAndBarbeiroId(Long id, Long barbeiroId);
     List<AtendimentoHumano> findTop100ByBarbeiroIdOrderBySolicitadoEmDesc(Long barbeiroId);

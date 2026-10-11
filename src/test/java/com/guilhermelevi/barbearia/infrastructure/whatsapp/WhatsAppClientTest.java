@@ -24,6 +24,32 @@ import static org.mockito.Mockito.*;
 
 class WhatsAppClientTest {
 
+    @Test
+    void menuUnicoContemAgendamentoEAtendenteSemSegundoCartao() {
+        var builder = RestClient.builder();
+        var server = MockRestServiceServer.bindTo(builder).build();
+        var repository = mock(IBarbeiroRepository.class);
+        when(repository.findByWhatsappPhoneNumberId("phone"))
+                .thenReturn(Optional.of(Barbeiro.builder().whatsappAccessToken("teste").build()));
+        var client = new WhatsAppClient(builder, repository);
+        ReflectionTestUtils.setField(client, "apiVersion", "v26.0");
+        server.expect(requestTo("https://graph.facebook.com/v26.0/phone/messages"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(content().json("""
+                        {"type":"interactive","interactive":{"type":"list","action":{"button":"Ver opções","sections":[
+                          {"title":"Atendimento","rows":[
+                            {"id":"AGENDAR","title":"Agendar horário"},
+                            {"id":"CONSULTAR","title":"Meus horários"},
+                            {"id":"CANCELAR","title":"Cancelar"},
+                            {"id":"FALAR_ATENDENTE","title":"Falar com atendente"}
+                          ]}
+                        ]}}}
+                        """))
+                .andRespond(withSuccess("{\"messages\":[{\"id\":\"wamid.menu\"}]}", MediaType.APPLICATION_JSON));
+        client.enviarMenuPrincipal("phone", "5588912345678");
+        server.verify();
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void controleEnviaBotaoCompativelComWhatsAppEComEstado(boolean ativo) {
