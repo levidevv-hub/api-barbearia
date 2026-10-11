@@ -15,6 +15,8 @@ import java.util.Optional;
 public interface IStatusMensagemRecebidoRepository
         extends JpaRepository<StatusMensagemRecebido, Long> {
 
+    List<StatusMensagemRecebido> findByMensagemIdMetaAndPhoneNumberIdOrderByRecebidoEmAsc(String mensagemIdMeta, String phoneNumberId);
+
     List<StatusMensagemRecebido>
     findByProcessadoFalseOrderByRecebidoEmAscIdAsc(Pageable pageable);
 

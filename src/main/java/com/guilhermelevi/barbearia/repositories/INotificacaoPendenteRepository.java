@@ -24,10 +24,12 @@ public interface INotificacaoPendenteRepository
     @Query("""
             SELECT n FROM NotificacaoPendente n
             WHERE n.status = :status
-              AND n.agendamento.barbeiro.roboAtivo = true
+              AND (n.agendamento.barbeiro.roboAtivo = true OR n.tipo = CANCELAMENTO_BARBEIRO)
             ORDER BY n.criadaEm, n.id
             """)
     List<NotificacaoPendente> buscarPendentesDeRobosAtivos(@Param("status") NotificacaoPendente.Status status, Pageable pageable);
+
+    List<NotificacaoPendente> findTop100ByAgendamentoBarbeiroIdOrderByCriadaEmDesc(Long barbeiroId);
 
     Optional<NotificacaoPendente> findByMensagemIdMeta(
             String mensagemIdMeta

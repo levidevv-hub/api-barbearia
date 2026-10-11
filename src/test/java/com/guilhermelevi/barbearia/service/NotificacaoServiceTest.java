@@ -28,7 +28,7 @@ class NotificacaoServiceTest {
     @Test
     void exigeTransacaoAtiva() {
         NotificacaoService service =
-                new NotificacaoService(mock(WhatsAppClient.class), new CentralWhatsappService(mock(IBarbeiroRepository.class)));
+                new NotificacaoService(mock(WhatsAppClient.class), new CentralWhatsappService(mock(IBarbeiroRepository.class)), mock(com.guilhermelevi.barbearia.repositories.INotificacaoPendenteRepository.class));
 
         assertThrows(
                 IllegalStateException.class,
@@ -39,7 +39,7 @@ class NotificacaoServiceTest {
     @Test
     void enviaSomenteDepoisDoCommit() throws Exception {
         WhatsAppClient whatsapp = mock(WhatsAppClient.class);
-        NotificacaoService service = new NotificacaoService(whatsapp, new CentralWhatsappService(mock(IBarbeiroRepository.class)));
+        NotificacaoService service = new NotificacaoService(whatsapp, new CentralWhatsappService(mock(IBarbeiroRepository.class)), mock(com.guilhermelevi.barbearia.repositories.INotificacaoPendenteRepository.class));
         definirUsarTemplate(service, false);
 
         TransactionSynchronizationManager.setActualTransactionActive(true);
@@ -65,7 +65,7 @@ class NotificacaoServiceTest {
     @Test
     void semDestinatarioNaoRegistraEnvio() throws Exception {
         WhatsAppClient whatsapp = mock(WhatsAppClient.class);
-        NotificacaoService service = new NotificacaoService(whatsapp, new CentralWhatsappService(mock(IBarbeiroRepository.class)));
+        NotificacaoService service = new NotificacaoService(whatsapp, new CentralWhatsappService(mock(IBarbeiroRepository.class)), mock(com.guilhermelevi.barbearia.repositories.INotificacaoPendenteRepository.class));
         definirUsarTemplate(service, false);
 
         Agendamento agendamento = agendamento();

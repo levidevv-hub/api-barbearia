@@ -230,6 +230,11 @@ public class WhatsAppClient {
         );
 
         enviarAposCommit(phoneNumberId, body);
+        enviarAposCommit(phoneNumberId, Map.of("messaging_product", "whatsapp", "to", numero,
+                "type", "interactive", "interactive", Map.of("type", "button",
+                "body", Map.of("text", "Precisa de ajuda?"),
+                "action", Map.of("buttons", List.of(botao("FALAR_ATENDENTE", "Falar com atendente"))))));
+
     }
 
     private Map<String, Object> botao(String id, String titulo) {

@@ -18,6 +18,7 @@ public class ConversaService {
     private final AutorizacaoBarbeiroService autorizacaoBarbeiroService;
     private final CentralWhatsappService centralWhatsappService;
     private final ConversaCentralService conversaCentralService;
+    private final AtendimentoHumanoService atendimentoHumanoService;
 
     public void processar(JsonNode payload) {
         JsonNode value = payload
@@ -64,6 +65,7 @@ public class ConversaService {
         // Mensagens ignoradas são concluídas pelo processamento do webhook,
         // sem cadastrar clientes ou avançar sessões de agendamento.
         if (!barbeiro.isRoboAtivo()
+                && !atendimentoHumanoService.estaAtivo(barbeiro.getId(), telefoneCliente)
                 && !autorizacaoBarbeiroService.podeAdministrar(
                         barbeiro.getId(), telefoneCliente)) {
             return;
@@ -73,6 +75,8 @@ public class ConversaService {
                 nomeCliente,
                 telefoneCliente
         );
+
+        if (atendimentoHumanoService.interceptar(barbeiro, cliente, mensagem)) return;
 
         String tipo = mensagem.path("type").asText();
 

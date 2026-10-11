@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class NotificacaoPendente {
 
     public enum Tipo {
-        CANCELAMENTO_POR_BLOQUEIO
+        CANCELAMENTO_POR_BLOQUEIO, CANCELAMENTO_BARBEIRO
     }
 
     public enum Status {
@@ -86,6 +86,25 @@ public class NotificacaoPendente {
         this.mensagem = mensagem;
         this.criadaEm = LocalDateTime.now();
         this.motivoBloqueio = MensagemBloqueio.normalizar(motivoBloqueio);
+    }
+
+    public static NotificacaoPendente cancelamentoBarbeiro(Agendamento agendamento) {
+        var n = new NotificacaoPendente(agendamento, "AGENDAMENTO CANCELADO");
+        n.tipo = Tipo.CANCELAMENTO_BARBEIRO;
+        n.destinatario = java.util.Objects.toString(agendamento.getBarbeiro().getNumeroWhatsAppNotificacao(), "");
+        n.phoneNumberId = java.util.Objects.toString(agendamento.getBarbeiro().getWhatsappPhoneNumberId(), "");
+        return n;
+    }
+
+    public void configurarDestino(String phoneNumberId, String destinatario) {
+        this.phoneNumberId = phoneNumberId;
+        this.destinatario = destinatario;
+    }
+
+    public void solicitarReenvio() {
+        if (status != Status.FALHA) throw new IllegalArgumentException("Somente notificações com falha podem ser reenviadas.");
+        status = Status.PENDENTE;
+        mensagemIdMeta = null;
     }
 
     public void registrarTentativa() {
