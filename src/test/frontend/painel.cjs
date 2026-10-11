@@ -9,6 +9,9 @@ const barbers=[1,2].map(id=>({id,nome:'Barbeiro '+id,numeroWhatsAppAdministrador
 const configs=new Map(barbers.map(b=>[b.id,{semana:days.map(diaSemana=>({diaSemana,aberto:diaSemana!=='SUNDAY',periodos:diaSemana==='SUNDAY'?[]:[{inicio:'08:00',fim:'12:00'},{inicio:'13:30',fim:'18:00'}]})),endereco:'Rua Teste',latitude:-4.94,longitude:-37.97}]));
 const services=new Map([[1,[]],[2,[]]]),blocks=new Map([[1,[]],[2,[]]]);
 const requests=[],errors=[];
+const conversation={id:10,nome:'<img src=x onerror=alert(1)>',numero:'5588991234567',estado:'AGUARDANDO',podeResponder:true,aviso:'FALHA',erroAviso:'Template pendente'};
+const chat=[{id:1,autor:'CLIENTE',texto:'Quero ajuda <script>alert(1)</script>',criadaEm:'2026-10-11T10:00:00'}];
+const notification={id:20,tipo:'CANCELAMENTO_BARBEIRO',estado:'FALHA',tentativas:1,erro:'132001'};
 let idCounter=1,acceptConfirm=true,failNextService=false,affectedReservations=[];
 const dom=new JSDOM(html,{url:'https://zaluratech.com.br/painel/',runScripts:'dangerously',pretendToBeVisual:true,beforeParse(w){
   w.HTMLElement.prototype.scrollIntoView=function(){};
@@ -24,6 +27,13 @@ const dom=new JSDOM(html,{url:'https://zaluratech.com.br/painel/',runScripts:'da
     if(route==='/api/admin/barbeiros')return ok(barbers);
     const match=route.match(/^\/api\/admin\/barbeiros\/(\d+)\/(.*)$/);
     assert.ok(match,'Unexpected route '+route);const id=Number(match[1]),resource=match[2];
+    if(resource==='atendimentos')return ok([conversation]);
+    if(resource==='atendimentos/notificacoes')return ok([notification]);
+    if(resource==='atendimentos/10/mensagens')return ok(chat);
+    if(resource==='atendimentos/10/assumir'){conversation.estado='EM_ATENDIMENTO';conversation.responsavel='admin';return ok(null,204)}
+    if(resource==='atendimentos/10/responder'){assert.equal(conversation.estado,'EM_ATENDIMENTO');chat.push({id:2,autor:'admin',texto:body.texto,criadaEm:'2026-10-11T10:01:00'});return ok(null,204)}
+    if(resource==='atendimentos/10/finalizar'){conversation.estado='AUTOMATICO';return ok(null,204)}
+    if(resource==='atendimentos/notificacoes/20/reenviar'){notification.estado='PENDENTE';return ok(null,204)}
     if(resource==='dados'){
       const b=barbers.find(b=>b.id===id);if(method==='POST')Object.assign(b,body);return ok(b);
     }
@@ -113,6 +123,20 @@ function button(root,text){return [...root.querySelectorAll('button')].find(b=>b
   submit($('config-form'));await until(()=>!$('config-fields').disabled);
   assert.equal(configs.get(1).semana[0].periodos.length,3,'Existing multiple breaks must be preserved');
   assert.deepEqual(configs.get(1).semana[6].periodos,[],'Closed days have no availability');
+  click(button($('rows'),'Atendimentos'));await until(()=>button($('att-list'),'Assumir atendimento'));
+  assert.equal($('att-list').querySelector('img'),null,'Customer names must render as text');
+  click(button($('att-list'),'Abrir conversa'));await until(()=>$('att-messages').textContent.includes('Quero ajuda'));
+  assert.equal($('att-messages').querySelector('script'),null,'Messages must not execute HTML');
+  assert.equal($('att-send').disabled,true);
+  click(button($('att-list'),'Assumir atendimento'));await until(()=>!$('att-send').disabled);
+  fill($('att-text'),'Posso ajudar');submit($('att-form'));await until(()=>chat.length===2&&$('att-text').value==='');
+  await until(()=>!$('att-send').disabled);
+  conversation.podeResponder=false;click($('att-refresh'));await until(()=>$('att-send').disabled);
+  acceptConfirm=false;click(button($('att-list'),'Finalizar atendimento'));assert.equal(conversation.estado,'EM_ATENDIMENTO');acceptConfirm=true;
+  click(button($('att-list'),'Finalizar atendimento'));await until(()=>conversation.estado==='AUTOMATICO');
+  await until(()=>$('att-list').textContent.includes('Automático'));
+  click(button($('att-notifications'),'Reenviar aviso'));await until(()=>notification.estado==='PENDENTE');
+  click($('att-close'));assert.equal($('att-box').hidden,true);assert.equal($('att-messages').textContent,'');
   assert.deepEqual(errors,[]);
   console.log('PASS: load, interval modes, invalid break, profile edit, service CRUD/status, failed save draft, unsaved navigation, block CRUD, optional message, reservation preview/confirmation, cancelled preview, reload and CSRF.');
   dom.window.close();

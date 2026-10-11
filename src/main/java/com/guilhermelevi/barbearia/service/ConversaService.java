@@ -65,6 +65,7 @@ public class ConversaService {
         // Mensagens ignoradas são concluídas pelo processamento do webhook,
         // sem cadastrar clientes ou avançar sessões de agendamento.
         if (!barbeiro.isRoboAtivo()
+                && !atendimentoHumanoService.estaAtivo(barbeiro.getId(), telefoneCliente)
                 && !autorizacaoBarbeiroService.podeAdministrar(
                         barbeiro.getId(), telefoneCliente)) {
             return;

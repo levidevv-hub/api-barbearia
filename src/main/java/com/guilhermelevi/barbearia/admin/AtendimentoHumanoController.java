@@ -56,6 +56,20 @@ public class AtendimentoHumanoController {
     @PostMapping("/{id}/responder") public void responder(@PathVariable Long barbeiroId, @PathVariable Long id, Principal p, @Valid @RequestBody Resposta r) { service.responder(barbeiroId, id, p.getName(), r.texto()); }
     @PostMapping({"/{id}/finalizar", "/{id}/retomar-robo"}) public void finalizar(@PathVariable Long barbeiroId, @PathVariable Long id, Principal p) { service.finalizar(barbeiroId, id, p.getName()); }
 
+    @PostMapping("/{id}/reenviar-aviso") @Transactional
+    public void reenviarAviso(@PathVariable Long barbeiroId, @PathVariable Long id) {
+        var a = service.buscarComTrava(barbeiroId, id);
+        if (a.getEstado() != AtendimentoHumano.Estado.AGUARDANDO) throw new ResponseStatusException(HttpStatus.CONFLICT, "O pedido não está aguardando atendimento.");
+        boolean falhou = a.getErroAviso() != null;
+        if (a.getAvisoMensagemId() != null) {
+            var eventos = status.findByMensagemIdMetaAndPhoneNumberIdOrderByRecebidoEmAsc(a.getAvisoMensagemId(), a.getAvisoPhoneNumberId());
+            boolean entregue = eventos.stream().anyMatch(e -> "delivered".equals(e.getStatus()) || "read".equals(e.getStatus()));
+            falhou = !entregue && eventos.stream().anyMatch(e -> "failed".equals(e.getStatus()));
+        }
+        if (!falhou) throw new ResponseStatusException(HttpStatus.CONFLICT, "Somente um aviso com falha pode ser reenviado.");
+        a.setErroAviso(null); a.setAvisoMensagemId(null); a.setAvisoPhoneNumberId(null);
+    }
+
     @GetMapping("/notificacoes") @Transactional(readOnly=true)
     public List<Notificacao> notificacoes(@PathVariable Long barbeiroId) {
         return notificacoes.findTop100ByAgendamentoBarbeiroIdOrderByCriadaEmDesc(barbeiroId).stream()

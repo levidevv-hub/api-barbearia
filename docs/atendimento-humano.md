@@ -11,7 +11,7 @@ Corpo sugerido (três parâmetros de texto, nesta ordem):
 
 > Um cliente solicitou atendimento humano no estabelecimento {{3}}. Nome do cliente: {{1}}. Telefone para identificação: {{2}}. Acesse o painel da ZaluraTech para assumir e responder à conversa. O atendimento automático desse cliente ficará pausado até o encerramento manual.
 
-A aprovação/categoria final depende da Meta. O nome pode ser alterado em `whatsapp.atendimento.template`. Sem aprovação, a solicitação funciona no painel e o aviso registra falha. O painel suporta mensagens de texto; áudio, imagens e outros anexos aparecem identificados, sem download/visualização.
+A aprovação/categoria final depende da Meta. O nome pode ser alterado em `whatsapp.atendimento.template`. Sem aprovação, a solicitação funciona no painel e o aviso registra falha. Após corrigir a causa, use “Reenviar aviso de atendimento” no pedido que está aguardando. O painel suporta mensagens de texto; áudio, imagens e outros anexos aparecem identificados, sem download/visualização.
 
 ## Operação
 

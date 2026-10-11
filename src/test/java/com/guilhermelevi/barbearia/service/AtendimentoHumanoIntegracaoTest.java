@@ -82,7 +82,9 @@ class AtendimentoHumanoIntegracaoTest {
         assertTrue(service.interceptar(b,c,node));
         var payload=JsonMapper.builder().build().valueToTree(Map.of("entry",List.of(Map.of("changes",List.of(Map.of("value",Map.of(
                 "metadata",Map.of("phone_number_id","linha-a"),"messages",List.of(mensagem("oi")))))))));
+        b.setRoboAtivo(false); // A pausa global não interrompe um atendimento humano já aberto.
         conversa.processar(payload);
+        assertEquals(2,mensagens.findTop100ByAtendimentoIdOrderByIdDesc(atendimentos.findByBarbeiroIdAndNumeroCliente(b.getId(),c.getNumeroTelefone()).orElseThrow().getId()).size());
         verify(whatsapp,never()).enviarMenuPrincipal(anyString(),anyString());
     }
 }

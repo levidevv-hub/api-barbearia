@@ -67,6 +67,12 @@ public class AtendimentoHumanoService {
         return true;
     }
 
+    @Transactional(readOnly=true)
+    public boolean estaAtivo(Long barbeiroId, String numero) {
+        return atendimentos.findByBarbeiroIdAndNumeroCliente(barbeiroId, numero)
+                .map(a -> a.getEstado() != AtendimentoHumano.Estado.AUTOMATICO).orElse(false);
+    }
+
     public static boolean solicitaAtendente(String texto) {
         String normal = Normalizer.normalize(texto, Normalizer.Form.NFD).replaceAll("\\p{M}", "")
                 .toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9 ]", " ").replaceAll("\\s+", " ").strip();
