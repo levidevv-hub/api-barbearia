@@ -37,7 +37,7 @@ class BloqueioDataServiceTest {
                 barbeiros,
                 bloqueios,
                 notificacoes,
-                autorizacao
+                autorizacao, mock(NotificacaoService.class)
         );
     }
 

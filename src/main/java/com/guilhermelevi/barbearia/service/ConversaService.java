@@ -18,6 +18,7 @@ public class ConversaService {
     private final AutorizacaoBarbeiroService autorizacaoBarbeiroService;
     private final CentralWhatsappService centralWhatsappService;
     private final ConversaCentralService conversaCentralService;
+    private final AtendimentoHumanoService atendimentoHumanoService;
 
     public void processar(JsonNode payload) {
         JsonNode value = payload
@@ -73,6 +74,8 @@ public class ConversaService {
                 nomeCliente,
                 telefoneCliente
         );
+
+        if (atendimentoHumanoService.interceptar(barbeiro, cliente, mensagem)) return;
 
         String tipo = mensagem.path("type").asText();
 
