@@ -132,7 +132,7 @@ function button(root,text){return [...root.querySelectorAll('button')].find(b=>b
   fill($('att-text'),'Posso ajudar');submit($('att-form'));await until(()=>chat.length===2&&$('att-text').value==='');
   await until(()=>!$('att-send').disabled);
   conversation.podeResponder=false;click($('att-refresh'));await until(()=>$('att-send').disabled);
-  acceptConfirm=false;click(button($('att-list'),'Finalizar atendimento'));assert.equal(conversation.estado,'EM_ATENDIMENTO');acceptConfirm=true;
+  acceptConfirm=false;click(button($('att-list'),'Finalizar atendimento'));assert.equal(conversation.estado,'EM_ATENDIMENTO');await until(()=>!button($('att-list'),'Finalizar atendimento').disabled);acceptConfirm=true;
   click(button($('att-list'),'Finalizar atendimento'));await until(()=>conversation.estado==='AUTOMATICO');
   await until(()=>$('att-list').textContent.includes('Automático'));
   click(button($('att-notifications'),'Reenviar aviso'));await until(()=>notification.estado==='PENDENTE');
