@@ -168,7 +168,7 @@ class CentralWhatsappIntegracaoTest {
         assertEquals(com.guilhermelevi.barbearia.domain.enums.StatusAgendamentoEnum.CONFIRMADO, reservaB.getStatus());
         assertTrue(bloqueios.existsByBarbeiroIdAndData(a.getId(), dia));
         assertFalse(bloqueios.existsByBarbeiroIdAndData(b.getId(), dia));
-        var aviso = em.createQuery("select n from NotificacaoPendente n where n.agendamento.id = :id", NotificacaoPendente.class)
+        var aviso = em.createQuery("select n from NotificacaoPendente n where n.agendamento.id = :id and n.tipo = CANCELAMENTO_POR_BLOQUEIO", NotificacaoPendente.class)
                 .setParameter("id", reservaA.getId()).getSingleResult();
         assertEquals("linha-1", aviso.getPhoneNumberId());
         texto(admin, "Liberar " + data);

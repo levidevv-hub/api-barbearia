@@ -35,7 +35,7 @@ class EnvioNotificacaoServiceTest {
         service.enviarPendente(1L);
         assertEquals(1,aviso.getTentativas()); // Sem repetição silenciosa após falha.
         aviso.solicitarReenvio();
-        when(whatsapp.enviarTemplate(anyString(),anyString(),anyString(),anyList())).thenReturn("wamid.cancelado");
+        doReturn("wamid.cancelado").when(whatsapp).enviarTemplate(anyString(),anyString(),anyString(),anyList());
         service.enviarPendente(1L);
         assertEquals(NotificacaoPendente.Status.ACEITA_PELA_API,aviso.getStatus());
         verify(whatsapp,times(2)).enviarTemplate(eq("central"),eq("5588991111111"),eq("agendamento_cancelado_barbeiro"),argThat(d -> d.size()==5));
