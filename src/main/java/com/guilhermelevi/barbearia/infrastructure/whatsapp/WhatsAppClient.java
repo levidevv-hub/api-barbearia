@@ -193,16 +193,17 @@ public class WhatsAppClient {
     }
 
     public void enviarMenuPrincipal(String phoneNumberId, String numero) {
+        var linhas = List.of(
+                Map.of("id", "AGENDAR", "title", "Agendar horário"),
+                Map.of("id", "CONSULTAR", "title", "Meus horários"),
+                Map.of("id", "CANCELAR", "title", "Cancelar"),
+                Map.of("id", "FALAR_ATENDENTE", "title", "Falar com atendente"));
+        var acao = Map.of("button", "Ver opções", "sections", List.of(
+                Map.of("title", "Atendimento", "rows", linhas)));
         enviarAposCommit(phoneNumberId, Map.of(
                 "messaging_product", "whatsapp", "to", numero, "type", "interactive",
-                "interactive", Map.of(
-                        "type", "list", "body", Map.of("text", "Olá! O que deseja fazer?"),
-                        "action", Map.of("button", "Ver opções", "sections", List.of(Map.of(
-                                "title", "Atendimento", "rows", List.of(
-                                        Map.of("id", "AGENDAR", "title", "Agendar horário"),
-                                        Map.of("id", "CONSULTAR", "title", "Meus horários"),
-                                        Map.of("id", "CANCELAR", "title", "Cancelar"),
-                                        Map.of("id", "FALAR_ATENDENTE", "title", "Falar com atendente")))))));
+                "interactive", Map.of("type", "list",
+                        "body", Map.of("text", "Olá! O que deseja fazer?"), "action", acao)));
     }
 
     private Map<String, Object> botao(String id, String titulo) {
