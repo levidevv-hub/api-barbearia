@@ -49,7 +49,7 @@ class AtendimentoHumanoIntegracaoTest {
         verify(whatsapp,times(1)).enviarTextoAposCommit(eq("linha-a"),eq(c.getNumeroTelefone()),contains("Solicitei"));
         assertFalse(service.interceptar(outro,c,mensagem("oi")));
         a.setUltimaMensagemClienteEm(LocalDateTime.now().minusDays(3));
-        assertTrue(service.interceptar(b,c,mensagem("oi"))); // Nunca expira a pausa.
+        assertTrue(service.interceptar(b,c,mensagem("oi"))); // Mensagem recente não encerra a pausa antes de completar uma hora.
         service.assumir(b.getId(),a.getId(),"admin");
         when(whatsapp.enviarTexto(anyString(),anyString(),anyString())).thenReturn("wamid.resposta");
         service.responder(b.getId(),a.getId(),"admin","Posso ajudar?");
@@ -58,6 +58,40 @@ class AtendimentoHumanoIntegracaoTest {
         assertFalse(service.interceptar(b,c,mensagem("oi")));
         assertEquals(EtapaConversaEnum.ESCOLHENDO_DATA,sessao.getEtapa());
     }
+    @Test void umaHoraExpiraMesmoAssumidoSemRenovarComMensagensENaoDuplicaAviso() {
+        var a=solicitar();
+        a.setSolicitadoEm(LocalDateTime.now(ZoneId.of("America/Fortaleza")).minusMinutes(59));
+        service.assumir(b.getId(),a.getId(),"admin");
+        var inicio=a.getSolicitadoEm();
+        assertTrue(service.interceptar(b,c,mensagem("Ainda preciso de ajuda")));
+        assertEquals(inicio,a.getSolicitadoEm());
+        service.reativarExpirado(b.getId(),a.getId());
+        assertEquals(AtendimentoHumano.Estado.EM_ATENDIMENTO,a.getEstado());
+        a.setSolicitadoEm(inicio.minusMinutes(2));em.flush();
+        assertEquals(1,atendimentos.buscarExpirados(LocalDateTime.now(ZoneId.of("America/Fortaleza")).minusHours(1),
+                org.springframework.data.domain.PageRequest.of(0,50)).size());
+        service.reativarExpirado(b.getId(),a.getId());
+        service.reativarExpirado(b.getId(),a.getId());
+        assertEquals(AtendimentoHumano.Estado.AUTOMATICO,a.getEstado());assertNull(a.getResponsavel());
+        verify(whatsapp,times(1)).enviarTextoAposCommit(eq("linha-a"),eq(c.getNumeroTelefone()),contains("O prazo de 1 hora"));
+        assertFalse(service.interceptar(b,c,mensagem("oi")));
+    }
+    @Test void expiraAguardandoNaEntradaMesmoAntesDoSchedulerEPodePedirNovamente() {
+        var a=solicitar();a.setSolicitadoEm(LocalDateTime.now(ZoneId.of("America/Fortaleza")).minusHours(2));
+        assertFalse(service.interceptar(b,c,mensagem("oi")));
+        assertTrue(service.interceptar(b,c,mensagem("atendente")));
+        assertEquals(AtendimentoHumano.Estado.AGUARDANDO,a.getEstado());
+        assertTrue(a.getSolicitadoEm().isAfter(LocalDateTime.now(ZoneId.of("America/Fortaleza")).minusMinutes(1)));
+    }
+    @Test void naoPermiteRespostaExpiradaENaoReativaRoboGlobal() {
+        var a=solicitar();service.assumir(b.getId(),a.getId(),"admin");
+        a.setSolicitadoEm(LocalDateTime.now(ZoneId.of("America/Fortaleza")).minusHours(2));b.setRoboAtivo(false);
+        assertThrows(ResponseStatusException.class,()->service.responder(b.getId(),a.getId(),"admin","Oi"));
+        assertEquals(AtendimentoHumano.Estado.AUTOMATICO,a.getEstado());assertFalse(b.isRoboAtivo());
+        verify(whatsapp,never()).enviarTexto(anyString(),anyString(),anyString());
+        verify(whatsapp,never()).enviarTextoAposCommit(anyString(),anyString(),contains("O prazo de 1 hora"));
+    }
+
     @Test void naoRespondeSemAssumirNemForaDaJanelaNemEmOutroTenant() {
         var a=solicitar();
         assertThrows(ResponseStatusException.class,()->service.responder(b.getId(),a.getId(),"admin","Oi"));

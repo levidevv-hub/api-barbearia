@@ -9,15 +9,15 @@
 
 Corpo sugerido (três parâmetros de texto, nesta ordem):
 
-> Um cliente solicitou atendimento humano no estabelecimento {{3}}. Nome do cliente: {{1}}. Telefone para identificação: {{2}}. Acesse o painel da ZaluraTech para assumir e responder à conversa. O atendimento automático desse cliente ficará pausado até o encerramento manual.
+> Um cliente solicitou atendimento humano no estabelecimento {{3}}. Nome do cliente: {{1}}. Telefone para identificação: {{2}}. Acesse o painel da ZaluraTech para assumir e responder à conversa. O atendimento automático desse cliente ficará pausado por até 1 hora após o pedido, com retorno automático ao final do prazo.
 
 A aprovação/categoria final depende da Meta. O nome pode ser alterado em `whatsapp.atendimento.template`. Sem aprovação, a solicitação funciona no painel e o aviso registra falha. Após corrigir a causa, use “Reenviar aviso de atendimento” no pedido que está aguardando. O painel suporta mensagens de texto; áudio, imagens e outros anexos aparecem identificados, sem download/visualização.
 
 ## Operação
 
-- Menu mantém Agendar / Meus horários / Cancelar e ganha um segundo cartão com Falar com atendente, respeitando o limite de três botões por cartão.
+- Uma única mensagem de lista reúne Agendar / Meus horários / Cancelar / Falar com atendente. O cliente toca em Ver opções para escolher.
 - Também aceita “atendente”, “falar com alguém” e “quero falar com um atendente”.
-- A pausa persiste por profissional + telefone, independentemente da sessão de agendamento. Não expira automaticamente.
+- A pausa persiste por profissional + telefone, independentemente da sessão de agendamento. Expira 1 hora após o pedido, tanto aguardando quanto em atendimento. Novas mensagens e assumir o atendimento não renovam esse prazo. O scheduler verifica a cada 10 segundos e a entrada de mensagens e as ações de assumir/responder também verificam o prazo. A expiração preserva o histórico e a sessão; não altera a pausa global do estabelecimento.
 - O pedido informa a próxima abertura, considerando semana, intervalos e bloqueios nos próximos 14 dias. A abertura não é promessa de resposta imediata.
 - Painel → Atendimentos → Abrir conversa → Assumir atendimento → Enviar resposta → Finalizar atendimento.
 - “Retomar robô” encerra manualmente uma solicitação que ainda está aguardando.
@@ -46,3 +46,7 @@ Os cancelamentos antigos, anteriores à fila, não são reenviados automaticamen
 - Assuma, responda e finalize no painel; confirme a resposta no celular.
 - Cancele uma reserva futura e acompanhe o aviso até ENTREGUE. Repita o clique e confirme que não surgiu outro aviso.
 - Confira bloqueio de data, template da central e erros visíveis. Aceite da API não significa entrega.
+
+## Atualização do prazo e menu único
+
+Esta atualização reutiliza `solicitado_em`: não exige nova migração de banco. Atualize a aplicação e o HTML do painel. Atendimentos antigos já abertos há mais de uma hora serão encerrados automaticamente na próxima execução do scheduler.
