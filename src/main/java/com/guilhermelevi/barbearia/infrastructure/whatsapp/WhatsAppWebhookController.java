@@ -1,8 +1,9 @@
 package com.guilhermelevi.barbearia.infrastructure.whatsapp;
 
-import com.guilhermelevi.barbearia.service.ConversaService;
+import com.guilhermelevi.barbearia.service.IStatusForwardingInboxService;
+import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.TransactionException;
 import com.guilhermelevi.barbearia.service.LoteMensagensService;
-import com.guilhermelevi.barbearia.service.RecebimentoStatusService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,18 +20,21 @@ public class WhatsAppWebhookController {
     private final RecebimentoStatusService recebimentoStatusService;
     private final ValidadorAssinaturaWebhook validadorAssinatura;
     private final ObjectMapper objectMapper;
+    private final IStatusForwardingInboxService forwarding;
 
     @Value("${whatsapp.verify-token}")
     private String verifyToken;
 
     public WhatsAppWebhookController(
             LoteMensagensService loteMensagensService,
-            RecebimentoStatusService recebimentoStatusService, ValidadorAssinaturaWebhook validadorAssinatura, ObjectMapper objectMapper
+            RecebimentoStatusService recebimentoStatusService, ValidadorAssinaturaWebhook validadorAssinatura, ObjectMapper objectMapper,
+            IStatusForwardingInboxService forwarding
     ) {
         this.loteMensagensService = loteMensagensService;
         this.recebimentoStatusService = recebimentoStatusService;
         this.validadorAssinatura = validadorAssinatura;
         this.objectMapper = objectMapper;
+        this.forwarding = forwarding;
     }
 
     @GetMapping
@@ -61,6 +65,12 @@ public class WhatsAppWebhookController {
         }
 
         JsonNode payload = objectMapper.readTree(corpo);
+
+        try {
+            forwarding.receive(corpo, assinatura, payload);
+        } catch (DataAccessException | TransactionException ex) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
 
         recebimentoStatusService.receber(payload);
         loteMensagensService.processar(payload);
