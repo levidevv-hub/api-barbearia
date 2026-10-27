@@ -17,6 +17,7 @@ public class AtendimentoHumano {
     @Enumerated(EnumType.STRING) @Column(nullable = false) private Estado estado = Estado.AUTOMATICO;
     private String responsavel;
     private LocalDateTime solicitadoEm;
+    private LocalDateTime pausaAte;
     private LocalDateTime ultimaMensagemClienteEm;
     @Column(columnDefinition = "text") private String erroAviso;
     private String avisoMensagemId;
