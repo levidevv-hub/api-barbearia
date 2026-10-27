@@ -17,11 +17,11 @@ A aprovação/categoria final depende da Meta. O nome pode ser alterado em `what
 
 - Menu mantém Agendar / Meus horários / Cancelar e ganha um segundo cartão com Falar com atendente, respeitando o limite de três botões por cartão.
 - Também aceita “atendente”, “falar com alguém” e “quero falar com um atendente”.
-- A pausa persiste por profissional + telefone, independentemente da sessão de agendamento. Não expira automaticamente.
+- A pausa persiste por profissional + telefone, independentemente da sessão de agendamento. Expira automaticamente após 1 hora, mesmo após reinicialização da aplicação. Uma nova solicitação inicia outra hora.
 - O pedido informa a próxima abertura, considerando semana, intervalos e bloqueios nos próximos 14 dias. A abertura não é promessa de resposta imediata.
 - Painel → Atendimentos → Abrir conversa → Assumir atendimento → Enviar resposta → Finalizar atendimento.
-- “Retomar robô” encerra manualmente uma solicitação que ainda está aguardando.
-- A sessão anterior é preservada. O cliente pode enviar “oi” para recomeçar; confirmar uma opção antiga continua sujeito à validação de disponibilidade, preço e duração da reserva.
+- “Retomar robô” encerra manualmente uma solicitação que ainda está aguardando. Sem ação manual, o scheduler verifica expirações a cada 30 segundos (configurável via `whatsapp.atendimento.expiracao-intervalo-ms`).
+- O robô volta a responder ao receber a próxima mensagem após o prazo, sem mensagem automática de encerramento. A sessão anterior é preservada. O cliente pode enviar “oi” para recomeçar; confirmar uma opção antiga continua sujeito à validação de disponibilidade, preço e duração da reserva.
 - A janela de 24h usa o timestamp da última mensagem recebida da Meta. Fora dela, o painel exige uma nova mensagem do cliente.
 - As permissões seguem o painel existente: administrador global. Esta alteração não cria contas individuais por estabelecimento.
 - Respostas enviadas diretamente no aplicativo WhatsApp Business não são sincronizadas por esta implementação. Para histórico completo use o painel.
