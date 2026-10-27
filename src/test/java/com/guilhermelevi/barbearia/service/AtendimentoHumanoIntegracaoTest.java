@@ -45,11 +45,12 @@ class AtendimentoHumanoIntegracaoTest {
         var a = solicitar();
         assertTrue(service.interceptar(b,c,mensagem("atendente")));
         assertEquals(1,atendimentos.count());
+        assertNotNull(a.getPausaAte());
+        assertTrue(a.getPausaAte().isAfter(LocalDateTime.now(ZoneId.of("America/Fortaleza")).plusMinutes(59)));
         assertEquals(EtapaConversaEnum.ESCOLHENDO_DATA,sessao.getEtapa());
         verify(whatsapp,times(1)).enviarTextoAposCommit(eq("linha-a"),eq(c.getNumeroTelefone()),contains("Solicitei"));
         assertFalse(service.interceptar(outro,c,mensagem("oi")));
-        a.setUltimaMensagemClienteEm(LocalDateTime.now().minusDays(3));
-        assertTrue(service.interceptar(b,c,mensagem("oi"))); // Nunca expira a pausa.
+        assertTrue(service.interceptar(b,c,mensagem("oi"))); // Ainda está dentro da primeira hora.
         service.assumir(b.getId(),a.getId(),"admin");
         when(whatsapp.enviarTexto(anyString(),anyString(),anyString())).thenReturn("wamid.resposta");
         service.responder(b.getId(),a.getId(),"admin","Posso ajudar?");
@@ -57,6 +58,28 @@ class AtendimentoHumanoIntegracaoTest {
         service.finalizar(b.getId(),a.getId(),"admin");
         assertFalse(service.interceptar(b,c,mensagem("oi")));
         assertEquals(EtapaConversaEnum.ESCOLHENDO_DATA,sessao.getEtapa());
+    }
+    @Test void expiraAposUmaHoraEReativaApenasEstaConversa() {
+        var a = solicitar();
+        a.setPausaAte(LocalDateTime.now(ZoneId.of("America/Fortaleza")).minusSeconds(1));
+        em.flush();
+        assertFalse(service.estaAtivo(b.getId(),c.getNumeroTelefone()));
+        assertFalse(service.interceptar(b,c,mensagem("oi")));
+        assertEquals(AtendimentoHumano.Estado.AUTOMATICO,a.getEstado());
+        assertNull(a.getPausaAte());
+        assertFalse(service.estaAtivo(outro.getId(),c.getNumeroTelefone()));
+        assertTrue(service.interceptar(b,c,mensagem("falar com atendente")));
+        assertEquals(AtendimentoHumano.Estado.AGUARDANDO,a.getEstado());
+        assertTrue(a.getPausaAte().isAfter(LocalDateTime.now(ZoneId.of("America/Fortaleza")).plusMinutes(59)));
+    }
+    @Test void expiraSemMensagemPeloSchedulerENaoPermiteAssumir() {
+        var a = solicitar();
+        a.setPausaAte(LocalDateTime.now(ZoneId.of("America/Fortaleza")).minusSeconds(1));
+        em.flush();
+        assertThrows(ResponseStatusException.class,()->service.assumir(b.getId(),a.getId(),"admin"));
+        service.reativarSeExpirado(a.getId());
+        assertEquals(AtendimentoHumano.Estado.AUTOMATICO,a.getEstado());
+        assertNull(a.getPausaAte());
     }
     @Test void naoRespondeSemAssumirNemForaDaJanelaNemEmOutroTenant() {
         var a=solicitar();
