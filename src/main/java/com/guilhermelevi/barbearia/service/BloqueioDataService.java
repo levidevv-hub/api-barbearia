@@ -198,7 +198,9 @@ public class BloqueioDataService {
 
         for (Agendamento agendamento : afetados) {
             agendamento.setStatus(StatusAgendamentoEnum.CANCELADO);
-            notificacaoService.agendamentoCancelado(agendamento);
+            // Bloqueio administrativo: o barbeiro iniciou o cancelamento.
+            // O aviso de cancelamento ao barbeiro e reservado ao cancelamento pelo cliente.
+
 
             String mensagem = """
                 Olá, %s.
