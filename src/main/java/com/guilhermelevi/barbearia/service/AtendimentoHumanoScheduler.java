@@ -16,7 +16,7 @@ public class AtendimentoHumanoScheduler {
     @Scheduled(fixedDelayString="${whatsapp.atendimento.expiracao-intervalo-ms:30000}", initialDelayString="${whatsapp.atendimento.expiracao-intervalo-ms:30000}")
     public void reativarPausas() {
         var agora = LocalDateTime.now(ZoneId.of("America/Fortaleza"));
-        for (Long id : atendimentos.buscarPausasExpiradas(agora, PageRequest.of(0, 100))) {
+        for (Long id : atendimentos.buscarPausasExpiradas(agora, agora.minusHours(1), PageRequest.of(0, 100))) {
             try { service.reativarSeExpirado(id); }
             catch (RuntimeException e) { log.error("Falha ao reativar atendimento {}", id, e); }
         }
