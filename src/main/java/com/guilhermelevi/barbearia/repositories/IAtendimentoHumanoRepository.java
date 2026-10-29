@@ -14,10 +14,14 @@ public interface IAtendimentoHumanoRepository extends JpaRepository<AtendimentoH
     List<AvisoPendente> buscarAvisosPendentes(org.springframework.data.domain.Pageable pageable);
     @org.springframework.data.jpa.repository.Query("""
         select a.id from AtendimentoHumano a
-        where a.estado <> AUTOMATICO and a.pausaAte <= :agora
-        order by a.pausaAte, a.id
+        where a.estado <> AUTOMATICO and (
+            a.pausaAte <= :agora or
+            (a.pausaAte is null and (a.solicitadoEm is null or a.solicitadoEm <= :limiteLegado))
+        )
+        order by a.solicitadoEm, a.id
         """)
     List<Long> buscarPausasExpiradas(@org.springframework.data.repository.query.Param("agora") java.time.LocalDateTime agora,
+                                     @org.springframework.data.repository.query.Param("limiteLegado") java.time.LocalDateTime limiteLegado,
                                      org.springframework.data.domain.Pageable pageable);
     Optional<AtendimentoHumano> findByBarbeiroIdAndNumeroCliente(Long barbeiroId, String numero);
     Optional<AtendimentoHumano> findByIdAndBarbeiroId(Long id, Long barbeiroId);
