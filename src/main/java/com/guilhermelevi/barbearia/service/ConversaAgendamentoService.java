@@ -50,15 +50,11 @@ public class ConversaAgendamentoService {
                 telefone
         );
 
-        if (
-                barbeiro.getLatitude() != null &&
-                        barbeiro.getLongitude() != null
-        ) {
-            whatsapp.enviarBotaoLocalizacao(
-                    barbeiro.getWhatsappPhoneNumberId(),
-                    telefone
-            );
-        }
+        whatsapp.enviarMenuAjuda(
+                barbeiro.getWhatsappPhoneNumberId(),
+                telefone,
+                barbeiro.getLatitude() != null && barbeiro.getLongitude() != null
+        );
     }
 
     public void processarInteracao(
