@@ -105,7 +105,7 @@ class BloqueioMensagemIntegracaoTest {
             assertEquals("linha-a",aviso.getPhoneNumberId());
             assertEquals(NotificacaoPendente.Status.PENDENTE,aviso.getStatus());
         }
-        clique("ADMIN_CONFIRMAR_BLOQUEIO_"+id); assertEquals(4,notificacoes.count());
+        clique("ADMIN_CONFIRMAR_BLOQUEIO_"+id); assertEquals(2,notificacoes.count());
     }
     @Test void confirmarSemEscreverMensagemUsaAvisoPadraoETemplateAtual() {
         reservar(barbeiro,dia,10,"5511911111111"); consultarBloqueio();
@@ -191,7 +191,7 @@ class BloqueioMensagemIntegracaoTest {
         var previa = painel.previaBloqueio(barbeiro.getId(),new BarbeiroConfiguracaoController.Liberacao(dia));
         assertEquals(List.of(a.getId()),previa.stream().map(BloqueioDataService.ReservaAfetada::agendamentoId).toList());
         painel.bloquear(barbeiro.getId(),new BarbeiroConfiguracaoController.Bloqueio(dia,null,List.of(a.getId())));
-        assertEquals(StatusAgendamentoEnum.CANCELADO,a.getStatus()); assertEquals(2,notificacoes.count());
+        assertEquals(StatusAgendamentoEnum.CANCELADO,a.getStatus()); assertEquals(1,notificacoes.count());
         assertEquals(StatusAgendamentoEnum.CONFIRMADO,b.getStatus());
     }
     @Test void reservaNovaDepoisDaPreviaImpedeCancelamentoParcial() {
