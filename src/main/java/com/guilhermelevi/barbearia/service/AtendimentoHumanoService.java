@@ -149,7 +149,8 @@ public class AtendimentoHumanoService {
 
     private boolean pausaExpirada(AtendimentoHumano a) {
         return a.getEstado() != AtendimentoHumano.Estado.AUTOMATICO
-                && a.getPausaAte() != null && !a.getPausaAte().isAfter(agora());
+                && (a.getPausaAte() != null ? !a.getPausaAte().isAfter(agora())
+                : a.getSolicitadoEm() == null || !a.getSolicitadoEm().plus(DURACAO_PAUSA).isAfter(agora()));
     }
 
     private void reativar(AtendimentoHumano a, String motivo) {
